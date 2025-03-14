@@ -1,14 +1,147 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/next.config.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/postcss.config.mjs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/fotoDeFrente.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/public/teclas.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tailwind.config.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/teclas/3lhp_7dzm_230113.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.project" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.settings/.jsdtscope" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.wst.jsdt.ui.superType.container" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.settings/org.eclipse.wst.jsdt.ui.superType.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CNAME" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Untitled.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/about.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/contact.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/courses.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/bootstrap.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/bootstrap.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/elegant-fonts.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/font-awesome.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/font-awesome.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/swiper.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/swiper.min.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/css/themify-icons.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/event.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/explore.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/ElegantIcons.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/ElegantIcons.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/ElegantIcons.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/ElegantIcons.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/FontAwesome.otf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/fontawesome-webfont.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/themify.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/themify.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/themify.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fonts/themify.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/4.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/5.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/6.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Saxophone.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/Violin.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/What-Are-The-Benefits-Of-Playing-The-Violin-Blog.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/a.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/ads.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/app-store.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b-1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b-2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b-3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b-4.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b-5.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b-6.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/b.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/background.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/blog-post-img.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/c-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/c-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/c-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/c.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/course-author.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/courses-header.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/d.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/drum.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/e.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/event-1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/event-2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/event-3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/expectmore.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/foot-logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/g.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/guitar.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/h.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/hero-bg.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/i.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/instructor.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/j.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/k.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/l.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/logo-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/logo-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/logo-3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/logo-4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/logo-5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/m.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/n.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news5.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news6.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/news8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/o.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/piano-at-home.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/play-store.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/quote-icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/quote.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/reasons-to-play-cello.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/single-course-featured-img.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/single-courses-bg.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/single-post.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/t-1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/t-2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/t-3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/t-4.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/team-1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/team-2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/team-3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/team-4.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/user-1.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/user-2.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/user-3.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/video-icon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images/video-screenshot.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/custom.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/jquery.collapsible.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/jquery.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/masonry.pkgd.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/swiper.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/swiper.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/single-courses.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/single-post.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/style.css" beforeDir="false" />
     </list>
-    <ignored path="$PROJECT_DIR$/.tmp/" />
-    <ignored path="$PROJECT_DIR$/temp/" />
-    <ignored path="$PROJECT_DIR$/tmp/" />
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -80,6 +213,13 @@
       </file>
     </leaf>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>read-more</find>
@@ -117,6 +257,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Fabricio333&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Fabricio333/teclas-web&quot;,
+    &quot;accountId&quot;: &quot;6353bb08-c084-4d9e-8831-635d70e04c5b&quot;
+  }
+}</component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -137,11 +289,15 @@
       </list>
     </option>
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectFrameBounds">
     <option name="y" value="39" />
     <option name="width" value="1440" />
     <option name="height" value="809" />
   </component>
+  <component name="ProjectId" id="2ntDfti84syAstkApI8zKi1nwM8" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -152,29 +308,45 @@
       <pane id="Scope" />
     </panes>
   </component>
-  <component name="PropertiesComponent">
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
   </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/acost/WebstormProjects/teclas-web/public",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "C:\\Users\\acost\\WebstormProjects\\teclas-web\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
       <recent name="$PROJECT_DIR$" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
+      <recent name="C:\Users\acost\WebstormProjects\teclas-web\teclas" />
+      <recent name="C:\Users\acost\WebstormProjects\teclas-web" />
+    </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+      </set>
+    </attachedChunks>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -192,6 +364,12 @@
       <workItem from="1598397011993" duration="22000" />
       <workItem from="1598397046016" duration="3000" />
       <workItem from="1598397098683" duration="9000" />
+      <workItem from="1729783587420" duration="1234000" />
+      <workItem from="1733937765590" duration="45000" />
+      <workItem from="1739794576468" duration="629000" />
+      <workItem from="1739907907884" duration="12000" />
+      <workItem from="1739919440663" duration="6000" />
+      <workItem from="1741973321999" duration="1045000" />
     </task>
     <servers />
   </component>
@@ -221,7 +399,7 @@
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="3" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/css/bootstrap.min.css">
