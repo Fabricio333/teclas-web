@@ -2,7 +2,7 @@
 import Link from "next/link";
 import React, { useEffect, useState, useRef } from 'react';
 import { X, Menu } from "lucide-react";
-import styles from "./Navbar.module.scss";
+import styles from "./NavBar.module.scss";
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
