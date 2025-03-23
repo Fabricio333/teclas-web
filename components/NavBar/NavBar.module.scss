@@ -1,0 +1,87 @@
+@use "../../styles/components" as *;
+@use "../../styles/variables" as *;
+
+.header {
+  padding: 1rem 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  transition: transform 0.3s ease-in-out;
+  z-index: 100;
+  background-color: $green-color;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+.visible {
+  transform: translateY(0);
+}
+
+.hidden {
+  transform: translateY(-100%);
+}
+
+.container {
+  @extend .container;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  color: inherit;
+}
+
+.mobileMenuButton {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  @media (max-width: $mobile-breakpoint) {
+    display: block;
+  }
+}
+
+.desktopNav {
+  display: flex;
+  gap: 2rem;
+
+  @media (max-width: $mobile-breakpoint) {
+    display: none;
+  }
+}
+
+.navLink {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: var(--gold);
+  }
+}
+
+.mobileNavContainer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+  z-index: 50;
+
+  @media (min-width: 768px) {
+    display: none;
+  }
+}
+
+.mobileNav {
+  @extend .container;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

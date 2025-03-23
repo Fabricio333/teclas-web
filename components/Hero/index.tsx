@@ -1,0 +1,34 @@
+import Link from "next/link";
+import Image from "next/image";
+import styles from "./Hero.module.scss";
+
+export default function HeroSection() {
+    return (
+        <section className="sectionPadding">
+            <div className="container">
+                <div className={styles.heroGrid}>
+                    <div className={styles.heroImageWrapper}>
+                        <Image
+                            src="/teclas.jpg?height=1080&width=1920"
+                            alt="Piano de cola en una sala de conciertos"
+                            fill
+                            priority
+                            className={styles.heroImage}
+                        />
+                    </div>
+                    <div className={styles.heroContent}>
+                        <h1 className={styles.heroTitle}>
+                            Domina el arte del piano con clases personalizadas
+                        </h1>
+                        <p className={styles.heroSubtitle}>
+                            Clases presenciales personalizadas diseñadas para sacar al pianista que llevas dentro.
+                        </p>
+                        <Link href="#" className="btnPrimary">
+                            Comienza hoy mismo
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}

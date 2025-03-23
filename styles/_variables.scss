@@ -1,0 +1,33 @@
+@use "sass:color";
+
+// Color Palette
+$primary-color: #415CA9;         // Dark header/footer background
+$secondary-color: #A5CE39;       // Footer & subtle elements
+$success-color: green;
+$failure-color: red;
+$background-color: #FFFFFF;   // Light background for content sections
+$text-color: #222;            // Standard text color
+$dark-text-color: color.scale($primary-color, $lightness: -40%);
+$light-text-color: #666;      // Subdued text (for descriptions, secondary info)
+$green-color: #A5CE39;
+$purple-color:#8E55A2;
+$yellow-color: #FFD122;
+$blue-color: #415CA9;
+$sky-color:#60C9DE;
+$pink-color: #ED3B95;
+$orange-color: #F3862C;
+
+// Other Common Variables
+$container-width: 1200px;     // Max content width
+
+// Mobile Breakpoint
+$mobile-breakpoint: 768px;
+$tablet-breakpoint: 1024px;
+
+// Font Sizes
+$base-font-size: 1rem !default;
+$font-size-sm: $base-font-size * 0.75 !default;
+$font-size-md: $base-font-size * 1.2 !default;
+$font-size-lg: $base-font-size * 1.5 !default;
+$font-size-xl: $base-font-size * 2 !default;
+$font-size-xxl: $base-font-size * 2.5 !default;

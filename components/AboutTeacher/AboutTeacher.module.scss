@@ -1,0 +1,96 @@
+@use "../../styles/variables" as *;
+@use "../../styles/components" as *;
+@use "sass:color";
+
+.about {
+  @extend .sectionPadding;
+  background-color: color.scale($primary-color, $lightness: +60%);
+  text-align: center;
+}
+
+.decorativeLine {
+  width: 6rem;
+  height: 0.25rem;
+  background-color: $yellow-color;
+  margin: 1.5rem auto 0;
+}
+
+.instructorGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+  margin-bottom: 5rem;
+
+  @media (min-width: $mobile-breakpoint) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.imageWrapper {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+}
+
+.instructorImage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.instructorText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.instructorBio {
+  color: #4b5563;
+
+  p {
+    margin-bottom: 1rem;
+  }
+}
+
+.textCenter {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.philosophyContent {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.philosophyText {
+  color: #4b5563;
+
+  p {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.socialLinks {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1.5rem;
+
+  .icon {
+    color: $dark-text-color;
+    transition: color 0.3s;
+
+    &:hover {
+      color: $yellow-color;
+    }
+  }
+
+}

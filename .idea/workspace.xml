@@ -4,7 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="" />
+    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/app/page.module.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/About/About.module.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/About/index.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/Footer/Footer.module.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/Inscription/Inscription.module.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/NavBar/NavBar.module.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/styles/_components.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/styles/_variables.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/styles/globals.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/about/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/inscription/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Inscription/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Footer/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/NavBar/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles/globals.css" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -179,33 +199,38 @@
   "keyToString": {
     "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "C:/Users/acost/WebstormProjects/teclas-web/public",
+    "last_opened_file_path": "/Users/analiaacosta/Documents/teclas-web/app",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.pluginManager",
-    "ts.external.directory.path": "C:\\Users\\acost\\WebstormProjects\\teclas-web\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "/Users/analiaacosta/Documents/teclas-web/node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app" />
+      <recent name="$PROJECT_DIR$/styles" />
       <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
       <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/components" />
+      <recent name="$PROJECT_DIR$/components/NavBar" />
+      <recent name="$PROJECT_DIR$/components/Footer" />
+      <recent name="$PROJECT_DIR$/styles" />
       <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
-      <recent name="C:\Users\acost\WebstormProjects\teclas-web\teclas" />
-      <recent name="C:\Users\acost\WebstormProjects\teclas-web" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-WS-243.22562.222" />
       </set>
     </attachedChunks>
   </component>
@@ -233,6 +258,7 @@
       <workItem from="1739907907884" duration="12000" />
       <workItem from="1739919440663" duration="6000" />
       <workItem from="1741973321999" duration="1863000" />
+      <workItem from="1742686744143" duration="13139000" />
     </task>
     <servers />
   </component>

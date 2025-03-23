@@ -1,0 +1,23 @@
+@use "../../styles/variables" as *;
+@use "../../styles/components" as *;
+.inscriptionSection {
+  @extend .sectionPadding;
+  background-color: $primary-color;
+  color: #ffffff;
+  text-align: center;
+
+  .sectionTitle {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+
+    @media (min-width: $mobile-breakpoint) {
+      font-size: 2.5rem;
+    }
+  }
+
+  .sectionSubtitle {
+    font-size: 1.25rem;
+    color: #d1d5db;
+    margin-bottom: 2rem;
+  }
+}
