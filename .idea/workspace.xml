@@ -4,26 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/app/page.module.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/About/About.module.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/About/index.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/Footer/Footer.module.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/Inscription/Inscription.module.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/NavBar/NavBar.module.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/styles/_components.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/styles/_variables.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/styles/globals.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/about/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/inscription/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Inscription/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="fix navbar">
+      <change afterPath="$PROJECT_DIR$/components/Philosophy/Philosophy.module.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/components/Philosophy/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/footer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Footer/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/header.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/NavBar/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles/globals.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/AboutAcademy/AboutAcademy.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/components/AboutAcademy/AboutAcademy.module.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/AboutAcademy/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/AboutAcademy/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/AboutTeacher/AboutTeacher.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/components/AboutTeacher/AboutTeacher.module.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/AboutTeacher/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/AboutTeacher/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Footer/Footer.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/components/Footer/Footer.module.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/Inscription/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/Inscription/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/NavBar/NavBar.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/components/NavBar/NavBar.module.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/NavBar/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/NavBar/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles/_components.scss" beforeDir="false" afterPath="$PROJECT_DIR$/styles/_components.scss" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,6 +165,9 @@
       </list>
     </option>
   </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -258,8 +254,33 @@
       <workItem from="1739907907884" duration="12000" />
       <workItem from="1739919440663" duration="6000" />
       <workItem from="1741973321999" duration="1863000" />
-      <workItem from="1742686744143" duration="13139000" />
+      <workItem from="1742686744143" duration="28689000" />
     </task>
+    <task id="LOCAL-00001" summary="home page new style">
+      <option name="closed" value="true" />
+      <created>1742745784833</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1742745784833</updated>
+    </task>
+    <task id="LOCAL-00002" summary="fix navbar">
+      <option name="closed" value="true" />
+      <created>1742748575981</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1742748575981</updated>
+    </task>
+    <task id="LOCAL-00003" summary="fix navbar">
+      <option name="closed" value="true" />
+      <created>1742748624537</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742748624537</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -289,6 +310,11 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="home page new style" />
+    <MESSAGE value="fix navbar" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix navbar" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/css/bootstrap.min.css">

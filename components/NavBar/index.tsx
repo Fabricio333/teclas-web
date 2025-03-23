@@ -13,9 +13,9 @@ export default function Navbar() {
         const currentScrollY = window.scrollY;
 
         if (currentScrollY > lastScrollY.current && currentScrollY > 80) {
-            setShowNavbar(false); // hide navbar on scroll down
+            setShowNavbar(false);
         } else {
-            setShowNavbar(true); // show navbar on scroll up
+            setShowNavbar(true);
         }
         lastScrollY.current = currentScrollY;
     };
@@ -82,9 +82,9 @@ function NavLinks({ handleSmoothScroll }: NavLinksProps) {
             <a href="#inscription" className={styles.navLink} onClick={(e) => handleSmoothScroll(e, '#inscription')}>
                 Inscripción
             </a>
-            <Link href="/resources" className={styles.navLink}>
+           {/* <Link href="/resources" className={styles.navLink}>
                 Recursos
-            </Link>
+            </Link>*/}
         </>
     );
 }

@@ -5,6 +5,8 @@
   background-color: $primary-color;
   color: #ffffff;
   text-align: center;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 
   .sectionTitle {
     font-size: 2rem;

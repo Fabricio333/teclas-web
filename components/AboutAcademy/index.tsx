@@ -6,8 +6,8 @@ export default function AboutAcademy() {
             <section className={styles.featuresSection} id="about-academy">
                 <div className="container">
                     <div className={styles.sectionHeader}>
-                        <h2 className={styles.sectionTitle}>¿Por qué elegir nuestra academia?</h2>
-                        <div className={styles.decorativeLine}></div>
+                        <h1 className={styles.sectionTitle}>¿Por qué elegir nuestra academia?</h1>
+                        <div className="decorativeLine"></div>
                     </div>
 
                     <div className={styles.featuresGrid}>

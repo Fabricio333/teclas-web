@@ -23,16 +23,37 @@
   }
 }
 
-.btnPrimary {
+.btn {
   display: inline-block;
-  background-color: $sky-color;
-  color: $dark-text-color;
   padding: 0.75rem 2rem;
   border-radius: 0.375rem;
   transition: background-color 0.3s ease;
   text-decoration: none;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btnPrimary {
+  @extend .btn;
+  background-color: $primary-color;
+  color: #FFFFFF;
+  &:hover {
+    background-color: $yellow-color;
+  }
+}
+
+.btnSecondary {
+  @extend .btn;
+  background-color: color.scale($purple-color, $lightness: +60%);
+  color: $dark-text-color;
 
   &:hover {
-    background-color: color.scale($purple-color, $lightness: +60%);
+    background-color: $yellow-color;
   }
+}
+
+.decorativeLine {
+  width: 6rem;
+  height: 0.25rem;
+  background-color: $yellow-color;
+  margin: 0 auto;
 }

@@ -13,7 +13,7 @@ export default function Inscription() {
                 <p className={styles.sectionSubtitle}>
                     Únete a nuestra academia hoy y descubre la alegría de tocar el piano con la guía de expertos.
                 </p>
-                <Link href="#" className="btnPrimary">
+                <Link href="#" className="btnSecondary">
                     Inscribirme ahora
                 </Link>
             </div>

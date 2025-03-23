@@ -2,8 +2,9 @@
 @use "sass:color";
 
 .footer {
-  background-color: color.scale($primary-color, $lightness: +60%);
+  background-color: color.scale($purple-color, $lightness: +60%);
   padding: 3rem 1rem;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.3);
 
   .footerWrapper {
     display: flex;

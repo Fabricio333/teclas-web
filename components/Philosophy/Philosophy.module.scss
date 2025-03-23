@@ -1,0 +1,31 @@
+@use "../../styles/variables" as *;
+@use "../../styles/components" as *;
+@use "sass:color";
+
+.philosophy {
+  text-align: center;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.textCenter {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.philosophyContent {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.philosophyText {
+  color: #4b5563;
+
+  p {
+    margin-bottom: 1.5rem;
+  }
+}
+
