@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {Instagram, MapPin, Phone, Youtube} from "lucide-react";
+import {Instagram, MapPin, Phone} from "lucide-react";
 import styles from "./Footer.module.scss";
 
 export default function Footer() {
