@@ -23,7 +23,7 @@ export default function HeroSection() {
                         <p className={styles.heroSubtitle}>
                             Clases presenciales personalizadas diseñadas para sacar al pianista que llevas dentro.
                         </p>
-                        <Link href="#" className="btnPrimary">
+                        <Link href="https://docs.google.com/forms/d/e/1FAIpQLSenT_EzJoCuNDeRN6dQN38OdeJ8RBybZvxOkESqKQBYAObf8w/viewform?usp=dialog" className="btnPrimary">
                             Comienza hoy mismo
                         </Link>
                     </div>
