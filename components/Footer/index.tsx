@@ -1,5 +1,7 @@
 import Link from "next/link";
-import {Instagram, MapPin, Phone} from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInstagram } from "@fortawesome/free-brands-svg-icons";
+import { faMapPin, faPhone } from "@fortawesome/free-solid-svg-icons";
 import styles from "./Footer.module.scss";
 
 export default function Footer() {
@@ -14,7 +16,7 @@ export default function Footer() {
                             pianista que hay en vos.
                         </p>
                         <div className={styles.footerLocation}>
-                            <MapPin size={20} className={styles.icon}/>
+                            <FontAwesomeIcon icon={faMapPin} className={styles.icon} />
                             <p>
                                 Ciudad Jardín Lomas del Palomar, Buenos Aires
                             </p>
@@ -25,14 +27,14 @@ export default function Footer() {
                         <h3 className={styles.footerTitle}>Contacto</h3>
                         <div className={styles.contactContent}>
                             <p>
-                                <Phone size={20} className={styles.icon}/>
+                                <FontAwesomeIcon icon={faPhone} className={styles.icon} />
                                 <span>(+54) 9 11 3416-2288</span>
                             </p>
                             <Link
                                 href="https://www.instagram.com/teclas.ciudadjardin/"
                                 className={styles.socialLink}
                             >
-                                <Instagram size={20} className={styles.icon}/>
+                                <FontAwesomeIcon icon={faInstagram} className={styles.icon} />
                                 <span>teclas.ciudadjardin</span>
                             </Link>
                         </div>

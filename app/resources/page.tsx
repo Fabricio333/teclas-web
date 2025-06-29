@@ -1,6 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
-import { FileText, Video, Music, BookOpen } from "lucide-react"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import {
+  faFileLines,
+  faVideo,
+  faMusic,
+  faBookOpen,
+} from "@fortawesome/free-solid-svg-icons"
 
 export default function ResourcesPage() {
   return (
@@ -46,7 +52,7 @@ export default function ResourcesPage() {
       <section id="sheet-music" className="section-padding">
         <div className="container-custom">
           <div className="flex items-center mb-8">
-            <FileText className="text-gold mr-3" size={28} />
+            <FontAwesomeIcon icon={faFileLines} className="text-gold mr-3" size="lg" />
             <h2 className="text-3xl font-heading">Sheet Music</h2>
           </div>
 
@@ -66,7 +72,7 @@ export default function ResourcesPage() {
                   A collection of {level.toLowerCase()} level pieces carefully selected to develop your skills.
                 </p>
                 <Link href="#" className="text-gold hover:underline flex items-center">
-                  Download PDF <FileText className="ml-2" size={16} />
+                  Download PDF <FontAwesomeIcon icon={faFileLines} className="ml-2" size="sm" />
                 </Link>
               </div>
             ))}
@@ -78,7 +84,7 @@ export default function ResourcesPage() {
       <section id="practice-exercises" className="section-padding bg-gray-50">
         <div className="container-custom">
           <div className="flex items-center mb-8">
-            <Music className="text-gold mr-3" size={28} />
+            <FontAwesomeIcon icon={faMusic} className="text-gold mr-3" size="lg" />
             <h2 className="text-3xl font-heading">Practice Exercises</h2>
           </div>
 
@@ -116,7 +122,7 @@ export default function ResourcesPage() {
       <section id="video-demonstrations" className="section-padding">
         <div className="container-custom">
           <div className="flex items-center mb-8">
-            <Video className="text-gold mr-3" size={28} />
+            <FontAwesomeIcon icon={faVideo} className="text-gold mr-3" size="lg" />
             <h2 className="text-3xl font-heading">Video Demonstrations</h2>
           </div>
 
@@ -152,7 +158,7 @@ export default function ResourcesPage() {
       <section id="music-theory" className="section-padding bg-gray-50">
         <div className="container-custom">
           <div className="flex items-center mb-8">
-            <BookOpen className="text-gold mr-3" size={28} />
+            <FontAwesomeIcon icon={faBookOpen} className="text-gold mr-3" size="lg" />
             <h2 className="text-3xl font-heading">Music Theory Essentials</h2>
           </div>
 

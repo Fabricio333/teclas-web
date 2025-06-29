@@ -1,5 +1,10 @@
 import styles from "./AboutAcademy.module.scss";
-import {Award, Music, Users} from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faMusic,
+  faAward,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function AboutAcademy() {
     return (
@@ -13,7 +18,7 @@ export default function AboutAcademy() {
                     <div className={styles.featuresGrid}>
                         <div className={styles.featureCard}>
                             <div className={styles.iconWrapper}>
-                                <Music className={styles.icon} size={50}/>
+                                <FontAwesomeIcon icon={faMusic} className={styles.icon} size="2x"/>
                             </div>
                             <h3 className={styles.cardTitle}>Enfoque personalizado</h3>
                             <p className={styles.cardDescription}>
@@ -23,7 +28,7 @@ export default function AboutAcademy() {
 
                         <div className={styles.featureCard}>
                             <div className={styles.iconWrapper}>
-                                <Award className={styles.icon} size={50}/>
+                                <FontAwesomeIcon icon={faAward} className={styles.icon} size="2x"/>
                             </div>
                             <h3 className={styles.cardTitle}>Instrucción experta</h3>
                             <p className={styles.cardDescription}>
@@ -33,7 +38,7 @@ export default function AboutAcademy() {
 
                         <div className={styles.featureCard}>
                             <div className={styles.iconWrapper}>
-                                <Users className={styles.icon} size={50}/>
+                                <FontAwesomeIcon icon={faUsers} className={styles.icon} size="2x"/>
                             </div>
                             <h3 className={styles.cardTitle}>Comunidad de apoyo</h3>
                             <p className={styles.cardDescription}>

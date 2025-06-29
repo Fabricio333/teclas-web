@@ -1,7 +1,8 @@
 import Image from "next/image";
 import styles from "./AboutTeacher.module.scss";
 import Link from "next/link";
-import {Instagram, Youtube} from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInstagram, faYoutube } from "@fortawesome/free-brands-svg-icons";
 import Philosophy from "@/components/Philosophy";
 
 export default function AboutTeacher() {
@@ -47,13 +48,13 @@ export default function AboutTeacher() {
                                 href="https://www.instagram.com/teclas.ciudadjardin/"
                                 className={styles.socialLink}
                             >
-                                <Instagram size={40} className={styles.icon}/>
+                                <FontAwesomeIcon icon={faInstagram} size="2x" className={styles.icon}/>
                             </Link>
                             <Link
                                 href="https://www.youtube.com/@roxanaarena618"
                                 className={styles.socialLink}
                             >
-                                <Youtube size={40} className={styles.icon}/>
+                                <FontAwesomeIcon icon={faYoutube} size="2x" className={styles.icon}/>
                             </Link>
                         </div>
                     </div>

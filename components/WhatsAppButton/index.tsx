@@ -1,6 +1,7 @@
 "use client"
 
-import { Music } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import styles from "./WhatsAppButton.module.scss";
 
 export default function WhatsAppButton() {
@@ -12,7 +13,7 @@ export default function WhatsAppButton() {
       className={styles.whatsappButton}
       aria-label="Contactar por WhatsApp"
     >
-      <Music size={28} />
+      <FontAwesomeIcon icon={faWhatsapp} size="lg" />
     </a>
   );
 }
