@@ -40,7 +40,11 @@ export default function Navbar() {
         <header className={`${styles.header} ${showNavbar ? styles.visible : styles.hidden}`}>
             <div className={styles.container}>
                 <Link href="/" className={styles.logo}>
-                    Teclas Ciudad Jardín
+                    <div className={styles.logoText}>
+                        <span className={styles.logoMain}>TECLAS</span>
+                        <span className={styles.logoSub}>Ciudad Jardín</span>
+                    </div>
+                    <span className={styles.logoRight}>Escuela de Piano</span>
                 </Link>
 
                 <button

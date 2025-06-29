@@ -28,10 +28,32 @@
 }
 
 .logo {
-  font-size: 1.5rem;
-  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
   text-decoration: none;
   color: inherit;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logoMain {
+  font-family: var(--font-lobster), cursive;
+  font-size: 2rem;
+}
+
+.logoSub {
+  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
+  font-size: 1rem;
+}
+
+.logoRight {
+  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
+  font-size: 1.5rem;
+  margin-left: 0.5rem;
 }
 
 .mobileMenuButton {
