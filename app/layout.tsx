@@ -1,21 +1,24 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Lora, Playfair_Display } from "next/font/google";
+import { Delius, Comic_Neue } from "next/font/google";
 import "../styles/globals.scss";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Script from "next/script";
 
-const playfair = Playfair_Display({
+
+const delius = Delius({
     subsets: ["latin"],
-    variable: "--font-playfair",
+    weight: "400",
+    variable: "--font-delius",
     display: "swap",
 });
 
-const lora = Lora({
+const comicNeue = Comic_Neue({
     subsets: ["latin"],
-    variable: "--font-lora",
+    weight: ["400"],
+    variable: "--font-comic-neue",
     display: "swap",
 });
 
@@ -53,7 +56,7 @@ export default function RootLayout({
                 }}
             />
         </head>
-        <body className={`${playfair.variable} ${lora.variable} font-serif bg-white text-gray-900`}>
+        <body className={`${delius.variable} ${comicNeue.variable} font-serif bg-white text-gray-900`}>
         <NavBar />
         <main>{children}</main>
         <WhatsAppButton />
