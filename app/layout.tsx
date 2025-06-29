@@ -1,6 +1,6 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Delius, Comic_Neue } from "next/font/google";
+import { Delius, Comic_Neue, Lobster } from "next/font/google";
 import "../styles/globals.scss";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
@@ -19,6 +19,13 @@ const comicNeue = Comic_Neue({
     subsets: ["latin"],
     weight: ["400"],
     variable: "--font-comic-neue",
+    display: "swap",
+});
+
+const lobster = Lobster({
+    subsets: ["latin"],
+    weight: "400",
+    variable: "--font-lobster",
     display: "swap",
 });
 
@@ -56,7 +63,7 @@ export default function RootLayout({
                 }}
             />
         </head>
-        <body className={`${delius.variable} ${comicNeue.variable} font-serif bg-white text-gray-900`}>
+        <body className={`${delius.variable} ${comicNeue.variable} ${lobster.variable} font-serif bg-white text-gray-900`}>
         <NavBar />
         <main>{children}</main>
         <WhatsAppButton />
