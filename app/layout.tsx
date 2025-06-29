@@ -33,6 +33,9 @@ export const metadata: Metadata = {
     title: "Teclas Ciudad Jardín",
     description: "Domina el arte del piano con clases presenciales personalizadas",
     generator: "v0.dev",
+    icons: {
+        icon: "/favicon.ico",
+    },
 };
 
 export default function RootLayout({
@@ -43,7 +46,7 @@ export default function RootLayout({
     return (
         <html lang="en">
         <head>
-            <link rel="icon" href="/icon.png"/>
+            <link rel="icon" href="/favicon.ico" />
 
             {/* Google Analytics */}
             <Script
