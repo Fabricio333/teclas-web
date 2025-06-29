@@ -1,6 +1,6 @@
 "use client"
 
-import { Whatsapp } from "lucide-react";
+import { Music } from "lucide-react";
 import styles from "./WhatsAppButton.module.scss";
 
 export default function WhatsAppButton() {
@@ -12,7 +12,7 @@ export default function WhatsAppButton() {
       className={styles.whatsappButton}
       aria-label="Contactar por WhatsApp"
     >
-      <Whatsapp size={28} />
+      <Music size={28} />
     </a>
   );
 }
