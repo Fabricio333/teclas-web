@@ -58,6 +58,7 @@
   text-decoration: none;
   color: inherit;
   transition: color 0.3s ease;
+  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
 
   &:hover {
     color: var(--gold);

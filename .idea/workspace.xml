@@ -4,12 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="whatsapp button added">
+    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="footer responsive added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/Footer/Footer.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/components/Footer/Footer.module.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/WhatsAppButton/WhatsAppButton.module.scss" beforeDir="false" afterPath="$PROJECT_DIR$/components/WhatsAppButton/WhatsAppButton.module.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/WhatsAppButton/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/WhatsAppButton/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/styles/globals.scss" beforeDir="false" afterPath="$PROJECT_DIR$/styles/globals.scss" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,7 +186,7 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "codex/change-icon-library-to-font-awesome",
+    "git-widget-placeholder": "codex/update-headers-and-paragraph-fonts",
     "last_opened_file_path": "C:/Users/acost/WebstormProjects/teclas-web/public",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -292,7 +289,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751223739497</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="footer responsive added">
+      <option name="closed" value="true" />
+      <created>1751227108000</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1751227108000</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -339,7 +344,8 @@
     <MESSAGE value="fix navbar" />
     <MESSAGE value="Google Analytics Tag" />
     <MESSAGE value="whatsapp button added" />
-    <option name="LAST_COMMIT_MESSAGE" value="whatsapp button added" />
+    <MESSAGE value="footer responsive added" />
+    <option name="LAST_COMMIT_MESSAGE" value="footer responsive added" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/css/bootstrap.min.css">
