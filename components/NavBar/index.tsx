@@ -1,7 +1,8 @@
 "use client"
 import Link from "next/link";
 import React, { useEffect, useState, useRef } from 'react';
-import { X, Menu } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
 import styles from "./NavBar.module.scss";
 
 export default function Navbar() {
@@ -47,7 +48,11 @@ export default function Navbar() {
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
                 >
-                    {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    {isMenuOpen ? (
+                        <FontAwesomeIcon icon={faXmark} size="lg" />
+                    ) : (
+                        <FontAwesomeIcon icon={faBars} size="lg" />
+                    )}
                 </button>
 
                 <nav className={styles.desktopNav}>
