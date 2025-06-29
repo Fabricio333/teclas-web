@@ -4,6 +4,7 @@ import { Lora, Playfair_Display } from "next/font/google";
 import "../styles/globals.scss";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import Script from "next/script";
 
 const playfair = Playfair_Display({
@@ -55,6 +56,7 @@ export default function RootLayout({
         <body className={`${playfair.variable} ${lora.variable} font-serif bg-white text-gray-900`}>
         <NavBar />
         <main>{children}</main>
+        <WhatsAppButton />
         <Footer />
         </body>
         </html>
