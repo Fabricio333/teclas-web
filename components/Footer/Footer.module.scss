@@ -9,6 +9,11 @@
   .footerWrapper {
     display: flex;
     justify-content: space-between;
+
+    @media (max-width: $mobile-breakpoint) {
+      flex-direction: column;
+      gap: 1rem;
+    }
   }
 
   .footerTitle {

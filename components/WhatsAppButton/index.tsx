@@ -13,7 +13,7 @@ export default function WhatsAppButton() {
       className={styles.whatsappButton}
       aria-label="Contactar por WhatsApp"
     >
-      <FontAwesomeIcon icon={faWhatsapp} size="lg" />
+      <FontAwesomeIcon icon={faWhatsapp} size="xl" />
     </a>
   );
 }

@@ -1,3 +1,4 @@
+@use "sass:color";
 .whatsappButton {
   position: fixed;
   right: 1.5rem;
@@ -15,6 +16,6 @@
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: darken(#25D366, 5%);
+    background-color: color.scale(#25D366, $lightness: -5%);
   }
 }
