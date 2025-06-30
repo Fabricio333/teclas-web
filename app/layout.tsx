@@ -30,8 +30,8 @@ const lobster = Lobster({
 });
 
 export const metadata: Metadata = {
-    title: "Teclas Ciudad Jardín",
-    description: "Domina el arte del piano con clases presenciales personalizadas",
+    title: "TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires",
+    description: "Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.",
     generator: "v0.dev",
     icons: {
         icon: "/favicon.ico",

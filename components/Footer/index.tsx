@@ -18,7 +18,7 @@ export default function Footer() {
                         <div className={styles.footerLocation}>
                             <FontAwesomeIcon icon={faMapPin} className={styles.icon} />
                             <p>
-                                Ciudad Jardín Lomas del Palomar, Buenos Aires
+                                Blvd. F.i.n.c.a 61 42 Local 12, B1684 Cdad. Jardin Lomas de Palomar, Provincia de Buenos Aires
                             </p>
                         </div>
                     </div>
@@ -28,7 +28,7 @@ export default function Footer() {
                         <div className={styles.contactContent}>
                             <p>
                                 <FontAwesomeIcon icon={faPhone} className={styles.icon} />
-                                <span>(+54) 9 11 3416-2288</span>
+                                <a href="tel:+541134162288">(+54) 9 11 3416-2288</a>
                             </p>
                             <Link
                                 href="https://www.instagram.com/teclas.ciudadjardin/"

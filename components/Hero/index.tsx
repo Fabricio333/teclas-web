@@ -18,10 +18,10 @@ export default function HeroSection() {
                     </div>
                     <div className={styles.heroContent}>
                         <h1 className={styles.heroTitle}>
-                            Domina el arte del piano con clases personalizadas
+                            Clases de piano en Ciudad Jardín, Buenos Aires
                         </h1>
                         <p className={styles.heroSubtitle}>
-                            Clases presenciales personalizadas diseñadas para sacar al pianista que llevas dentro.
+                            Domina el arte del piano con clases presenciales diseñadas para sacar al pianista que llevas dentro.
                         </p>
                         <Link href="https://docs.google.com/forms/d/e/1FAIpQLSenT_EzJoCuNDeRN6dQN38OdeJ8RBybZvxOkESqKQBYAObf8w/viewform?usp=dialog" className="btnPrimary">
                             Comienza hoy mismo
