@@ -8,6 +8,10 @@ import {
   faBookOpen,
 } from "@fortawesome/free-solid-svg-icons"
 
+import { resourcesMetadata } from "@/lib/metadata";
+
+export { resourcesMetadata as metadata };
+
 export default function ResourcesPage() {
   return (
     <>

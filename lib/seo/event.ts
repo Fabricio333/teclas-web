@@ -18,11 +18,11 @@ export const eventJsonLd = {
       "addressCountry": "AR"
     }
   },
-  "image": "https://example.com/icon.png",
+  "image": "https://teclasciudadjardin.com.ar/teclas.jpg",
   "description": "Taller intensivo de piano para todos los niveles.",
   "offers": {
     "@type": "Offer",
-    "url": "https://example.com/events/workshop",
+    "url": "https://teclasciudadjardin.com.ar/events/workshop",
     "price": "0",
     "priceCurrency": "ARS",
     "availability": "https://schema.org/InStock"

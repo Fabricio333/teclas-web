@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import eventJsonLd from "@/lib/seo/event";
+import { eventsMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Eventos | TECLAS Ciudad Jardín",
-  description: "Próximos eventos y talleres de piano en Ciudad Jardín, Buenos Aires."
-};
+export { eventsMetadata as metadata };
+
 
 export function Head() {
   return (

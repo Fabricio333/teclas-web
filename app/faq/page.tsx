@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import faqJsonLd from "@/lib/seo/faq";
+import { faqMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Preguntas frecuentes | TECLAS Ciudad Jardín",
-  description: "Respuestas a las dudas más comunes sobre nuestras clases de piano en Ciudad Jardín, Buenos Aires."
-};
+export { faqMetadata as metadata };
+
 
 export function Head() {
   return (
