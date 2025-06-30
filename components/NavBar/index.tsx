@@ -90,15 +90,12 @@ function NavLinks({ handleSmoothScroll }: NavLinksProps) {
             </a>
             <a href="#inscription" className={styles.navLink} onClick={(e) => handleSmoothScroll(e, '#inscription')}>
                 Inscripción
-            </a>
+            </a>{/*
             <Link href="/events" className={styles.navLink}>
                 Eventos
             </Link>
             <Link href="/faq" className={styles.navLink}>
                 Preguntas Frecuentes
-            </Link>
-           {/* <Link href="/resources" className={styles.navLink}>
-                Recursos
             </Link>*/}
         </>
     );
