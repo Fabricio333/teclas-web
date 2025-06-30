@@ -31,10 +31,31 @@ const lobster = Lobster({
 
 export const metadata: Metadata = {
     title: "TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires",
-    description: "Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.",
+    description:
+        "Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.",
     generator: "v0.dev",
     icons: {
         icon: "/favicon.ico",
+    },
+    alternates: {
+        canonical: "https://teclasciudadjardin.com.ar/",
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
+    openGraph: {
+        type: "website",
+        url: "https://teclasciudadjardin.com.ar/",
+        title: "TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires",
+        description:
+            "Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.",
+        siteName: "TECLAS",
+        images: [
+            {
+                url: "/teclas.jpg",
+            },
+        ],
     },
 };
 
@@ -47,6 +68,8 @@ export default function RootLayout({
         <html lang="en">
         <head>
             <link rel="icon" href="/favicon.ico" />
+            <meta name="robots" content="index, follow" />
+            <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
             {/* Google Analytics */}
             <Script

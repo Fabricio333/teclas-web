@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://teclasciudadjardin.com.ar/sitemap.xml
