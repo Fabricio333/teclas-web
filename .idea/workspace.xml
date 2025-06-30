@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="footer responsive added">
+    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="added favicon">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/styles/globals.scss" beforeDir="false" afterPath="$PROJECT_DIR$/styles/globals.scss" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,8 +185,8 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "codex/update-headers-and-paragraph-fonts",
-    "last_opened_file_path": "C:/Users/acost/WebstormProjects/teclas-web/public",
+    "git-widget-placeholder": "codex/add-favicon.ico-as-favicon",
+    "last_opened_file_path": "/Users/analiaacosta/Documents/teclas-web/app",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -200,17 +199,17 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
       <recent name="$PROJECT_DIR$/app" />
+      <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
       <recent name="$PROJECT_DIR$/styles" />
       <recent name="$PROJECT_DIR$" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/public" />
       <recent name="$PROJECT_DIR$/components" />
       <recent name="$PROJECT_DIR$/components/NavBar" />
       <recent name="$PROJECT_DIR$/components/Footer" />
       <recent name="$PROJECT_DIR$/styles" />
-      <recent name="C:\Users\acost\WebstormProjects\teclas-web\public" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -297,7 +296,23 @@
       <option name="project" value="LOCAL" />
       <updated>1751227108000</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="added favicon">
+      <option name="closed" value="true" />
+      <created>1751238821891</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1751238821891</updated>
+    </task>
+    <task id="LOCAL-00008" summary="added favicon">
+      <option name="closed" value="true" />
+      <created>1751239765528</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1751239765528</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -345,7 +360,8 @@
     <MESSAGE value="Google Analytics Tag" />
     <MESSAGE value="whatsapp button added" />
     <MESSAGE value="footer responsive added" />
-    <option name="LAST_COMMIT_MESSAGE" value="footer responsive added" />
+    <MESSAGE value="added favicon" />
+    <option name="LAST_COMMIT_MESSAGE" value="added favicon" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/css/bootstrap.min.css">
