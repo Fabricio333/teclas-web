@@ -1,5 +1,27 @@
 # AGENTS.md
 
+## Purpose
+
+You are assisting in the development of Teclas website, using Next.js with TypeScript.
+
+## Coding Standards
+
+Please follow the ESLint and Prettier configurations defined in the project:
+
+- ESLint: See `.eslintrc.js`
+- Prettier: See `.prettierrc`
+
+### Key Style Rules:
+
+Refer to the ESLint and Prettier config files for the complete list of enforced rules.
+
+## Expected Format
+
+When providing code:
+
+- The code must be linted and formatted according to the above rules.
+- Prefer TypeScript when applicable.
+
 ## ⚙️ Coding Instructions
 
 ### General
