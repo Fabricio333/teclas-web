@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link";
 import React, { useEffect, useState, useRef } from 'react';
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
 import styles from "./NavBar.module.scss";
@@ -9,6 +10,7 @@ export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [showNavbar, setShowNavbar] = useState(true);
     const lastScrollY = useRef(0);
+    const router = useRouter();
 
     const controlNavbar = () => {
         const currentScrollY = window.scrollY;
@@ -28,11 +30,18 @@ export default function Navbar() {
         };
     }, []);
 
-    const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    const handleSmoothScroll = (
+        e: React.MouseEvent<HTMLAnchorElement>,
+        targetId: string
+    ) => {
         e.preventDefault();
-        document.querySelector(targetId)?.scrollIntoView({
-            behavior: 'smooth',
-        });
+        if (window.location.pathname === "/") {
+            document.querySelector(targetId)?.scrollIntoView({
+                behavior: "smooth",
+            });
+        } else {
+            router.push(`/${targetId}`);
+        }
         setIsMenuOpen(false);
     };
 
@@ -82,13 +91,25 @@ interface NavLinksProps {
 function NavLinks({ handleSmoothScroll }: NavLinksProps) {
     return (
         <>
-            <a href="#about-academy" className={styles.navLink} onClick={(e) => handleSmoothScroll(e, '#about-academy')}>
+            <a
+                href="/#about-academy"
+                className={styles.navLink}
+                onClick={(e) => handleSmoothScroll(e, '#about-academy')}
+            >
                 La Academia
             </a>
-            <a href="#about-teacher" className={styles.navLink} onClick={(e) => handleSmoothScroll(e, '#about-teacher')}>
+            <a
+                href="/#about-teacher"
+                className={styles.navLink}
+                onClick={(e) => handleSmoothScroll(e, '#about-teacher')}
+            >
                 La Profesora
             </a>
-            <a href="#inscription" className={styles.navLink} onClick={(e) => handleSmoothScroll(e, '#inscription')}>
+            <a
+                href="/#inscription"
+                className={styles.navLink}
+                onClick={(e) => handleSmoothScroll(e, '#inscription')}
+            >
                 Inscripción
             </a>{/*
             <Link href="/events" className={styles.navLink}>
