@@ -18,7 +18,7 @@ export default function Footer() {
                         <div className={styles.footerLocation}>
                             <FontAwesomeIcon icon={faMapPin} className={styles.icon} />
                             <p>
-                                Blvd. F.i.n.c.a 61 42 Local 12, B1684 Cdad. Jardin Lomas de Palomar, Provincia de Buenos Aires
+                                Blvd. F.i.n.c.a 6142 Local 12, Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires
                             </p>
                         </div>
                     </div>
