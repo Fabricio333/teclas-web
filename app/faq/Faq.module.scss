@@ -3,6 +3,7 @@
 
 .faqSection {
   @extend .sectionPadding;
+  min-height: 100vh;
 }
 
 .faqTitle {
