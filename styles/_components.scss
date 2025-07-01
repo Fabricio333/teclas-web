@@ -14,13 +14,8 @@
 }
 
 .sectionPadding {
-  padding-top: 4rem;
-  padding-bottom: 4rem;
-
-  @media (min-width: $mobile-breakpoint) {
-    padding-top: 6rem;
-    padding-bottom: 6rem;
-  }
+  padding-top: 6rem;
+  padding-bottom: 6rem;
 }
 
 .btn {

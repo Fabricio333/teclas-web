@@ -1,9 +1,22 @@
-@use "../../styles/variables" as *;
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
+
+.faqSection {
+  @extend .sectionPadding;
+  min-height: 100vh;
+}
+
 .faqTitle {
-  font-size: 2.5rem;
+  font-size: 1rem;
   margin-bottom: 1.5rem;
 
   @media (min-width: $tablet-breakpoint) {
-    font-size: 3rem;
+    font-size: 2rem;
   }
+}
+
+.faqList {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.5rem;
 }
