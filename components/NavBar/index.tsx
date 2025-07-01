@@ -114,10 +114,10 @@ function NavLinks({ handleSmoothScroll }: NavLinksProps) {
             </a>{/*
             <Link href="/events" className={styles.navLink}>
                 Eventos
-            </Link>
+            </Link>*/}
             <Link href="/faq" className={styles.navLink}>
                 Preguntas Frecuentes
-            </Link>*/}
+            </Link>
         </>
     );
 }
