@@ -1,0 +1,61 @@
+@use '../../../styles/variables' as *;
+
+.faqItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.faqHeader {
+  position: relative;
+  padding-left: 2rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  .icon {
+    position: absolute;
+    left: 0;
+    top: 0.25rem;
+    transition: transform 0.25s ease-in-out;
+  }
+
+  &[data-open='true'] {
+    .icon {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.title {
+  color: $light-text-color;
+  margin: 0;
+
+  &[data-open='true'] {
+    color: $text-color;
+  }
+
+  @media (max-width: $tablet-breakpoint) {
+    font-size: 1rem;
+  }
+}
+
+.description {
+  color: $light-text-color;
+  overflow: hidden;
+  max-height: 0;
+  transition: all 0.25s ease-in-out;
+  opacity: 0;
+  visibility: hidden;
+  z-index: -1;
+
+  &[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    z-index: 10;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: $tablet-breakpoint) {
+    font-size: 0.875rem;
+  }
+}
