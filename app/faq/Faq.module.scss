@@ -1,0 +1,9 @@
+@use "../../styles/variables" as *;
+.faqTitle {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: 3rem;
+  }
+}
