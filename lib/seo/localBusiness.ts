@@ -8,8 +8,8 @@ export const localBusinessJsonLd = {
   "image": "https://teclasciudadjardin.com.ar/teclas.jpg",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Blvd. F.i.n.c.a 61 42 Local 12",
-    "addressLocality": "Cdad. Jardin Lomas de Palomar",
+    "streetAddress": "Blvd. F.i.n.c.a 6142 Local 12",
+    "addressLocality": "Ciudad Jardín Lomas del Palomar",
     "addressRegion": "Buenos Aires",
     "postalCode": "B1684",
     "addressCountry": "AR"
