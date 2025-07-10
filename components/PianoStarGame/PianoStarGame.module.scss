@@ -1,0 +1,60 @@
+@use '../../styles/variables' as *;
+
+.gameSection {
+  margin: 3rem auto;
+  max-width: 40rem;
+  padding: 1.5rem;
+  background-color: #fafafa;
+  border-radius: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.piano {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  user-select: none;
+  position: relative;
+}
+
+.key {
+  width: 48px;
+  height: 180px;
+  border: 1px solid #999;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: #fafafa;
+  margin: 0 1px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.05s;
+}
+
+.black {
+  width: 36px;
+  height: 120px;
+  background: #111;
+  color: #fff;
+  position: absolute;
+  left: 32px;
+  top: 0;
+  z-index: 1;
+}
+
+.pressed {
+  background: $yellow-color !important;
+}
+
+.hint {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #666;
+}
