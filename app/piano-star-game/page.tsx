@@ -1,9 +1,7 @@
 import PianoStarGame from '@/components/PianoStarGame';
+import { pianoStarGameMetadata } from '@/lib/metadata';
 
-export const metadata = {
-  title: 'Juega a Estrellita',
-  description: 'Mini juego de piano para practicar la canción Estrellita.',
-};
+export { pianoStarGameMetadata as metadata };
 
 export default function PianoStarGamePage() {
   return (
