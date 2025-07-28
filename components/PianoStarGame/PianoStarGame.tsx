@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import styles from './PianoStarGame.module.scss';
+import abcjs from 'abcjs';
 
 interface NoteKey {
     key: string;
@@ -78,27 +79,21 @@ export default function PianoStarGame() {
                 synth.triggerAttackRelease(note, '8n');
             };
 
-            const vf = new VexFlow.Factory({
-                renderer: { elementId: 'sheet', width: 600, height: 160 },
+
+            const abc = `
+X:1
+T:Estrellita
+M:4/4
+L:1/4
+K:C
+C C G G | A A G2 | F F E E | D D C2 |
+`;
+
+            abcjs.renderAbc("sheet", abc, {
+                add_classes: true,
+                responsive: 'resize'
             });
-            const score = vf.EasyScore();
-            const system = vf.System();
 
-            const groupedNotes = [
-                SONG.slice(0, 4),
-                SONG.slice(4, 8),
-                SONG.slice(8, 12),
-                SONG.slice(12), // 2 notes only
-            ];
-
-            groupedNotes.forEach((notes, i) => {
-                const voice = score.voice(score.notes(notes.map(n => n.replace('4', '/q')).join(',')));
-                if (notes.length < 4) voice.setStrict(false); // allow incomplete measure
-
-                system.addStave({
-                    voices: [voice],
-                });
-            });
 
             const noteElems = document.querySelectorAll<SVGElement>('#sheet svg .vf-notehead');
 

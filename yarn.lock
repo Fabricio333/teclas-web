@@ -887,6 +887,11 @@
   dependencies:
     csstype "^3.0.2"
 
+abcjs@^6.5.1:
+  version "6.5.1"
+  resolved "https://registry.npmjs.org/abcjs/-/abcjs-6.5.1.tgz"
+  integrity sha512-kv/VEB8W0JyB1u9BmW4CXiQU225B/EeXXFhtTUtasHVJ+qDTvn3U6sEtnHzl8sRmrQiMRV/EgUTNUu7hXnm1pQ==
+
 acorn-jsx@^5.3.2:
   version "5.3.2"
   resolved "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-5.3.2.tgz"
