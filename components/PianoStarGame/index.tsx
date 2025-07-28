@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
 import styles from './PianoStarGame.module.scss';
 
+interface NoteKey {
+  key: string;
+  note: string;
+  position: number;
+}
+
 export default function PianoStarGame() {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
@@ -15,23 +21,31 @@ export default function PianoStarGame() {
       return;
     }
 
-    const WHITE_KEYS = ['A', 'S', 'D', 'F', 'G', 'H', 'J'];
-    const BLACK_KEYS = ['W', 'E', 'T', 'Y', 'U'];
-    const NOTE_MAP: Record<string, string> = {
-      A: 'C4',
-      W: 'C#4',
-      S: 'D4',
-      E: 'D#4',
-      D: 'E4',
-      F: 'F4',
-      T: 'F#4',
-      G: 'G4',
-      Y: 'G#4',
-      H: 'A4',
-      U: 'A#4',
-      J: 'B4',
-    };
+    // ---------- Keyboard–note mapping ----------
+    const WHITE_KEYS: NoteKey[] = [
+      { key: 'A', note: 'C4', position: 0 },
+      { key: 'S', note: 'D4', position: 1 },
+      { key: 'D', note: 'E4', position: 2 },
+      { key: 'F', note: 'F4', position: 3 },
+      { key: 'G', note: 'G4', position: 4 },
+      { key: 'H', note: 'A4', position: 5 },
+      { key: 'J', note: 'B4', position: 6 },
+    ];
 
+    const BLACK_KEYS: NoteKey[] = [
+      { key: 'W', note: 'C#4', position: 0 },
+      { key: 'E', note: 'D#4', position: 1 },
+      { key: 'T', note: 'F#4', position: 3 },
+      { key: 'Y', note: 'G#4', position: 4 },
+      { key: 'U', note: 'A#4', position: 5 },
+    ];
+
+    const NOTE_MAP: Record<string, string> = {};
+    [...WHITE_KEYS, ...BLACK_KEYS].forEach(({ key, note }) => {
+      NOTE_MAP[key] = note;
+    });
+
+    // ---------- Song ("Twinkle Twinkle Little Star") ----------
     const SONG = [
       'C4',
       'C4',
@@ -48,35 +62,40 @@ export default function PianoStarGame() {
       'D4',
       'C4',
     ];
+
     const IDLE_TIMEOUT_MS = 4500;
 
+    /* ---------- Build piano UI ---------- */
     const pianoDiv = pianoRef.current;
     pianoDiv.innerHTML = '';
-    WHITE_KEYS.forEach((key, i) => {
-      const k = document.createElement('div');
-      k.className = styles.key;
-      k.dataset.note = NOTE_MAP[key];
-      k.textContent = key;
-      if (![2, 6].includes(i)) {
-        const bk = document.createElement('div');
-        bk.className = `${styles.key} ${styles.black}`;
-        bk.textContent = BLACK_KEYS[[0, 1, 3, 4, 5][i]];
-        bk.dataset.note = NOTE_MAP[BLACK_KEYS[[0, 1, 3, 4, 5][i]]];
-        k.appendChild(bk);
+
+    WHITE_KEYS.forEach((white) => {
+      const wEl = document.createElement('div');
+      wEl.className = styles.key;
+      wEl.dataset.note = white.note;
+      wEl.textContent = white.key;
+
+      const black = BLACK_KEYS.find((b) => b.position === white.position);
+      if (black) {
+        const bEl = document.createElement('div');
+        bEl.className = `${styles.key} ${styles.black}`;
+        bEl.textContent = black.key;
+        bEl.dataset.note = black.note;
+        wEl.appendChild(bEl);
       }
-      pianoDiv.appendChild(k);
+
+      pianoDiv.appendChild(wEl);
     });
 
+    /* ---------- Tone.js setup ---------- */
     const Tone = (window as any).Tone;
-    const synth = new Tone.Sampler({
-      urls: { C4: 'C4.mp3', 'D#4': 'Ds4.mp3', 'F#4': 'Fs4.mp3', A4: 'A4.mp3' },
-      baseUrl: 'https://tonejs.github.io/audio/salamander/',
-    }).toDestination();
+    const synth = new Tone.PolySynth().toDestination();
 
     function play(note: string) {
       synth.triggerAttackRelease(note, '8n');
     }
 
+    /* ---------- VexFlow sheet ---------- */
     const Vex = (window as any).Vex;
     const VF = Vex.Flow;
     const vf = new VF.Factory({
@@ -85,46 +104,44 @@ export default function PianoStarGame() {
     const score = vf.EasyScore();
     const system = vf.System();
     system.addStave({
-      voices: [
-        score.voice(
-          score.notes(SONG.map((n) => n.replace('4', '/q')).join(',')),
-        ),
-      ],
+      voices: [score.voice(score.notes(SONG.map((n) => n.replace('4', '/q')).join(',')))],
     });
     vf.draw();
-    const noteElems = document.querySelectorAll<SVGElement>(
-      '#sheet svg .vf-note',
-    );
 
+    const noteElems = document.querySelectorAll<SVGElement>('#sheet svg .vf-note');
+
+    /* ---------- Game state ---------- */
     let pos = 0;
     let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
-    function nextExpected() {
-      return SONG[pos];
-    }
+    const nextExpected = () => SONG[pos];
 
-    function highlightSheet(idx: number, col: string) {
-      noteElems[idx].style.fill = col;
-    }
-
-    function clearIdle() {
-      if (idleTimer) {
-        clearTimeout(idleTimer);
+    const highlightSheet = (idx: number, color: string) => {
+      const target = noteElems[idx];
+      if (target) {
+        target.style.fill = color;
       }
-      hintRef.current!.textContent = '';
-    }
+    };
 
-    function startIdle() {
+    /* ---------- Idle hint helpers ---------- */
+    const clearIdle = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      hintRef.current!.textContent = '';
+    };
+
+    const startIdle = () => {
       idleTimer = setTimeout(() => {
         hintRef.current!.innerHTML = `→ Pulsa <strong>${getKeyFromNote(nextExpected())}</strong>`;
       }, IDLE_TIMEOUT_MS);
-    }
+    };
 
-    function getKeyFromNote(note: string) {
-      return Object.entries(NOTE_MAP).find(([k, v]) => v === note)?.[0] || '';
-    }
+    const getKeyFromNote = (note: string) => {
+      const entry = [...WHITE_KEYS, ...BLACK_KEYS].find((nk) => nk.note === note);
+      return entry?.key || '';
+    };
 
-    function handlePress(note: string, origEl: HTMLElement) {
+    /* ---------- Interaction ---------- */
+    const handlePress = (note: string, el: HTMLElement) => {
       if (note === nextExpected()) {
         highlightSheet(pos, '#22c55e');
         pos += 1;
@@ -138,56 +155,61 @@ export default function PianoStarGame() {
       } else {
         hintRef.current!.textContent = 'Esa no es 🤔';
       }
-      origEl.classList.add(styles.pressed);
-      setTimeout(() => origEl.classList.remove(styles.pressed), 80);
-    }
 
-    function keydownListener(e: KeyboardEvent) {
+      el.classList.add(styles.pressed);
+      setTimeout(() => el.classList.remove(styles.pressed), 80);
+    };
+
+    const keydownListener = (e: KeyboardEvent) => {
       const key = e.key.toUpperCase();
-      if (!NOTE_MAP[key]) return;
       const note = NOTE_MAP[key];
-      const el = Array.from(pianoDiv.querySelectorAll(`.${styles.key}`)).find(
-        (k) => (k as HTMLElement).dataset.note === note,
-      ) as HTMLElement | undefined;
+      if (!note) return;
+
+      const el = pianoDiv.querySelector<HTMLElement>(`[data-note="${note}"]`);
       if (!el) return;
+
       play(note);
       handlePress(note, el);
-    }
+    };
 
-    function clickListener(e: MouseEvent) {
-      const target = e.target as HTMLElement;
+    const clickListener = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement).closest<HTMLElement>(`.${styles.key}`);
+      if (!target) return;
       const note = target.dataset.note;
       if (!note) return;
       play(note);
       handlePress(note, target);
-    }
+    };
 
     document.addEventListener('keydown', keydownListener);
     pianoDiv.addEventListener('click', clickListener);
     startIdle();
 
+    /* ---------- Cleanup ---------- */
     return () => {
       document.removeEventListener('keydown', keydownListener);
       pianoDiv.removeEventListener('click', clickListener);
+      synth.dispose();
     };
   }, [toneReady, vexReady]);
 
   return (
-    <section id="piano-star-game" className={styles.gameSection}>
-      <h2 className={styles.title}>Juega a “Estrellita”</h2>
-      <canvas id="sheet" width={600} height={160} />
-      <div ref={pianoRef} className={styles.piano} />
-      <p ref={hintRef} className={styles.hint} />
-      <Script
-        src="https://unpkg.com/tone@latest/build/Tone.js"
-        strategy="afterInteractive"
-        onLoad={() => setToneReady(true)}
-      />
-      <Script
-        src="https://unpkg.com/vexflow/releases/vexflow-debug.js"
-        strategy="afterInteractive"
-        onLoad={() => setVexReady(true)}
-      />
-    </section>
+      <section id="piano-star-game" className={styles.gameSection}>
+        <h2 className={styles.title}>Juega a “Estrellita”</h2>
+        {/* VexFlow renders into this div */}
+        <div id="sheet" />
+        <div ref={pianoRef} className={styles.piano} />
+        <p ref={hintRef} className={styles.hint} />
+        <Script
+            src="https://unpkg.com/tone@latest/build/Tone.js"
+            strategy="afterInteractive"
+            onLoad={() => setToneReady(true)}
+        />
+        <Script
+            src="https://unpkg.com/vexflow/releases/vexflow-debug.js"
+            strategy="afterInteractive"
+            onLoad={() => setVexReady(true)}
+        />
+      </section>
   );
 }
