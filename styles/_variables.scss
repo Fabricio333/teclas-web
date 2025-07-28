@@ -31,3 +31,20 @@ $font-size-md: $base-font-size * 1.2 !default;
 $font-size-lg: $base-font-size * 1.5 !default;
 $font-size-xl: $base-font-size * 2 !default;
 $font-size-xxl: $base-font-size * 2.5 !default;
+
+// Colors
+$primary-color: #3b82f6;
+$success-color: #22c55e;
+$error-color: #ef4444;
+$warning-color: #f59e0b;
+
+// Piano
+$white-key-color: #f8fafc;
+$black-key-color: #1e293b;
+$pressed-key-color: #fbbf24;
+
+// Dimensions
+$white-key-width: 48px;
+$white-key-height: 180px;
+$black-key-width: 36px;
+$black-key-height: 120px;

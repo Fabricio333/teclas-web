@@ -1,12 +1,9 @@
-import { pianoStarGameMetadata } from '@/lib/metadata';
-import PianoStarGameClient from './PianoStarGameClient';
+import PianoStarGame from '@/components/PianoStarGame';
 
-export { pianoStarGameMetadata as metadata };
-
-export default function PianoStarGamePage() {
-  return (
-    <div className="container">
-      <PianoStarGameClient />
-    </div>
-  );
+export default function PianoGamePage() {
+    return (
+        <main>
+            <PianoStarGame />
+        </main>
+    );
 }
