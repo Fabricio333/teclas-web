@@ -114,12 +114,19 @@ C C G G | A A G2 | F F E E | D D C2 |
       let pos = 0;
       let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
-      const highlightSheet = (idx: number, color: string) => {
-        const el = noteElems[idx];
-        if (el) el.style.fill = color;
+      let highlighted = -1;
+      const highlightCurrent = () => {
+        if (highlighted >= 0) {
+          noteElems[highlighted]?.classList.remove(styles.sheetHighlight);
+        }
+        noteElems[pos]?.classList.add(styles.sheetHighlight);
+        highlighted = pos;
       };
 
-      const highlightCurrent = () => highlightSheet(pos, '#f59e0b');
+      const markCorrect = (idx: number) => {
+        noteElems[idx]?.classList.remove(styles.sheetHighlight);
+        noteElems[idx]?.classList.add(styles.sheetCorrect);
+      };
 
       const showFeedback = (el: HTMLElement, ok: boolean) => {
         let fb = el.querySelector<HTMLSpanElement>(`.${styles.feedback}`);
@@ -153,7 +160,7 @@ C C G G | A A G2 | F F E E | D D C2 |
         const correct = note === nextExpected();
         showFeedback(el, correct);
         if (correct) {
-          highlightSheet(pos, '#22c55e');
+          markCorrect(pos);
           pos += 1;
 
           if (pos === SONG.length) {
