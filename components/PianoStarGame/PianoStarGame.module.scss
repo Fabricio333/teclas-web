@@ -49,10 +49,24 @@
   z-index: 2;
 }
 
-
 .pressed {
   background-color: #60a5fa !important;
   color: white;
+}
+
+.feedback {
+  position: absolute;
+  top: -1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.feedbackVisible {
+  opacity: 1;
 }
 
 .hint {
