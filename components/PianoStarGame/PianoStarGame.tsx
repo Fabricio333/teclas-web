@@ -111,6 +111,18 @@ C C G G | A A G2 | F F E E | D D C2 |
         '#sheet svg .vf-notehead',
       );
 
+      const applyClass = (el: SVGElement | undefined, cls: string) => {
+        if (!el) return;
+        el.classList.add(cls);
+        el.querySelectorAll('path, ellipse').forEach((p) => p.classList.add(cls));
+      };
+
+      const removeClass = (el: SVGElement | undefined, cls: string) => {
+        if (!el) return;
+        el.classList.remove(cls);
+        el.querySelectorAll('path, ellipse').forEach((p) => p.classList.remove(cls));
+      };
+
       const nextExpected = () => SONG[pos];
       let pos = 0;
       let idleTimer: ReturnType<typeof setTimeout> | null = null;
@@ -119,16 +131,16 @@ C C G G | A A G2 | F F E E | D D C2 |
       let highlighted = -1;
       const highlightCurrent = () => {
         if (highlighted >= 0) {
-          noteElems[highlighted]?.classList.remove(styles.sheetHighlight);
-          noteElems[highlighted]?.classList.remove(styles.sheetError);
+          removeClass(noteElems[highlighted], styles.sheetHighlight);
+          removeClass(noteElems[highlighted], styles.sheetError);
         }
-        noteElems[pos]?.classList.add(styles.sheetHighlight);
+        applyClass(noteElems[pos], styles.sheetHighlight);
         highlighted = pos;
       };
 
       const markCorrect = (idx: number) => {
-        noteElems[idx]?.classList.remove(styles.sheetHighlight);
-        noteElems[idx]?.classList.add(styles.sheetCorrect);
+        removeClass(noteElems[idx], styles.sheetHighlight);
+        applyClass(noteElems[idx], styles.sheetCorrect);
       };
 
       const markError = () => {
@@ -138,7 +150,7 @@ C C G G | A A G2 | F F E E | D D C2 |
         try {
           (abcjs as any).highlight && (abcjs as any).highlight(el);
         } catch {}
-        el.classList.add(styles.sheetError);
+        applyClass(el, styles.sheetError);
         errorHighlighted = true;
       };
 
@@ -163,7 +175,7 @@ C C G G | A A G2 | F F E E | D D C2 |
         if (idleTimer) clearTimeout(idleTimer);
         hintRef.current!.textContent = '';
         if (errorHighlighted) {
-          noteElems[pos]?.classList.remove(styles.sheetError);
+          removeClass(noteElems[pos], styles.sheetError);
           errorHighlighted = false;
         }
       };
@@ -182,7 +194,7 @@ C C G G | A A G2 | F F E E | D D C2 |
           markCorrect(pos);
           pos += 1;
           if (errorHighlighted) {
-            noteElems[pos - 1]?.classList.remove(styles.sheetError);
+            removeClass(noteElems[pos - 1], styles.sheetError);
             errorHighlighted = false;
           }
 
