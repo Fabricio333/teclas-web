@@ -13,6 +13,7 @@ interface NoteKey {
 export default function PianoStarGame() {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
+  const doneRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let synth: InstanceType<(typeof import('tone'))['PolySynth']>;
@@ -113,11 +114,13 @@ C C G G | A A G2 | F F E E | D D C2 |
       const nextExpected = () => SONG[pos];
       let pos = 0;
       let idleTimer: ReturnType<typeof setTimeout> | null = null;
+      let errorHighlighted = false;
 
       let highlighted = -1;
       const highlightCurrent = () => {
         if (highlighted >= 0) {
           noteElems[highlighted]?.classList.remove(styles.sheetHighlight);
+          noteElems[highlighted]?.classList.remove(styles.sheetError);
         }
         noteElems[pos]?.classList.add(styles.sheetHighlight);
         highlighted = pos;
@@ -126,6 +129,17 @@ C C G G | A A G2 | F F E E | D D C2 |
       const markCorrect = (idx: number) => {
         noteElems[idx]?.classList.remove(styles.sheetHighlight);
         noteElems[idx]?.classList.add(styles.sheetCorrect);
+      };
+
+      const markError = () => {
+        if (errorHighlighted) return;
+        const el = noteElems[pos];
+        if (!el) return;
+        try {
+          (abcjs as any).highlight && (abcjs as any).highlight(el);
+        } catch {}
+        el.classList.add(styles.sheetError);
+        errorHighlighted = true;
       };
 
       const showFeedback = (el: HTMLElement, ok: boolean) => {
@@ -148,11 +162,16 @@ C C G G | A A G2 | F F E E | D D C2 |
       const clearIdle = () => {
         if (idleTimer) clearTimeout(idleTimer);
         hintRef.current!.textContent = '';
+        if (errorHighlighted) {
+          noteElems[pos]?.classList.remove(styles.sheetError);
+          errorHighlighted = false;
+        }
       };
 
       const startIdle = () => {
         idleTimer = setTimeout(() => {
           hintRef.current!.innerHTML = `→ Pulsa <strong>${getKeyFromNote(nextExpected())}</strong>`;
+          markError();
         }, IDLE_TIMEOUT_MS);
       };
 
@@ -162,9 +181,14 @@ C C G G | A A G2 | F F E E | D D C2 |
         if (correct) {
           markCorrect(pos);
           pos += 1;
+          if (errorHighlighted) {
+            noteElems[pos - 1]?.classList.remove(styles.sheetError);
+            errorHighlighted = false;
+          }
 
           if (pos === SONG.length) {
             hintRef.current!.textContent = '¡Bien hecho!';
+            doneRef.current?.classList.add(styles.doneVisible);
             clearIdle();
             return;
           }
@@ -218,6 +242,9 @@ C C G G | A A G2 | F F E E | D D C2 |
       <div id="sheet" />
       <div ref={pianoRef} className={styles.piano} />
       <p ref={hintRef} className={styles.hint} />
+      <div ref={doneRef} className={styles.done}>
+        ✓
+      </div>
     </section>
   );
 }

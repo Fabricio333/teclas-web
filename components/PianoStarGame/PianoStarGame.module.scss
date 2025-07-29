@@ -1,6 +1,7 @@
 .gameSection {
   padding: 2rem;
   text-align: center;
+  position: relative;
 }
 
 .title {
@@ -80,4 +81,23 @@
 
 .sheetCorrect {
   fill: #22c55e;
+}
+
+.sheetError {
+  fill: #ef4444;
+}
+
+.done {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.doneVisible {
+  opacity: 1;
 }
