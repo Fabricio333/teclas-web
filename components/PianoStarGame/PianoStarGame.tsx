@@ -66,6 +66,8 @@ export default function PianoStarGame() {
   const handlePressRef = useRef<(note: string) => void>();
 
   const [pressed, setPressed] = useState<Record<string, boolean>>({});
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [wrongNote, setWrongNote] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -118,20 +120,33 @@ C C G G | A A G2 | F F E E | D D C2 |
         }, IDLE_TIMEOUT_MS);
       };
 
+      highlightSheet(posRef.current, '#fbbf24');
+
       const handlePress = (note: string) => {
         if (note === nextExpected()) {
           highlightSheet(posRef.current, '#22c55e');
           posRef.current += 1;
+          setCurrentIdx(posRef.current);
 
           if (posRef.current === SONG.length) {
             hintRef.current!.textContent = '¡Bien hecho!';
             clearIdle();
             return;
           }
+
+          highlightSheet(posRef.current, '#fbbf24');
           clearIdle();
           startIdle();
         } else {
+          highlightSheet(posRef.current, '#ef4444');
+          setWrongNote(note);
+          setTimeout(() => {
+            setWrongNote(null);
+            highlightSheet(posRef.current, '#fbbf24');
+          }, 300);
           hintRef.current!.textContent = 'Esa no es 🤔';
+          clearIdle();
+          startIdle();
         }
 
         setPressed((prev) => ({ ...prev, [note]: true }));
@@ -163,6 +178,15 @@ C C G G | A A G2 | F F E E | D D C2 |
     handleNote(note);
   };
 
+  const getKeyClass = (note: string, extra?: string) => {
+    const classes = [styles.key];
+    if (extra) classes.push(extra);
+    if (note === SONG[currentIdx]) classes.push(styles.next);
+    if (wrongNote === note) classes.push(styles.wrong);
+    if (pressed[note]) classes.push(styles.pressed);
+    return classes.join(' ');
+  };
+
   return (
     <section id="piano-star-game" className={styles.gameSection}>
       <h2 className={styles.title}>Juega a “Estrellita”</h2>
@@ -179,18 +203,14 @@ C C G G | A A G2 | F F E E | D D C2 |
             <div
               key={white.note}
               data-note={white.note}
-              className={`${styles.key} ${
-                pressed[white.note] ? styles.pressed : ''
-              }`}
+              className={getKeyClass(white.note)}
               onClick={() => handleNote(white.note)}
             >
               {white.key}
               {black && (
                 <div
                   data-note={black.note}
-                  className={`${styles.key} ${styles.black} ${
-                    pressed[black.note] ? styles.pressed : ''
-                  }`}
+                  className={getKeyClass(black.note, styles.black)}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleNote(black.note);
