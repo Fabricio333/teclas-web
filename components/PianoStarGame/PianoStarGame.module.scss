@@ -49,9 +49,18 @@
   z-index: 2;
 }
 
-
 .pressed {
   background-color: #60a5fa !important;
+  color: white;
+}
+
+.wrong {
+  background-color: #ef4444 !important;
+  color: white;
+}
+
+.next {
+  background-color: #fbbf24 !important;
   color: white;
 }
 

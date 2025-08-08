@@ -1,86 +1,87 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './PianoStarGame.module.scss';
-import abcjs from 'abcjs';
 
 interface NoteKey {
-    key: string;
-    note: string;
-    position: number;
+  key: string;
+  note: string;
+  position: number;
 }
 
+const WHITE_KEYS: NoteKey[] = [
+  { key: 'A', note: 'C4', position: 0 },
+  { key: 'S', note: 'D4', position: 1 },
+  { key: 'D', note: 'E4', position: 2 },
+  { key: 'F', note: 'F4', position: 3 },
+  { key: 'G', note: 'G4', position: 4 },
+  { key: 'H', note: 'A4', position: 5 },
+  { key: 'J', note: 'B4', position: 6 },
+];
+
+const BLACK_KEYS: NoteKey[] = [
+  { key: 'W', note: 'C#4', position: 0 },
+  { key: 'E', note: 'D#4', position: 1 },
+  { key: 'T', note: 'F#4', position: 3 },
+  { key: 'Y', note: 'G#4', position: 4 },
+  { key: 'U', note: 'A#4', position: 5 },
+];
+
+const NOTE_MAP: Record<string, string> = {};
+[...WHITE_KEYS, ...BLACK_KEYS].forEach(
+  ({ key, note }) => (NOTE_MAP[key] = note),
+);
+
+const SONG = [
+  'C4',
+  'C4',
+  'G4',
+  'G4',
+  'A4',
+  'A4',
+  'G4',
+  'F4',
+  'F4',
+  'E4',
+  'E4',
+  'D4',
+  'D4',
+  'C4',
+];
+
+const IDLE_TIMEOUT_MS = 4500;
+
 export default function PianoStarGame() {
-    const pianoRef = useRef<HTMLDivElement>(null);
-    const hintRef = useRef<HTMLParagraphElement>(null);
+  const pianoRef = useRef<HTMLDivElement>(null);
+  const hintRef = useRef<HTMLParagraphElement>(null);
 
-    useEffect(() => {
-        let synth: InstanceType<typeof import('tone')['PolySynth']>;
-        let keydownListener: (e: KeyboardEvent) => void;
-        let clickListener: (e: MouseEvent) => void;
+  const synthRef = useRef<InstanceType<
+    (typeof import('tone'))['PolySynth']
+  > | null>(null);
+  const noteElemsRef = useRef<SVGElement[]>([]);
+  const posRef = useRef(0);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-        (async () => {
-            const [Tone, VexFlow] = await Promise.all([
-                import('tone'),
-                import('vexflow'),
-            ]);
+  const playRef = useRef<(note: string) => void>();
+  const handlePressRef = useRef<(note: string) => void>();
 
+  const [pressed, setPressed] = useState<Record<string, boolean>>({});
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const [wrongNote, setWrongNote] = useState<string | null>(null);
 
-            if (!pianoRef.current || !hintRef.current) return;
-            const pianoDiv = pianoRef.current;
+  useEffect(() => {
+    (async () => {
+      const Tone = await import('tone');
+      await import('vexflow');
+      const abcjs = (await import('abcjs')).default;
 
-            const WHITE_KEYS: NoteKey[] = [
-                { key: 'A', note: 'C4', position: 0 },
-                { key: 'S', note: 'D4', position: 1 },
-                { key: 'D', note: 'E4', position: 2 },
-                { key: 'F', note: 'F4', position: 3 },
-                { key: 'G', note: 'G4', position: 4 },
-                { key: 'H', note: 'A4', position: 5 },
-                { key: 'J', note: 'B4', position: 6 },
-            ];
-            const BLACK_KEYS: NoteKey[] = [
-                { key: 'W', note: 'C#4', position: 0 },
-                { key: 'E', note: 'D#4', position: 1 },
-                { key: 'T', note: 'F#4', position: 3 },
-                { key: 'Y', note: 'G#4', position: 4 },
-                { key: 'U', note: 'A#4', position: 5 },
-            ];
-            const NOTE_MAP: Record<string, string> = {};
-            [...WHITE_KEYS, ...BLACK_KEYS].forEach(({ key, note }) => (NOTE_MAP[key] = note));
+      synthRef.current = new Tone.PolySynth().toDestination();
+      playRef.current = async (note: string) => {
+        await Tone.start();
+        synthRef.current?.triggerAttackRelease(note, '8n');
+      };
 
-            const SONG = [
-                'C4','C4','G4','G4','A4','A4','G4',
-                'F4','F4','E4','E4','D4','D4','C4',
-            ];
-            const IDLE_TIMEOUT_MS = 4500;
-
-            pianoDiv.innerHTML = '';
-            WHITE_KEYS.forEach((white) => {
-                const wEl = document.createElement('div');
-                wEl.className = styles.key;
-                wEl.dataset.note = white.note;
-                wEl.textContent = white.key;
-
-                const black = BLACK_KEYS.find((b) => b.position === white.position);
-                if (black) {
-                    const bEl = document.createElement('div');
-                    bEl.className = `${styles.key} ${styles.black}`;
-                    bEl.dataset.note = black.note;
-                    bEl.textContent = black.key;
-                    wEl.appendChild(bEl);
-                }
-
-                pianoDiv.appendChild(wEl);
-            });
-
-            synth = new Tone.PolySynth().toDestination();
-            const play = async (note: string) => {
-                await Tone.start(); // resume audio context
-                synth.triggerAttackRelease(note, '8n');
-            };
-
-
-            const abc = `
+      const abc = `
 X:1
 T:Estrellita
 M:4/4
@@ -88,94 +89,141 @@ L:1/4
 K:C
 C C G G | A A G2 | F F E E | D D C2 |
 `;
+      abcjs.renderAbc('sheet', abc, {
+        add_classes: true,
+        responsive: 'resize',
+      });
+      noteElemsRef.current = Array.from(
+        document.querySelectorAll<SVGElement>('#sheet svg .vf-notehead'),
+      );
 
-            abcjs.renderAbc("sheet", abc, {
-                add_classes: true,
-                responsive: 'resize'
-            });
+      const nextExpected = () => SONG[posRef.current];
 
+      const getKeyFromNote = (note: string) =>
+        [...WHITE_KEYS, ...BLACK_KEYS].find((n) => n.note === note)?.key || '';
 
-            const noteElems = document.querySelectorAll<SVGElement>('#sheet svg .vf-notehead');
+      const highlightSheet = (idx: number, color: string) => {
+        const el = noteElemsRef.current[idx];
+        if (el) el.style.fill = color;
+      };
 
-            const nextExpected = () => SONG[pos];
-            let pos = 0;
-            let idleTimer: ReturnType<typeof setTimeout> | null = null;
+      const clearIdle = () => {
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+        hintRef.current!.textContent = '';
+      };
 
-            const highlightSheet = (idx: number, color: string) => {
-                const el = noteElems[idx];
-                if (el) el.style.fill = color;
-            };
+      const startIdle = () => {
+        idleTimerRef.current = setTimeout(() => {
+          hintRef.current!.innerHTML = `→ Pulsa <strong>${getKeyFromNote(
+            nextExpected(),
+          )}</strong>`;
+        }, IDLE_TIMEOUT_MS);
+      };
 
-            const getKeyFromNote = (note: string) =>
-                [...WHITE_KEYS, ...BLACK_KEYS].find((n) => n.note === note)?.key || '';
+      highlightSheet(posRef.current, '#fbbf24');
 
-            const clearIdle = () => {
-                if (idleTimer) clearTimeout(idleTimer);
-                hintRef.current!.textContent = '';
-            };
+      const handlePress = (note: string) => {
+        if (note === nextExpected()) {
+          highlightSheet(posRef.current, '#22c55e');
+          posRef.current += 1;
+          setCurrentIdx(posRef.current);
 
-            const startIdle = () => {
-                idleTimer = setTimeout(() => {
-                    hintRef.current!.innerHTML = `→ Pulsa <strong>${getKeyFromNote(nextExpected())}</strong>`;
-                }, IDLE_TIMEOUT_MS);
-            };
+          if (posRef.current === SONG.length) {
+            hintRef.current!.textContent = '¡Bien hecho!';
+            clearIdle();
+            return;
+          }
 
-            const handlePress = (note: string, el: HTMLElement) => {
-                if (note === nextExpected()) {
-                    highlightSheet(pos, '#22c55e');
-                    pos += 1;
+          highlightSheet(posRef.current, '#fbbf24');
+          clearIdle();
+          startIdle();
+        } else {
+          highlightSheet(posRef.current, '#ef4444');
+          setWrongNote(note);
+          setTimeout(() => {
+            setWrongNote(null);
+            highlightSheet(posRef.current, '#fbbf24');
+          }, 300);
+          hintRef.current!.textContent = 'Esa no es 🤔';
+          clearIdle();
+          startIdle();
+        }
 
-                    if (pos === SONG.length) {
-                        hintRef.current!.textContent = '¡Bien hecho!';
-                        clearIdle();
-                        return;
-                    }
-                    clearIdle();
-                    startIdle();
-                } else {
-                    hintRef.current!.textContent = 'Esa no es 🤔';
-                }
+        setPressed((prev) => ({ ...prev, [note]: true }));
+        setTimeout(
+          () => setPressed((prev) => ({ ...prev, [note]: false })),
+          80,
+        );
+      };
 
-                el.classList.add(styles.pressed);
-                setTimeout(() => el.classList.remove(styles.pressed), 80);
-            };
+      handlePressRef.current = handlePress;
+      startIdle();
+      pianoRef.current?.focus();
+    })();
 
-            keydownListener = (e) => {
-                const note = NOTE_MAP[e.key.toUpperCase()];
-                if (!note) return;
-                const el = pianoDiv.querySelector<HTMLElement>(`[data-note="${note}"]`);
-                if (!el) return;
-                play(note);
-                handlePress(note, el);
-            };
+    return () => {
+      if (synthRef.current) synthRef.current.dispose();
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    };
+  }, []);
 
-            clickListener = (e) => {
-                const target = (e.target as HTMLElement).closest<HTMLElement>(`.${styles.key}`);
-                if (!target) return;
-                const note = target.dataset.note;
-                if (!note) return;
-                play(note);
-                handlePress(note, target);
-            };
+  const handleNote = (note: string) => {
+    playRef.current?.(note);
+    handlePressRef.current?.(note);
+  };
 
-            document.addEventListener('keydown', keydownListener);
-            pianoDiv.addEventListener('click', clickListener);
-            startIdle();
-        })();
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const note = NOTE_MAP[e.key.toUpperCase()];
+    if (!note) return;
+    handleNote(note);
+  };
 
-        return () => {
-            document.removeEventListener('keydown', keydownListener as any);
-            pianoRef.current?.removeEventListener('click', clickListener as any);
-            if (synth) synth.dispose();
-        };
-    }, []);
+  const getKeyClass = (note: string, extra?: string) => {
+    const classes = [styles.key];
+    if (extra) classes.push(extra);
+    if (note === SONG[currentIdx]) classes.push(styles.next);
+    if (wrongNote === note) classes.push(styles.wrong);
+    if (pressed[note]) classes.push(styles.pressed);
+    return classes.join(' ');
+  };
 
-    return (
-        <section id="piano-star-game" className={styles.gameSection}>
-            <h2 className={styles.title}>Juega a “Estrellita”</h2>
-            <div id="sheet" />
-            <div ref={pianoRef} className={styles.piano} />
-            <p ref={hintRef} className={styles.hint} />
-        </section>
-    );
+  return (
+    <section id="piano-star-game" className={styles.gameSection}>
+      <h2 className={styles.title}>Juega a “Estrellita”</h2>
+      <div id="sheet" />
+      <div
+        ref={pianoRef}
+        className={styles.piano}
+        tabIndex={0}
+        onKeyDown={onKeyDown}
+      >
+        {WHITE_KEYS.map((white) => {
+          const black = BLACK_KEYS.find((b) => b.position === white.position);
+          return (
+            <div
+              key={white.note}
+              data-note={white.note}
+              className={getKeyClass(white.note)}
+              onClick={() => handleNote(white.note)}
+            >
+              {white.key}
+              {black && (
+                <div
+                  data-note={black.note}
+                  className={getKeyClass(black.note, styles.black)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleNote(black.note);
+                  }}
+                >
+                  {black.key}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <p ref={hintRef} className={styles.hint} />
+    </section>
+  );
 }
