@@ -4,10 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="added favicon">
-      <change afterPath="$PROJECT_DIR$/eslint.config.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/yarn.lock" beforeDir="false" afterPath="$PROJECT_DIR$/yarn.lock" afterDir="false" />
+    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="piano keyboard working">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/piano-star-game/PianoStarGameClient.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/piano-star-game/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/NavBar/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/NavBar/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/PianoStarGame/PianoStarGame.module.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/PianoStarGame/PianoStarGame.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/PianoStarGame/index.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/piano-game/constants.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/piano-game/types.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,6 +91,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="HTML File" />
+        <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
+        <option value="SCSS File" />
       </list>
     </option>
   </component>
@@ -122,7 +132,13 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="deepseek" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -132,8 +148,8 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Fabricio333/teclas-web&quot;,
-    &quot;accountId&quot;: &quot;6353bb08-c084-4d9e-8831-635d70e04c5b&quot;
+    &quot;url&quot;: &quot;https://github.com/Fabricio333/teclas-web.git&quot;,
+    &quot;accountId&quot;: &quot;0c59d077-a3a5-4b1f-ac8a-9b8699879454&quot;
   }
 }</component>
   <component name="IdeDocumentHistory">
@@ -168,7 +184,6 @@
     <option name="height" value="809" />
   </component>
   <component name="ProjectId" id="2ntDfti84syAstkApI8zKi1nwM8" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -185,17 +200,23 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.Next.js: debug client-side.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "codex/update-code-for-google-search-indexing",
+    "git-widget-placeholder": "#13 on codex/set-game-title-to-estrellita",
+    "js.debugger.nextJs.config.created.client": "true",
+    "js.debugger.nextJs.config.created.server": "true",
     "last_opened_file_path": "/Users/analiaacosta/Documents/teclas-web",
+    "list.type.of.created.stylesheet": "SCSS",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "npm.Next.js: server-side.executor": "Run",
+    "npm.lint.executor": "Run",
     "settings.editor.selected.configurable": "preferences.pluginManager",
-    "ts.external.directory.path": "/Users/analiaacosta/Documents/teclas-web/node_modules/typescript/lib",
+    "ts.external.directory.path": "/Users/fabricioacosta/WebstormProjects/teclas-web/node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -214,10 +235,40 @@
       <recent name="$PROJECT_DIR$/styles" />
     </key>
   </component>
+  <component name="RunManager" selected="JavaScript Debug.Next.js: debug client-side">
+    <configuration name="Next.js: debug client-side" type="JavascriptDebugType" uri="http://localhost:3000/">
+      <method v="2" />
+    </configuration>
+    <configuration name="Next.js: server-side" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="lint" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="lint" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.lint" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-WS-251.29188.1" />
       </set>
     </attachedChunks>
   </component>
@@ -249,6 +300,14 @@
       <workItem from="1742841368936" duration="159000" />
       <workItem from="1744299679290" duration="985000" />
       <workItem from="1744303305257" duration="807000" />
+      <workItem from="1752165246033" duration="1271000" />
+      <workItem from="1752166522113" duration="518000" />
+      <workItem from="1753725814926" duration="4870000" />
+      <workItem from="1753749837637" duration="3111000" />
+      <workItem from="1754612698595" duration="650000" />
+      <workItem from="1755149098253" duration="3054000" />
+      <workItem from="1755233021725" duration="16000" />
+      <workItem from="1771220765878" duration="6458000" />
     </task>
     <task id="LOCAL-00001" summary="home page new style">
       <option name="closed" value="true" />
@@ -314,7 +373,31 @@
       <option name="project" value="LOCAL" />
       <updated>1751239765528</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="added changes">
+      <option name="closed" value="true" />
+      <created>1753726803308</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1753726803308</updated>
+    </task>
+    <task id="LOCAL-00010" summary="piano keyboard working">
+      <option name="closed" value="true" />
+      <created>1753728979209</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1753728979209</updated>
+    </task>
+    <task id="LOCAL-00011" summary="piano keyboard working">
+      <option name="closed" value="true" />
+      <created>1753729765332</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1753729765332</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -363,7 +446,9 @@
     <MESSAGE value="whatsapp button added" />
     <MESSAGE value="footer responsive added" />
     <MESSAGE value="added favicon" />
-    <option name="LAST_COMMIT_MESSAGE" value="added favicon" />
+    <MESSAGE value="added changes" />
+    <MESSAGE value="piano keyboard working" />
+    <option name="LAST_COMMIT_MESSAGE" value="piano keyboard working" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/css/bootstrap.min.css">

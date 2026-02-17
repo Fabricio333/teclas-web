@@ -115,6 +115,9 @@ function NavLinks({ handleSmoothScroll }: NavLinksProps) {
             <Link href="/events" className={styles.navLink}>
                 Eventos
             </Link>*/}
+            <Link href="/piano-player" className={styles.navLink}>
+                Aprender
+            </Link>
             <Link href="/faq" className={styles.navLink}>
                 Preguntas Frecuentes
             </Link>
