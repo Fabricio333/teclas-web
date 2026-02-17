@@ -19,7 +19,7 @@ Run `npx prettier --write .` and `npm run lint` before committing.
 
 ## Architecture
 
-- **App Router** (`app/`) — pages use slugified folder names (e.g., `app/piano-star-game/`)
+- **App Router** (`app/`) — pages use slugified folder names (e.g., `app/piano-player/`)
 - **Components** (`components/`) — reusable UI components
 - **UI primitives** (`components/ui/`) — shadcn/ui components (Radix UI based)
 - **Styles** (`styles/`) — `globals.scss`, `_variables.scss` (colors, breakpoints, font sizes), `_components.scss` (shared classes like `.container`, `.btnPrimary`)
@@ -38,6 +38,7 @@ Hybrid approach: **SCSS Modules** for component styles + **Tailwind CSS** for ut
 ## Component Conventions
 
 **Reusable components** in `components/`:
+
 ```
 components/NavBar/
 ├── index.tsx
@@ -45,6 +46,7 @@ components/NavBar/
 ```
 
 **Page-specific components** go directly inside the page folder (never in a nested `components/` subfolder):
+
 ```
 app/page-name/
 ├── page.tsx
@@ -60,6 +62,18 @@ app/page-name/
 - **FontAwesome** — icons (free solid + brands)
 - **React Hook Form + Zod** — form handling and validation
 - **Fonts** — Delius, Comic Neue, Lobster loaded via Next.js Font API (CSS vars: `--font-delius`, `--font-comic-neue`, `--font-lobster`)
+
+## SEO — DO NOT MODIFY
+
+**Never change SEO content or text.** This includes:
+
+- Metadata in `lib/metadata/index.tsx` (titles, descriptions, Open Graph)
+- JSON-LD schemas in `lib/seo/`
+- `public/sitemap.xml`
+- `<title>`, `<meta>`, and structured data in page files
+- Any user-facing marketing copy on landing pages (home, events, FAQ, resources)
+
+If a new page is added, create new metadata — do not alter existing entries.
 
 ## Code Style
 

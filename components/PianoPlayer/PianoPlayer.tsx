@@ -5,11 +5,15 @@ import styles from './PianoPlayer.module.scss';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import {
   LEVELS,
+  DEBUG_LEVEL,
   KEY_TO_MIDI,
   MIDI_TO_KEY,
   WHITE_KEYS,
   BLACK_KEYS,
 } from '@/lib/piano-player/songs';
+
+const ALL_LEVELS =
+  process.env.NODE_ENV === 'development' ? [...LEVELS, DEBUG_LEVEL] : LEVELS;
 
 function getDifficultyLabel(d: 1 | 2 | 3): string {
   return '\u2B50'.repeat(d);
@@ -24,7 +28,8 @@ export default function PianoPlayer() {
     let synth: any; // Tone.Sampler
     let keydownListener: (e: KeyboardEvent) => void;
     let keyupListener: (e: KeyboardEvent) => void;
-    let clickListener: (e: MouseEvent) => void;
+    let pointerDownListener: (e: PointerEvent) => void;
+    let pointerUpListener: (e: PointerEvent) => void;
     let midiInputs: any[] = [];
     let abcjs: any;
     let aborted = false;
@@ -58,16 +63,23 @@ export default function PianoPlayer() {
         'Bb',
         'B',
       ];
-      for (let octave = 3; octave <= 5; octave++) {
+      for (let octave = 1; octave <= 7; octave++) {
         for (const n of noteNames) {
           const name = `${n}${octave}`;
           urls[name] = `${name}.mp3`;
         }
       }
 
+      // Pre-compute MIDI → note name lookup (avoids per-press function calls)
+      const midiToName: Record<number, string> = {};
+      for (let m = 21; m <= 108; m++) {
+        midiToName[m] = midiNumberToNote(m, undefined, true);
+      }
+
       synth = new Tone.Sampler({
         urls,
         baseUrl: '/samples/mp3/',
+        release: 0.8, // natural damper decay time in seconds
         onload: () => {
           if (aborted) return;
           const loadingEl = document.getElementById('piano-loading');
@@ -80,21 +92,74 @@ export default function PianoPlayer() {
         },
       }).toDestination();
 
-      const play = async (midiNumber: number) => {
+      // ---------- Audio context: start once on first interaction ----------
+      let audioStarted = false;
+      const ensureAudio = async () => {
+        if (audioStarted) return;
+        await Tone.start();
+        audioStarted = true;
+      };
+
+      // Eagerly start audio on first user gesture (removes latency from first note)
+      const startOnGesture = () => {
+        ensureAudio();
+        document.removeEventListener('pointerdown', startOnGesture);
+        document.removeEventListener('keydown', startOnGesture);
+      };
+      document.addEventListener('pointerdown', startOnGesture, {
+        once: true,
+      });
+      document.addEventListener('keydown', startOnGesture, { once: true });
+
+      // ---------- Sustain audio: attack on press, release on lift ----------
+      const attackNote = (midiNumber: number) => {
+        if (!synth.loaded) return;
+        const name = midiToName[midiNumber];
+        if (!name) return;
         try {
-          await Tone.start();
-          const noteName = midiNumberToNote(midiNumber, undefined, true);
-          if (synth.loaded) {
-            synth.triggerAttackRelease(noteName, '8n');
-          }
+          synth.triggerAttack(name, Tone.now());
         } catch (err) {
-          console.error('Play error:', err);
+          console.error('Attack error:', err);
+        }
+      };
+
+      const releaseNote = (midiNumber: number) => {
+        if (!synth.loaded) return;
+        const name = midiToName[midiNumber];
+        if (!name) return;
+        try {
+          // Schedule release slightly in the future for natural damper feel
+          synth.triggerRelease(name, Tone.now() + 0.08);
+        } catch {
+          // ignore release errors
+        }
+      };
+
+      // Track pressed elements by actual MIDI so release works across offset changes
+      const pressedElements = new Map<number, HTMLElement>();
+
+      const pressKey = (midiNumber: number) => {
+        const baseMidi = midiNumber - midiOffset;
+        const el = pianoDiv.querySelector<HTMLElement>(
+          `[data-midi="${baseMidi}"]`,
+        );
+        if (el) {
+          el.classList.add(styles.pressed);
+          pressedElements.set(midiNumber, el);
+        }
+      };
+
+      const releaseKey = (midiNumber: number) => {
+        const el = pressedElements.get(midiNumber);
+        if (el) {
+          el.classList.remove(styles.pressed);
+          pressedElements.delete(midiNumber);
         }
       };
 
       // ---------- Level state ----------
       let currentLevelIndex = 0;
-      let level = LEVELS[currentLevelIndex];
+      let level = ALL_LEVELS[currentLevelIndex];
       let SONG = level.notes;
       const IDLE_TIMEOUT_MS = 4500;
 
@@ -107,6 +172,64 @@ export default function PianoPlayer() {
       let errorHighlighted = false;
       let highlighted = -1;
       const pressedMidi = new Set<number>();
+
+      // ---------- Octave shift ----------
+      let midiOffset = 0; // added to base MIDI (KEY_TO_MIDI) to get actual MIDI
+      // physical keyboard key → actual MIDI that was attacked (stable across offset changes)
+      const physicalKeyMidi = new Map<string, number>();
+
+      const updateOctaveIndicator = () => {
+        const el = document.getElementById('octave-indicator');
+        if (el) {
+          const octave = Math.floor((60 + midiOffset) / 12) - 1;
+          el.textContent = `Octava ${octave}`;
+          // Show/hide based on whether we're shifted
+          el.style.opacity = midiOffset === 0 ? '0.5' : '1';
+        }
+      };
+
+      const showShiftPopup = (direction: 'down' | 'up') => {
+        const popup = document.getElementById('octave-popup');
+        const noteEl = noteElems()[pos];
+        const sheetWrapper = document.getElementById('sheet-wrapper');
+        if (!popup || !noteEl || !sheetWrapper) return;
+
+        const noteRect = noteEl.getBoundingClientRect();
+        const wrapperRect = sheetWrapper.getBoundingClientRect();
+
+        const octave = Math.floor((60 + midiOffset) / 12) - 1;
+        popup.textContent =
+          direction === 'down'
+            ? `\u2B07 Octava ${octave}`
+            : `\u2B06 Octava ${octave}`;
+        popup.style.left = `${noteRect.left - wrapperRect.left + noteRect.width / 2}px`;
+        popup.style.top = `${noteRect.top - wrapperRect.top - 28}px`;
+        popup.classList.remove(styles.octavePopupVisible);
+        // Force reflow so re-adding the class triggers the animation
+        void popup.offsetWidth;
+        popup.classList.add(styles.octavePopupVisible);
+        setTimeout(
+          () => popup.classList.remove(styles.octavePopupVisible),
+          2500,
+        );
+      };
+
+      const checkOctaveShift = () => {
+        if (pos >= SONG.length) return;
+        const target = SONG[pos];
+        const low = 60 + midiOffset;
+        const high = 71 + midiOffset;
+        if (target >= low && target <= high) return; // in range
+
+        // Compute new offset (full octaves)
+        const newOffset = Math.floor((target - 60) / 12) * 12;
+        if (newOffset === midiOffset) return;
+
+        const direction = newOffset < midiOffset ? 'down' : 'up';
+        midiOffset = newOffset;
+        updateOctaveIndicator();
+        showShiftPopup(direction);
+      };
 
       // ---------- Build piano DOM ----------
       pianoDiv.innerHTML = '';
@@ -190,9 +313,15 @@ export default function PianoPlayer() {
             : '\u2014';
       };
 
-      const getKeyLabel = (midiNumber: number) => MIDI_TO_KEY[midiNumber] || '';
+      const getKeyLabel = (midiNumber: number) => {
+        const baseMidi = midiNumber - midiOffset;
+        return MIDI_TO_KEY[baseMidi] || '';
+      };
 
       const highlightCurrent = () => {
+        // Check if the next note needs an octave shift
+        checkOctaveShift();
+
         const elems = noteElems();
         if (highlighted >= 0 && elems[highlighted]) {
           removeClass(elems[highlighted], styles.sheetHighlight);
@@ -203,14 +332,15 @@ export default function PianoPlayer() {
           highlighted = pos;
         }
 
-        // hint key outline on piano
+        // hint key outline on piano (use base MIDI for DOM lookup)
         const prevHint = pianoDiv.querySelector<HTMLElement>(
           `.${styles.hintKey}`,
         );
         prevHint?.classList.remove(styles.hintKey);
         const expected = SONG[pos];
+        const baseMidi = expected - midiOffset;
         const expectedEl = pianoDiv.querySelector<HTMLElement>(
-          `[data-midi="${expected}"]`,
+          `[data-midi="${baseMidi}"]`,
         );
         if (expectedEl) expectedEl.classList.add(styles.hintKey);
 
@@ -239,8 +369,9 @@ export default function PianoPlayer() {
       };
 
       const showFeedback = (midiNumber: number, ok: boolean) => {
+        const baseMidi = midiNumber - midiOffset;
         const el = pianoDiv.querySelector<HTMLElement>(
-          `[data-midi="${midiNumber}"]`,
+          `[data-midi="${baseMidi}"]`,
         );
         if (!el) return;
         let fb = el.querySelector<HTMLSpanElement>(`.${styles.feedback}`);
@@ -273,11 +404,13 @@ export default function PianoPlayer() {
       };
 
       highlightCurrent();
+      updateOctaveIndicator();
       startIdle();
 
       // ---------- Game logic ----------
       const handleNotePress = (midiNumber: number) => {
-        play(midiNumber);
+        attackNote(midiNumber);
+        pressKey(midiNumber);
         if (pos >= SONG.length) return;
 
         const correct = midiNumber === SONG[pos];
@@ -285,15 +418,6 @@ export default function PianoPlayer() {
         if (correct) hits += 1;
 
         showFeedback(midiNumber, correct);
-
-        // Highlight pressed key
-        const el = pianoDiv.querySelector<HTMLElement>(
-          `[data-midi="${midiNumber}"]`,
-        );
-        if (el) {
-          el.classList.add(styles.pressed);
-          setTimeout(() => el.classList.remove(styles.pressed), 120);
-        }
 
         if (correct) {
           score += 10;
@@ -331,38 +455,67 @@ export default function PianoPlayer() {
         updateScoreUI();
       };
 
-      // ---------- PC keyboard input ----------
+      const handleNoteRelease = (midiNumber: number) => {
+        releaseNote(midiNumber);
+        releaseKey(midiNumber);
+      };
+
+      // ---------- PC keyboard input (with offset) ----------
       keydownListener = (e) => {
         if (e.repeat) return;
-        const midi = KEY_TO_MIDI[e.key.toLowerCase()];
-        if (midi === undefined) return;
-        if (pressedMidi.has(midi)) return;
+        const key = e.key.toLowerCase();
+        const baseMidi = KEY_TO_MIDI[key];
+        if (baseMidi === undefined) return;
+        if (physicalKeyMidi.has(key)) return;
+        const midi = baseMidi + midiOffset;
+        physicalKeyMidi.set(key, midi);
         pressedMidi.add(midi);
         handleNotePress(midi);
       };
 
       keyupListener = (e) => {
-        const midi = KEY_TO_MIDI[e.key.toLowerCase()];
+        const key = e.key.toLowerCase();
+        const midi = physicalKeyMidi.get(key);
         if (midi !== undefined) {
+          physicalKeyMidi.delete(key);
           pressedMidi.delete(midi);
+          handleNoteRelease(midi);
         }
       };
 
       document.addEventListener('keydown', keydownListener);
       document.addEventListener('keyup', keyupListener);
 
-      // ---------- Mouse click on piano ----------
-      clickListener = (e) => {
+      // ---------- Pointer (mouse + touch) on piano (with offset) ----------
+      const pointerMidi = new Map<number, number>(); // pointerId → actual midi
+
+      pointerDownListener = (e) => {
         const target = (e.target as HTMLElement).closest<HTMLElement>(
           `.${styles.key}`,
         );
         if (!target) return;
-        const midi = Number(target.dataset.midi);
-        if (!isNaN(midi)) handleNotePress(midi);
+        const baseMidi = Number(target.dataset.midi);
+        if (isNaN(baseMidi)) return;
+        e.preventDefault();
+        pianoDiv.setPointerCapture(e.pointerId);
+        const midi = baseMidi + midiOffset;
+        pointerMidi.set(e.pointerId, midi);
+        handleNotePress(midi);
       };
-      pianoDiv.addEventListener('click', clickListener);
 
-      // ---------- MIDI keyboard input ----------
+      pointerUpListener = (e) => {
+        const midi = pointerMidi.get(e.pointerId);
+        if (midi !== undefined) {
+          pointerMidi.delete(e.pointerId);
+          handleNoteRelease(midi);
+        }
+      };
+
+      pianoDiv.addEventListener('pointerdown', pointerDownListener);
+      pianoDiv.addEventListener('pointerup', pointerUpListener);
+      pianoDiv.addEventListener('pointercancel', pointerUpListener);
+
+      // ---------- MIDI keyboard input (no offset — sends real MIDI) ----------
       if (typeof navigator !== 'undefined' && navigator.requestMIDIAccess) {
         try {
           const access = await navigator.requestMIDIAccess();
@@ -376,6 +529,11 @@ export default function PianoPlayer() {
               const velocity = data[2];
               if (status === 0x90 && velocity > 0) {
                 handleNotePress(note);
+              } else if (
+                status === 0x80 ||
+                (status === 0x90 && velocity === 0)
+              ) {
+                handleNoteRelease(note);
               }
             };
           });
@@ -386,6 +544,13 @@ export default function PianoPlayer() {
 
       // ---------- Shared reset helper ----------
       const resetGame = () => {
+        // Release any held notes
+        if (synth?.loaded) synth.releaseAll();
+        pressedElements.forEach((el) => el.classList.remove(styles.pressed));
+        pressedElements.clear();
+        pressedMidi.clear();
+        physicalKeyMidi.clear();
+        midiOffset = 0;
         pos = 0;
         score = 0;
         hits = 0;
@@ -394,6 +559,7 @@ export default function PianoPlayer() {
         highlighted = -1;
         errorHighlighted = false;
         updateScoreUI();
+        updateOctaveIndicator();
         doneRef.current?.classList.remove(styles.doneVisible);
         renderSheet(level);
         setTimeout(() => {
@@ -405,7 +571,7 @@ export default function PianoPlayer() {
 
       const switchLevel = (idx: number) => {
         currentLevelIndex = idx;
-        level = LEVELS[idx];
+        level = ALL_LEVELS[idx];
         SONG = level.notes;
         const songSelect = document.getElementById(
           'level-select',
@@ -414,7 +580,7 @@ export default function PianoPlayer() {
         const nextBtn = document.getElementById('done-next-btn');
         if (nextBtn) {
           (nextBtn as HTMLButtonElement).style.display =
-            idx >= LEVELS.length - 1 ? 'none' : '';
+            idx >= ALL_LEVELS.length - 1 ? 'none' : '';
         }
         resetGame();
       };
@@ -445,12 +611,12 @@ export default function PianoPlayer() {
       const doneNextBtn = document.getElementById('done-next-btn');
       if (doneNextBtn) {
         doneNextBtn.addEventListener('click', () => {
-          if (currentLevelIndex < LEVELS.length - 1) {
+          if (currentLevelIndex < ALL_LEVELS.length - 1) {
             switchLevel(currentLevelIndex + 1);
           }
         });
         // Hide "next" if already on last song
-        if (currentLevelIndex >= LEVELS.length - 1) {
+        if (currentLevelIndex >= ALL_LEVELS.length - 1) {
           (doneNextBtn as HTMLButtonElement).style.display = 'none';
         }
       }
@@ -463,13 +629,30 @@ export default function PianoPlayer() {
       if (keydownListener)
         document.removeEventListener('keydown', keydownListener);
       if (keyupListener) document.removeEventListener('keyup', keyupListener);
-      pianoRef.current?.removeEventListener('click', clickListener as any);
+      if (pointerDownListener)
+        pianoRef.current?.removeEventListener(
+          'pointerdown',
+          pointerDownListener as any,
+        );
+      if (pointerUpListener) {
+        pianoRef.current?.removeEventListener(
+          'pointerup',
+          pointerUpListener as any,
+        );
+        pianoRef.current?.removeEventListener(
+          'pointercancel',
+          pointerUpListener as any,
+        );
+      }
       midiInputs.forEach((input) => {
         try {
           input.close();
         } catch {}
       });
-      if (synth) synth.dispose();
+      if (synth) {
+        synth.releaseAll();
+        synth.dispose();
+      }
     };
   }, []);
 
@@ -490,7 +673,7 @@ export default function PianoPlayer() {
           <label className={styles.selectLabel}>
             Cancion:{' '}
             <select id="level-select" className={styles.select}>
-              {LEVELS.map((lev, i) => (
+              {ALL_LEVELS.map((lev, i) => (
                 <option key={lev.id} value={i}>
                   {getDifficultyLabel(lev.difficulty)} {lev.name}
                 </option>
@@ -527,8 +710,9 @@ export default function PianoPlayer() {
       </div>
 
       {/* Sheet music */}
-      <div className={styles.sheetWrapper}>
+      <div id="sheet-wrapper" className={styles.sheetWrapper}>
         <div id="sheet" className={styles.sheet} />
+        <div id="octave-popup" className={styles.octavePopup} />
       </div>
 
       {/* Progress bar */}
@@ -545,6 +729,9 @@ export default function PianoPlayer() {
 
       {/* Piano */}
       <div className={styles.pianoWrapper}>
+        <span id="octave-indicator" className={styles.octaveIndicator}>
+          Octava 4
+        </span>
         <div ref={pianoRef} className={styles.piano} />
       </div>
 
