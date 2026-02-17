@@ -102,36 +102,9 @@ export const resourcesMetadata: Metadata = {
   },
 };
 
-export const pianoStarGameMetadata: Metadata = {
-  title: 'Juega a Estrellita | TECLAS Ciudad Jardín',
-  description:
-    'Mini juego de piano para practicar la canción Estrellita y mejorar tu oído.',
-  alternates: {
-    canonical: 'https://teclasciudadjardin.com.ar/piano-star-game',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-  openGraph: {
-    type: 'website',
-    url: 'https://teclasciudadjardin.com.ar/piano-star-game',
-    title: 'Juega a Estrellita | TECLAS Ciudad Jardín',
-    description:
-      'Mini juego de piano para practicar la canción Estrellita y mejorar tu oído.',
-    siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
-  },
-};
-
 export default {
   homeMetadata,
   eventsMetadata,
   faqMetadata,
   resourcesMetadata,
-  pianoStarGameMetadata,
 };

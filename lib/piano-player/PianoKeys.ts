@@ -1,0 +1,210 @@
+import {
+  highlight,
+  highlightDark,
+  pianoKeyOutlineWidth,
+  sharpKeyHeightFactor,
+  sharpKeyWidthFactor,
+} from './constants';
+import type { Piano } from './Piano';
+import defaultConfig from './config';
+import { midiNumberToNote } from './Midi';
+
+export class PianoKeys {
+  private piano: Piano;
+  private canvas: HTMLCanvasElement | null = null;
+  private width: number = 0;
+  private height: number = 0;
+  private drawNoteLabels: boolean = false;
+  private unsubConfig: (() => void) | null = null;
+
+  constructor(piano: Piano) {
+    this.piano = piano;
+    this.unsubConfig = defaultConfig.subscribe((v) => {
+      this.drawNoteLabels = v.drawNoteLabels;
+    });
+  }
+
+  public dispose() {
+    this.unsubConfig?.();
+  }
+
+  public setCanvas(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    const { width, height } = canvas.getBoundingClientRect();
+    this.width = width;
+    this.height = height;
+  }
+
+  public resize(newWidth: number, newHeight: number) {
+    this.width = newWidth;
+    this.height = newHeight;
+  }
+
+  public draw() {
+    if (this.canvas === null) return;
+    const ctx = this.canvas.getContext('2d');
+    if (ctx === null) return;
+    const { width, height } = this.canvas.getBoundingClientRect();
+
+    this.canvas.width = width;
+    this.canvas.height = height;
+
+    const numNaturalKeys = this.piano.getOctaves() * 7 + 1;
+    const naturalKeyWidth = width / numNaturalKeys;
+    const sharpKeyWidth = naturalKeyWidth * sharpKeyWidthFactor;
+
+    // natural keys
+    let absoluteIndex = 0;
+    for (let i = 0; i < numNaturalKeys; i++) {
+      if (
+        this.piano.isNoteDown(this.piano.getMidiAtIndex(absoluteIndex))
+      ) {
+        ctx.fillStyle = highlight;
+      } else {
+        ctx.fillStyle = '#fff';
+      }
+
+      ctx.fillRect(naturalKeyWidth * i, 0, naturalKeyWidth, height);
+
+      if (this.drawNoteLabels) {
+        ctx.fillStyle = '#000000';
+        ctx.font =
+          Math.floor(naturalKeyWidth * 0.6).toString() +
+          'px Courier New, Courier, monospace';
+        ctx.fillText(
+          midiNumberToNote(this.piano.getMidiAtIndex(absoluteIndex)),
+          naturalKeyWidth * i + 3.5,
+          height - 5,
+          naturalKeyWidth,
+        );
+      }
+
+      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1) {
+        absoluteIndex++;
+      } else {
+        absoluteIndex += 2;
+      }
+    }
+
+    // natural key outlines
+    ctx.lineWidth = pianoKeyOutlineWidth;
+    ctx.strokeStyle = '#000';
+    for (let i = 0; i < numNaturalKeys; i++) {
+      ctx.strokeRect(naturalKeyWidth * i, 0, naturalKeyWidth, height);
+    }
+
+    // sharp keys
+    absoluteIndex = 1;
+    for (let i = 0; i < numNaturalKeys; i++) {
+      if (
+        this.piano.isNoteDown(this.piano.getMidiAtIndex(absoluteIndex))
+      ) {
+        ctx.fillStyle = highlightDark;
+      } else {
+        ctx.fillStyle = '#000';
+      }
+
+      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1) {
+        absoluteIndex++;
+        continue;
+      }
+
+      ctx.fillRect(
+        naturalKeyWidth * i + naturalKeyWidth - sharpKeyWidth / 2,
+        0,
+        sharpKeyWidth,
+        height * sharpKeyHeightFactor,
+      );
+      absoluteIndex += 2;
+    }
+
+    // sharp key outlines
+    ctx.lineWidth = pianoKeyOutlineWidth;
+    ctx.strokeStyle = '#000';
+    for (let i = 0; i < numNaturalKeys; i++) {
+      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1)
+        continue;
+      ctx.strokeRect(
+        naturalKeyWidth * i + naturalKeyWidth - sharpKeyWidth / 2,
+        0,
+        sharpKeyWidth,
+        height * sharpKeyHeightFactor,
+      );
+    }
+  }
+
+  public mouseKeyPress(e: MouseEvent, down = true) {
+    if (!down) {
+      this.piano.releaseAll();
+      this.draw();
+      return;
+    }
+
+    if (this.canvas === null) return;
+
+    const { width, height } = this.canvas.getBoundingClientRect();
+    const numNaturalKeys = this.piano.getOctaves() * 7 + 1;
+    const naturalKeyWidth = width / numNaturalKeys;
+    const sharpKeyWidth = naturalKeyWidth * sharpKeyWidthFactor;
+
+    // sharp keys first (they're on top)
+    let absoluteIndex = 1;
+    for (let i = 0; i < numNaturalKeys; i++) {
+      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1) {
+        absoluteIndex++;
+        continue;
+      }
+      if (
+        isPointInRect(
+          naturalKeyWidth * i + naturalKeyWidth - sharpKeyWidth / 2,
+          0,
+          sharpKeyWidth,
+          height * sharpKeyHeightFactor,
+          e.offsetX,
+          e.offsetY,
+        )
+      ) {
+        this.piano.press(this.piano.getMidiAtIndex(absoluteIndex));
+        this.draw();
+        return;
+      }
+      absoluteIndex += 2;
+    }
+
+    // natural keys
+    absoluteIndex = 0;
+    for (let i = 0; i < numNaturalKeys; i++) {
+      if (
+        isPointInRect(
+          naturalKeyWidth * i,
+          0,
+          naturalKeyWidth,
+          height,
+          e.offsetX,
+          e.offsetY,
+        )
+      ) {
+        this.piano.press(this.piano.getMidiAtIndex(absoluteIndex));
+        this.draw();
+        return;
+      }
+
+      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1) {
+        absoluteIndex++;
+      } else {
+        absoluteIndex += 2;
+      }
+    }
+  }
+}
+
+function isPointInRect(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  px: number,
+  py: number,
+) {
+  return px >= x && px <= x + w && py >= y && py <= y + h;
+}

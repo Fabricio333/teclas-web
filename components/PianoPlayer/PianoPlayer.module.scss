@@ -1,0 +1,618 @@
+@use '../../styles/variables' as *;
+
+.gameSection {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  position: relative;
+  min-height: 80vh;
+}
+
+// ---------- Header ----------
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: $font-size-xl;
+  color: $primary-color;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: $font-size-md;
+  color: $light-text-color;
+}
+
+// ---------- Controls panel ----------
+
+.controlsPanel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.selectLabel {
+  font-size: 0.9rem;
+  color: $text-color;
+}
+
+.select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  background: white;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid $primary-color;
+    outline-offset: 1px;
+  }
+}
+
+.restartBtn {
+  padding: 6px 18px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:active {
+    background: #e2e8f0;
+  }
+}
+
+// ---------- Score cards ----------
+
+.scoreCards {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.scoreCard {
+  flex: 1;
+  max-width: 160px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.scoreCardLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.8;
+}
+
+.scoreCardValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.scoreCardBlue {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.scoreCardAmber {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+}
+
+.scoreCardGreen {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+// ---------- Sheet music ----------
+
+.sheetWrapper {
+  position: relative;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.sheet {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+// ---------- Progress ----------
+
+.progressSection {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 500px;
+  margin: 0 auto 1.25rem;
+}
+
+.progressLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $light-text-color;
+  white-space: nowrap;
+}
+
+.progressWrap {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, $primary-color, $success-color);
+  width: 0%;
+  transition: width 0.2s;
+}
+
+// ---------- Octave shift popup ----------
+
+@keyframes popupFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.octavePopup {
+  position: absolute;
+  transform: translateX(-50%);
+  background: $primary-color;
+  color: white;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.octavePopupVisible {
+  animation: popupFadeIn 2.5s ease-out forwards;
+}
+
+// ---------- Piano ----------
+
+.octaveIndicator {
+  display: block;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+  transition: opacity 0.3s;
+}
+
+.pianoWrapper {
+  background: linear-gradient(180deg, #0f172a, $black-key-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.piano {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: $white-key-height;
+  margin: 0 auto;
+  max-width: 500px;
+  touch-action: none; // eliminates ~100ms browser touch delay
+}
+
+.key {
+  background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
+  border: 1px solid #c4b99a;
+  width: $white-key-width;
+  height: 100%;
+  position: relative;
+  text-align: center;
+  font-weight: bold;
+  z-index: 1;
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 8px;
+  margin: 0 1px;
+  border-radius: 0 0 6px 6px;
+  transition:
+    background 0.06s ease-out,
+    transform 0.04s ease-out,
+    box-shadow 0.06s ease-out;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.15),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.04);
+
+  &:hover {
+    background: linear-gradient(180deg, #fdfcf5 0%, #ede8de 60%, #e4ddd0 100%);
+  }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 2px 4px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(180deg, #f0ebe0 0%, #e8e2d5 100%);
+  }
+}
+
+.black {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
+  color: white;
+  width: $black-key-width;
+  height: 60%;
+  position: absolute;
+  top: 0;
+  left: 34px;
+  z-index: 2;
+  border-radius: 0 0 4px 4px;
+  border: 1px solid #000;
+  align-items: flex-end;
+  padding-bottom: 6px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.06);
+
+  &:hover {
+    background: linear-gradient(180deg, #333 0%, #222 40%, #181818 100%);
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, #222 0%, #151515 100%);
+  }
+}
+
+.keyLabel {
+  font-size: $font-size-sm;
+  color: #999;
+  pointer-events: none;
+}
+
+.black .keyLabel {
+  color: #999;
+}
+
+.pressed {
+  transform: translateY(3px) !important;
+  background: linear-gradient(180deg, #e8e2d5 0%, #ddd6c6 100%) !important;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.08),
+    inset 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+
+  .keyLabel {
+    color: #888;
+  }
+}
+
+.black.pressed {
+  transform: translateY(2px) !important;
+  background: linear-gradient(180deg, #181818 0%, #0e0e0e 100%) !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    inset 0 2px 6px rgba(0, 0, 0, 0.5) !important;
+}
+
+.hintKey {
+  outline: 3px solid rgba(245, 158, 11, 0.6);
+  outline-offset: -3px;
+}
+
+.feedback {
+  position: absolute;
+  top: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.feedbackVisible {
+  opacity: 1;
+}
+
+// ---------- Sheet highlighting ----------
+
+@keyframes notePulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba($primary-color, 0.6));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba($primary-color, 0.9));
+    transform: scale(1.18);
+  }
+}
+
+.sheetHighlight {
+  fill: $primary-color !important;
+  animation: notePulse 1s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+.sheetCorrect {
+  fill: $success-color !important;
+  opacity: 0.5;
+}
+
+.sheetError {
+  fill: $error-color !important;
+}
+
+// ---------- Hint & done ----------
+
+.hint {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  min-height: 1.5rem;
+  color: $text-color;
+}
+
+.done {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 100;
+}
+
+.doneVisible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.doneCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.doneIcon {
+  font-size: 3.5rem;
+  color: $success-color;
+  line-height: 1;
+}
+
+.doneText {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $text-color;
+}
+
+.doneActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.doneBtn {
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:active {
+    background: #e2e8f0;
+  }
+}
+
+.doneBtnPrimary {
+  background: $primary-color;
+  border-color: $primary-color;
+  color: white;
+
+  &:hover {
+    background: darken($primary-color, 8%);
+    border-color: darken($primary-color, 8%);
+  }
+
+  &:active {
+    background: darken($primary-color, 12%);
+  }
+}
+
+// ---------- Keyboard reference ----------
+
+.keyboardRef {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  margin-top: 1rem;
+}
+
+.keyboardRefTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $light-text-color;
+  margin-right: 0.25rem;
+}
+
+.kbdGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.3rem;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: $text-color;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.kbdNote {
+  font-size: 0.65rem;
+  color: $light-text-color;
+}
+
+// ---------- Loading ----------
+
+.loading {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: $light-text-color;
+}
+
+// ---------- Mobile responsive ----------
+
+@media (max-width: $mobile-breakpoint) {
+  .gameSection {
+    padding: 1.25rem 0.75rem;
+  }
+
+  .title {
+    font-size: $font-size-lg;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .scoreCards {
+    gap: 0.5rem;
+  }
+
+  .scoreCard {
+    padding: 0.5rem 0.4rem;
+  }
+
+  .scoreCardLabel {
+    font-size: 0.65rem;
+  }
+
+  .scoreCardValue {
+    font-size: 1.2rem;
+  }
+
+  .pianoWrapper {
+    padding: 0.75rem 0.5rem 1rem;
+    border-radius: 12px;
+  }
+
+  .piano {
+    height: 150px;
+  }
+
+  .key {
+    width: 40px;
+  }
+
+  .black {
+    width: 28px;
+    left: 28px;
+  }
+
+  .keyboardRef {
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .kbd {
+    min-width: 1.3rem;
+    height: 1.3rem;
+    font-size: 0.65rem;
+  }
+
+  .doneCard {
+    padding: 2rem;
+  }
+}
