@@ -79,7 +79,7 @@ export const faqMetadata: Metadata = {
 };
 
 export const resourcesMetadata: Metadata = {
-  title: 'Learning Resources | TECLAS Ciudad Jardín',
+  title: 'Recursos de Aprendizaje | TECLAS Ciudad Jardín',
   description: 'Material de aprendizaje para mejorar tu práctica de piano.',
   alternates: {
     canonical: 'https://teclasciudadjardin.com.ar/resources',
@@ -91,8 +91,34 @@ export const resourcesMetadata: Metadata = {
   openGraph: {
     type: 'website',
     url: 'https://teclasciudadjardin.com.ar/resources',
-    title: 'Learning Resources | TECLAS Ciudad Jardín',
+    title: 'Recursos de Aprendizaje | TECLAS Ciudad Jardín',
     description: 'Material de aprendizaje para mejorar tu práctica de piano.',
+    siteName: 'TECLAS',
+    images: [
+      {
+        url: '/teclas.jpg',
+      },
+    ],
+  },
+};
+
+export const pianoPlayerMetadata: Metadata = {
+  title: 'Aprende Piano Online | TECLAS Ciudad Jardín',
+  description:
+    'Aplicación interactiva para aprender piano online. Seguí las notas en la partitura y tocá canciones clásicas usando tu teclado o haciendo clic en las teclas del piano.',
+  alternates: {
+    canonical: 'https://teclasciudadjardin.com.ar/piano-player',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    url: 'https://teclasciudadjardin.com.ar/piano-player',
+    title: 'Aprende Piano Online | TECLAS Ciudad Jardín',
+    description:
+      'Aplicación interactiva para aprender piano online. Seguí las notas en la partitura y tocá canciones clásicas usando tu teclado o haciendo clic en las teclas del piano.',
     siteName: 'TECLAS',
     images: [
       {
@@ -107,4 +133,5 @@ export default {
   eventsMetadata,
   faqMetadata,
   resourcesMetadata,
+  pianoPlayerMetadata,
 };

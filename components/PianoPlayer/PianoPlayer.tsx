@@ -6,6 +6,7 @@ import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import {
   LEVELS,
   DEBUG_LEVEL,
+  DEBUG_CANON,
   KEY_TO_MIDI,
   MIDI_TO_KEY,
   WHITE_KEYS,
@@ -13,7 +14,9 @@ import {
 } from '@/lib/piano-player/songs';
 
 const ALL_LEVELS =
-  process.env.NODE_ENV === 'development' ? [...LEVELS, DEBUG_LEVEL] : LEVELS;
+  process.env.NODE_ENV === 'development'
+    ? [...LEVELS, DEBUG_LEVEL, DEBUG_CANON]
+    : LEVELS;
 
 function getDifficultyLabel(d: 1 | 2 | 3): string {
   return '\u2B50'.repeat(d);

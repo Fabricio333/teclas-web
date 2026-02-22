@@ -181,6 +181,53 @@ export const DEBUG_LEVEL: Level = {
   ],
 };
 
+// Debug song: Canon in D (Pachelbel) — simplified single-note melody.
+// Only shown in development (localhost). Tests octave shift and sharps (D major: F#, C#).
+// Chord progression: D–A–Bm–F#m–G–D–G–A (repeats)
+// ABC K:D means F and C are sharp by default.
+// MIDI reference: D4=62 E4=64 F#4=66 G4=67 A4=69 B4=71 C#5=73 D5=74 E5=76 F#5=78
+export const DEBUG_CANON: Level = {
+  id: 'debug-canon',
+  name: 'Debug - Canon in D',
+  difficulty: 3,
+  abc: [
+    'X:1',
+    'T:Canon in D (Pachelbel)',
+    'M:4/4',
+    'L:1/4',
+    'K:D',
+    // Var 1 — The iconic descending theme (upper octave)
+    'f e d c | B A B c |',
+    // Var 2 — Canonic answer (descending from D5)
+    'd c B A | G F G A |',
+    // Var 3 — Arpeggiated variation (octave 4)
+    'D F A d | d A F A |',
+    // Var 4 — Stepwise variation (octave 4)
+    'D E F A | G F E D |',
+    // Var 5 — Running passage (octave 4)
+    'F A d c | B A G F |',
+    // Var 6 — Theme recap (upper octave)
+    'f e d c | B A B c |',
+    // Finale — Ascending resolution to D5
+    'D F A B | c d e d |',
+  ].join('\n'),
+  notes: [
+    // Var 1 — Descending theme: F#5 E5 D5 C#5 B4 A4 B4 C#5
+    78, 76, 74, 73, 71, 69, 71, 73,
+    // Var 2 — Canonic answer: D5 C#5 B4 A4 G4 F#4 G4 A4
+    74, 73, 71, 69, 67, 66, 67, 69,
+    // Var 3 — Arpeggiated: D4 F#4 A4 D5 D5 A4 F#4 A4
+    62, 66, 69, 74, 74, 69, 66, 69,
+    // Var 4 — Stepwise: D4 E4 F#4 A4 G4 F#4 E4 D4
+    62, 64, 66, 69, 67, 66, 64, 62,
+    // Var 5 — Running: F#4 A4 D5 C#5 B4 A4 G4 F#4
+    66, 69, 74, 73, 71, 69, 67, 66,
+    // Var 6 — Theme recap: F#5 E5 D5 C#5 B4 A4 B4 C#5
+    78, 76, 74, 73, 71, 69, 71, 73,
+    // Finale — Ascending resolution: D4 F#4 A4 B4 C#5 D5 E5 D5
+    62, 66, 69, 71, 73, 74, 76, 74,
+  ],
+};
 export const KEY_TO_MIDI: Record<string, number> = {
   a: 60, // C4
   w: 61, // C#4

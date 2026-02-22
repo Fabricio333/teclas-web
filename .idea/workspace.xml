@@ -4,17 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment="piano keyboard working">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/piano-star-game/PianoStarGameClient.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/piano-star-game/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/NavBar/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/NavBar/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/PianoStarGame/PianoStarGame.module.scss" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/PianoStarGame/PianoStarGame.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/PianoStarGame/index.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/piano-game/constants.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/piano-game/types.ts" beforeDir="false" />
+    <list default="true" id="9d34ff72-d30d-4df0-98c6-c765f86fd41e" name="Default Changelist" comment=".">
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/piano-player/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/piano-player/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/resources/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/resources/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/PianoPlayer/PianoPlayer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/PianoPlayer/PianoPlayer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/metadata/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/metadata/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/piano-player/songs.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/piano-player/songs.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -203,7 +199,7 @@
     "JavaScript Debug.Next.js: debug client-side.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "#13 on codex/set-game-title-to-estrellita",
+    "git-widget-placeholder": "main",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "last_opened_file_path": "/Users/analiaacosta/Documents/teclas-web",
@@ -397,7 +393,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753729765332</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary=".">
+      <option name="closed" value="true" />
+      <created>1771602652803</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1771602652803</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
@@ -448,7 +452,8 @@
     <MESSAGE value="added favicon" />
     <MESSAGE value="added changes" />
     <MESSAGE value="piano keyboard working" />
-    <option name="LAST_COMMIT_MESSAGE" value="piano keyboard working" />
+    <MESSAGE value="." />
+    <option name="LAST_COMMIT_MESSAGE" value="." />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/css/bootstrap.min.css">

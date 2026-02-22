@@ -1,0 +1,85 @@
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
+
+.resourcesSection {
+  @extend .sectionPadding;
+  min-height: 100vh;
+}
+
+.title {
+  font-size: $font-size-xl;
+  margin-bottom: 0.5rem;
+  text-align: center;
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: $font-size-xxl;
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: $light-text-color;
+  max-width: 600px;
+  margin: 0 auto 3rem;
+}
+
+.grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr;
+
+  @media (min-width: $mobile-breakpoint) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: $tablet-breakpoint) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 2rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, $blue-color, $sky-color);
+  color: #fff;
+  text-decoration: none;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+
+    .arrow {
+      transform: translateX(4px);
+    }
+  }
+}
+
+.cardIcon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.cardTitle {
+  font-size: $font-size-lg;
+  margin-bottom: 0.75rem;
+}
+
+.cardDescription {
+  font-size: $font-size-md;
+  opacity: 0.9;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.arrow {
+  font-size: 1.25rem;
+  transition: transform 0.3s ease;
+}
