@@ -135,21 +135,54 @@
   color: #15803d;
 }
 
-// ---------- Sheet music ----------
+// ---------- Prompt area ----------
 
-.sheetWrapper {
-  position: relative;
+.promptArea {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 0.75rem;
+  padding: 1.5rem;
   margin-bottom: 1.25rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.sheet {
-  max-width: 700px;
-  margin: 0 auto;
+.noteCounter {
+  font-size: 0.9rem;
+  color: $light-text-color;
+  font-weight: 600;
+}
+
+.playBtn {
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
+  border: 2px solid $primary-color;
+  background: $primary-color;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: color.adjust($primary-color, $lightness: -8%);
+    transform: scale(1.03);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.noteNameDisplay {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $success-color;
+  min-height: 2rem;
+  transition: opacity 0.3s;
 }
 
 // ---------- Progress ----------
@@ -184,45 +217,6 @@
   transition: width 0.2s;
 }
 
-// ---------- Octave shift popup ----------
-
-@keyframes popupFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(4px);
-  }
-  15% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  85% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-.octavePopup {
-  position: absolute;
-  transform: translateX(-50%);
-  background: $primary-color;
-  color: white;
-  padding: 0.3rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.octavePopupVisible {
-  animation: popupFadeIn 2.5s ease-out forwards;
-}
-
 // ---------- Piano ----------
 
 .octaveIndicator {
@@ -253,7 +247,7 @@
   height: $white-key-height;
   margin: 0 auto;
   max-width: 500px;
-  touch-action: none; // eliminates ~100ms browser touch delay
+  touch-action: none;
 }
 
 .key {
@@ -374,34 +368,32 @@
   opacity: 1;
 }
 
-// ---------- Sheet highlighting ----------
+// ---------- Correct / Incorrect key flash ----------
 
-@keyframes notePulse {
-  0%,
+@keyframes correctFlash {
+  0% {
+    background: $success-color;
+  }
   100% {
-    filter: drop-shadow(0 0 4px rgba($primary-color, 0.6));
-    transform: scale(1);
-  }
-  50% {
-    filter: drop-shadow(0 0 10px rgba($primary-color, 0.9));
-    transform: scale(1.18);
+    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
   }
 }
 
-.sheetHighlight {
-  fill: $primary-color !important;
-  animation: notePulse 1s ease-in-out infinite;
-  transform-origin: center;
-  transform-box: fill-box;
+@keyframes incorrectFlash {
+  0% {
+    background: $failure-color;
+  }
+  100% {
+    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
+  }
 }
 
-.sheetCorrect {
-  fill: $success-color !important;
-  opacity: 0.5;
+.correctFlash {
+  animation: correctFlash 0.6s ease-out forwards;
 }
 
-.sheetError {
-  fill: $error-color !important;
+.incorrectFlash {
+  animation: incorrectFlash 0.6s ease-out forwards;
 }
 
 // ---------- Hint & done ----------
@@ -452,6 +444,11 @@
   font-size: 1.5rem;
   font-weight: 700;
   color: $text-color;
+}
+
+.doneScore {
+  font-size: 1rem;
+  color: $light-text-color;
 }
 
 .doneActions {
@@ -582,6 +579,15 @@
 
   .scoreCardValue {
     font-size: 1.2rem;
+  }
+
+  .promptArea {
+    padding: 1rem;
+  }
+
+  .playBtn {
+    padding: 0.6rem 1.5rem;
+    font-size: 1rem;
   }
 
   .pianoWrapper {

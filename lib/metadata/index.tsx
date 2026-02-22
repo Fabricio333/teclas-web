@@ -128,10 +128,37 @@ export const pianoPlayerMetadata: Metadata = {
   },
 };
 
+export const earTrainingMetadata: Metadata = {
+  title: 'Entrenamiento Auditivo | TECLAS Ciudad Jardín',
+  description:
+    'Entrená tu oído musical identificando notas en el piano. Escuchá, reconocé y mejorá tu percepción auditiva con ejercicios interactivos.',
+  alternates: {
+    canonical: 'https://teclasciudadjardin.com.ar/ear-training',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    url: 'https://teclasciudadjardin.com.ar/ear-training',
+    title: 'Entrenamiento Auditivo | TECLAS Ciudad Jardín',
+    description:
+      'Entrená tu oído musical identificando notas en el piano. Escuchá, reconocé y mejorá tu percepción auditiva con ejercicios interactivos.',
+    siteName: 'TECLAS',
+    images: [
+      {
+        url: '/teclas.jpg',
+      },
+    ],
+  },
+};
+
 export default {
   homeMetadata,
   eventsMetadata,
   faqMetadata,
   resourcesMetadata,
   pianoPlayerMetadata,
+  earTrainingMetadata,
 };

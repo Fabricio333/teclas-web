@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMusic, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faMusic,
+  faHeadphones,
+  faArrowRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { resourcesMetadata } from '@/lib/metadata';
 import styles from './Resources.module.scss';
 
@@ -23,6 +27,18 @@ export default function ResourcesPage() {
             <p className={styles.cardDescription}>
               Seguí las notas en la partitura y tocá canciones clásicas usando
               tu teclado o haciendo clic en las teclas del piano.
+            </p>
+            <span className={styles.arrow}>
+              <FontAwesomeIcon icon={faArrowRight} />
+            </span>
+          </Link>
+
+          <Link href="/ear-training" className={styles.card}>
+            <FontAwesomeIcon icon={faHeadphones} className={styles.cardIcon} />
+            <h2 className={styles.cardTitle}>Entrenamiento Auditivo</h2>
+            <p className={styles.cardDescription}>
+              Escuchá las notas y encontralas en el piano. Mejorá tu oído
+              musical con ejercicios interactivos.
             </p>
             <span className={styles.arrow}>
               <FontAwesomeIcon icon={faArrowRight} />
