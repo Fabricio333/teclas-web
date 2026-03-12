@@ -1,4 +1,4 @@
-@use "./components" as *;
+@use './components' as *;
 
 html,
 body {
@@ -35,7 +35,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
+  font-family: var(--font-lobster), cursive;
 }
 
 p {
