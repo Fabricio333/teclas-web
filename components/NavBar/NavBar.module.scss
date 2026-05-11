@@ -37,7 +37,7 @@
 .logoText {
   display: flex;
   flex-direction: column;
-  line-height: 1;
+  line-height: 1.15;
 }
 
 .logoMain {
@@ -46,12 +46,12 @@
 }
 
 .logoSub {
-  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
+  font-family: var(--font-lobster), cursive;
   font-size: 1rem;
 }
 
 .logoRight {
-  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
+  font-family: var(--font-lobster), Arial, Helvetica, sans-serif;
   font-size: 1.5rem;
   margin-left: 0.5rem;
 }
@@ -80,7 +80,9 @@
   text-decoration: none;
   color: inherit;
   transition: color 0.3s ease;
-  font-family: var(--font-delius), Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 500;
 
   &:hover {
     color: var(--gold);

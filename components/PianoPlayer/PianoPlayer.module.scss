@@ -4,7 +4,7 @@
 .gameSection {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 6rem 1.5rem 2rem;
   text-align: center;
   position: relative;
   min-height: 80vh;
@@ -81,6 +81,58 @@
   &:active {
     background: #e2e8f0;
   }
+}
+
+// ---------- Microphone button ----------
+
+.micBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  font-size: 1rem;
+  color: $light-text-color;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:active {
+    background: #e2e8f0;
+  }
+}
+
+.micBtnActive {
+  color: white;
+  background: $success-color;
+  border-color: $success-color;
+
+  &:hover {
+    background: color.adjust($success-color, $lightness: -8%);
+    border-color: color.adjust($success-color, $lightness: -8%);
+  }
+
+  &:active {
+    background: color.adjust($success-color, $lightness: -12%);
+  }
+}
+
+.micBtnError {
+  border-color: $error-color;
+  color: $error-color;
+}
+
+.micErrorText {
+  font-size: 0.8rem;
+  color: $error-color;
+  margin-top: 0.5rem;
 }
 
 // ---------- Score cards ----------
@@ -551,6 +603,46 @@
   margin-top: 0.5rem;
   font-size: 0.85rem;
   color: $light-text-color;
+}
+
+// ---------- Play area (sheet + piano) ----------
+
+.playArea {
+  display: contents;
+}
+
+@media (min-width: $tablet-breakpoint) {
+  .gameSection {
+    max-width: 1200px;
+  }
+
+  .playArea {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'sheet piano'
+      'progress progress';
+    column-gap: 1.5rem;
+    row-gap: 1rem;
+    align-items: start;
+    margin-bottom: 1.25rem;
+  }
+
+  .sheetWrapper {
+    grid-area: sheet;
+    margin-bottom: 0;
+  }
+
+  .pianoWrapper {
+    grid-area: piano;
+    margin-bottom: 0;
+  }
+
+  .progressSection {
+    grid-area: progress;
+    max-width: none;
+    margin: 0;
+  }
 }
 
 // ---------- Mobile responsive ----------
