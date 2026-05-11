@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './EarTraining.module.scss';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import {
@@ -12,6 +12,12 @@ import {
   BLACK_KEYS,
   generateRound,
 } from '@/lib/ear-training/levels';
+import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faMicrophone,
+  faMicrophoneSlash,
+} from '@fortawesome/free-solid-svg-icons';
 
 function getDifficultyLabel(d: 1 | 2 | 3): string {
   return '\u2B50'.repeat(d);
@@ -21,6 +27,42 @@ export default function EarTraining() {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
   const doneRef = useRef<HTMLDivElement>(null);
+
+  // Bridge refs for microphone pitch detection
+  const notePressRef = useRef<((midi: number) => void) | null>(null);
+  const noteReleaseRef = useRef<((midi: number) => void) | null>(null);
+  const micMuteRef = useRef<(() => void) | null>(null);
+  const micUnmuteRef = useRef<(() => void) | null>(null);
+
+  const {
+    status: micStatus,
+    startListening,
+    stopListening,
+    error: micError,
+    muteDetection,
+    unmuteDetection,
+  } = useMicrophonePitch({
+    onNotePressRef: notePressRef,
+    onNoteReleaseRef: noteReleaseRef,
+  });
+
+  // Keep mute/unmute refs current
+  useEffect(() => {
+    micMuteRef.current = muteDetection;
+    micUnmuteRef.current = unmuteDetection;
+  }, [muteDetection, unmuteDetection]);
+
+  const [micEnabled, setMicEnabled] = useState(false);
+
+  const toggleMic = useCallback(async () => {
+    if (micEnabled) {
+      stopListening();
+      setMicEnabled(false);
+    } else {
+      await startListening();
+      setMicEnabled(true);
+    }
+  }, [micEnabled, startListening, stopListening]);
 
   useEffect(() => {
     let synth: any; // Tone.Sampler
@@ -108,6 +150,7 @@ export default function EarTraining() {
         if (!synth.loaded) return;
         const name = midiToName[midiNumber];
         if (!name) return;
+        micMuteRef.current?.();
         try {
           synth.triggerAttack(name, Tone.now());
         } catch (err) {
@@ -124,17 +167,20 @@ export default function EarTraining() {
         } catch {
           // ignore release errors
         }
+        setTimeout(() => micUnmuteRef.current?.(), 200);
       };
 
       const playNoteForDuration = (midiNumber: number) => {
         if (!synth.loaded) return;
         const name = midiToName[midiNumber];
         if (!name) return;
+        micMuteRef.current?.();
         try {
           synth.triggerAttackRelease(name, '2n', Tone.now());
         } catch (err) {
           console.error('Play error:', err);
         }
+        setTimeout(() => micUnmuteRef.current?.(), 800);
       };
 
       // Track pressed elements
@@ -412,6 +458,10 @@ export default function EarTraining() {
         releaseKey(midiNumber);
       };
 
+      // Bridge refs for microphone pitch detection
+      notePressRef.current = handleNotePress;
+      noteReleaseRef.current = handleNoteRelease;
+
       // ---------- Replay button ----------
       const playBtn = document.getElementById('play-btn');
       if (playBtn) {
@@ -592,6 +642,8 @@ export default function EarTraining() {
 
     return () => {
       aborted = true;
+      notePressRef.current = null;
+      noteReleaseRef.current = null;
       if (keydownListener)
         document.removeEventListener('keydown', keydownListener);
       if (keyupListener) document.removeEventListener('keyup', keyupListener);
@@ -650,7 +702,25 @@ export default function EarTraining() {
           <button id="restart-btn" className={styles.restartBtn}>
             Reiniciar
           </button>
+
+          <button
+            type="button"
+            onClick={toggleMic}
+            className={`${styles.micBtn} ${micStatus === 'listening' ? styles.micBtnActive : ''} ${micStatus === 'error' ? styles.micBtnError : ''}`}
+            title={
+              micStatus === 'listening'
+                ? 'Desactivar microfono'
+                : 'Activar microfono'
+            }
+          >
+            <FontAwesomeIcon
+              icon={
+                micStatus === 'listening' ? faMicrophone : faMicrophoneSlash
+              }
+            />
+          </button>
         </div>
+        {micError && <p className={styles.micErrorText}>{micError}</p>}
       </div>
 
       {/* Score cards */}
