@@ -96,11 +96,11 @@ export const LEVELS: Level[] = [
   },
   {
     id: 'campanitas',
-    name: 'Campanitas del Lugar',
+    name: 'Navidad Navidad',
     difficulty: 2,
     abc: [
       'X:1',
-      'T:Campanitas del Lugar',
+      'T:Navidad Navidad',
       'M:4/4',
       'L:1/4',
       'K:C',
