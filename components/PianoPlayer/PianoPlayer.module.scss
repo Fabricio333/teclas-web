@@ -353,8 +353,7 @@
   height: 60%;
   position: absolute;
   top: 0;
-  left: 34px;
-  z-index: 2;
+  z-index: 3;
   border-radius: 0 0 4px 4px;
   border: 1px solid #000;
   align-items: flex-end;
@@ -376,10 +375,32 @@
   }
 }
 
+.black[data-key-position='0'] {
+  left: calc(50% - 175px + 32px);
+}
+
+.black[data-key-position='1'] {
+  left: calc(50% - 175px + 82px);
+}
+
+.black[data-key-position='3'] {
+  left: calc(50% - 175px + 182px);
+}
+
+.black[data-key-position='4'] {
+  left: calc(50% - 175px + 232px);
+}
+
+.black[data-key-position='5'] {
+  left: calc(50% - 175px + 282px);
+}
+
 .keyLabel {
   font-size: $font-size-sm;
   color: #999;
   pointer-events: none;
+  position: relative;
+  z-index: 1;
 }
 
 .black .keyLabel {
@@ -691,7 +712,26 @@
 
   .black {
     width: 28px;
-    left: 28px;
+  }
+
+  .black[data-key-position='0'] {
+    left: calc(50% - 147px + 28px);
+  }
+
+  .black[data-key-position='1'] {
+    left: calc(50% - 147px + 70px);
+  }
+
+  .black[data-key-position='3'] {
+    left: calc(50% - 147px + 154px);
+  }
+
+  .black[data-key-position='4'] {
+    left: calc(50% - 147px + 196px);
+  }
+
+  .black[data-key-position='5'] {
+    left: calc(50% - 147px + 238px);
   }
 
   .keyboardRef {

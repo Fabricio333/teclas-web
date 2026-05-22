@@ -290,21 +290,21 @@ export default function PianoPlayer() {
         labelEl.textContent = white.label;
         wEl.appendChild(labelEl);
 
-        const black = BLACK_KEYS.find((b) => b.afterWhiteIndex === i);
-        if (black) {
-          const bEl = document.createElement('div');
-          bEl.className = `${styles.key} ${styles.black}`;
-          bEl.dataset.midi = String(black.midi);
-
-          const bLabel = document.createElement('span');
-          bLabel.className = styles.keyLabel;
-          bLabel.textContent = black.label;
-          bEl.appendChild(bLabel);
-
-          wEl.appendChild(bEl);
-        }
-
         pianoDiv.appendChild(wEl);
+      });
+
+      BLACK_KEYS.forEach((black) => {
+        const bEl = document.createElement('div');
+        bEl.className = `${styles.key} ${styles.black}`;
+        bEl.dataset.midi = String(black.midi);
+        bEl.dataset.keyPosition = String(black.afterWhiteIndex);
+
+        const bLabel = document.createElement('span');
+        bLabel.className = styles.keyLabel;
+        bLabel.textContent = black.label;
+        bEl.appendChild(bLabel);
+
+        pianoDiv.appendChild(bEl);
       });
 
       // ---------- Sheet music ----------
