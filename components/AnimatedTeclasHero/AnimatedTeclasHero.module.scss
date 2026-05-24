@@ -1,0 +1,229 @@
+@use '../../styles/variables' as *;
+
+.root {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 620px);
+  aspect-ratio: 1000 / 710;
+  margin: 0 auto;
+  overflow: visible;
+  touch-action: none;
+}
+
+.particles,
+.artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.particles {
+  z-index: 0;
+  pointer-events: none;
+}
+
+.artwork {
+  z-index: 1;
+  overflow: visible;
+}
+
+.keyboardBack {
+  fill: rgba(250, 251, 245, 0.92);
+  stroke: #d2d3c8;
+  stroke-width: 5;
+}
+
+.whiteKey,
+.blackKey {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.whiteKey {
+  fill: url('#teclasWhiteKey');
+  stroke: #d2d3c8;
+  stroke-width: 2.3;
+}
+
+.blackKey {
+  fill: url('#teclasBlackKey');
+  stroke: #2d2e33;
+  stroke-width: 2.8;
+}
+
+.keyHitTarget {
+  fill: transparent;
+  stroke: transparent;
+  cursor: pointer;
+  pointer-events: all;
+  touch-action: none;
+
+  &:focus-visible {
+    stroke: $primary-color;
+    stroke-opacity: 0.42;
+    stroke-width: 7;
+    outline: none;
+  }
+}
+
+.pressedKey {
+  fill: rgba(255, 209, 34, 0.26);
+  stroke: rgba(65, 92, 169, 0.32);
+  stroke-width: 3;
+  pointer-events: none;
+  animation: keyPulse 180ms ease-out both;
+}
+
+.floatSlow,
+.floatMedium,
+.floatTiny {
+  opacity: 0.95;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.65));
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.floatSlow {
+  animation: floatSlow 3.8s ease-in-out infinite;
+}
+
+.floatMedium {
+  animation: floatMedium 3.1s ease-in-out infinite;
+}
+
+.floatTiny {
+  animation: floatTiny 2.6s ease-in-out infinite;
+}
+
+.reducedMotion {
+  .floatSlow,
+  .floatMedium,
+  .floatTiny {
+    animation: none;
+  }
+}
+
+.sceneBurst {
+  .floatSlow {
+    animation:
+      clickKickSlow 640ms ease-out,
+      floatSlow 3.8s ease-in-out 640ms infinite;
+  }
+
+  .floatMedium {
+    animation:
+      clickKickMedium 640ms ease-out,
+      floatMedium 3.1s ease-in-out 640ms infinite;
+  }
+
+  .floatTiny {
+    animation:
+      clickKickTiny 640ms ease-out,
+      floatTiny 2.6s ease-in-out 640ms infinite;
+  }
+}
+
+@keyframes floatSlow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(0, -16px, 0) rotate(4deg);
+  }
+}
+
+@keyframes floatMedium {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(9px, -18px, 0) rotate(-6deg);
+  }
+}
+
+@keyframes floatTiny {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(-8px, -14px, 0) scale(1.08);
+  }
+}
+
+@keyframes keyPulse {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translateY(4px);
+  }
+
+  100% {
+    opacity: 0.1;
+    transform: translateY(2px);
+  }
+}
+
+@keyframes clickKickSlow {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+
+  45% {
+    transform: translate3d(-18px, -36px, 0) rotate(-8deg) scale(1.08);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes clickKickMedium {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+
+  45% {
+    transform: translate3d(28px, -42px, 0) rotate(10deg) scale(1.12);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes clickKickTiny {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+
+  45% {
+    transform: translate3d(-24px, -30px, 0) rotate(-12deg) scale(1.14);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .root {
+    width: min(100%, 390px);
+  }
+
+  .keyHitTarget:focus-visible {
+    stroke-width: 10;
+  }
+}
