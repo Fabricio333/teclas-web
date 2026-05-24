@@ -34,6 +34,8 @@ type HeroKey = {
   midi: number;
   kind: HeroKeyKind;
   path: string;
+  frontPath?: string;
+  capPath?: string;
   center: Point;
 };
 
@@ -60,8 +62,13 @@ const VIEWBOX_HEIGHT = 710;
 const TAU = Math.PI * 2;
 const WHITE_KEY_COUNT = 36;
 const KEY_HALF_WIDTH = 84;
-const BLACK_KEY_LENGTH = 126;
-const BLACK_KEY_WIDTH_FACTOR = 0.56;
+const BLACK_KEY_LENGTH = 122;
+const BLACK_KEY_WIDTH_FACTOR = 0.4;
+const BLACK_KEY_BACK_OVERHANG = 8;
+const BLACK_KEY_FRONT_WIDTH = 8;
+const BLACK_KEY_SHOULDER_WIDTH = 7;
+const BLACK_KEY_CAP_DEPTH = 16;
+const WHITE_KEY_FRONT_DEPTH = 13;
 const START_MIDI = 48;
 const NATURAL_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
 const BLACK_AFTER_NATURAL_INDEX = new Set([0, 1, 3, 4, 5]);
@@ -91,8 +98,8 @@ const curveA = {
 const curveB = {
   start: curveA.end,
   c1: { x: 650, y: 350 },
-  c2: { x: 805, y: 474 },
-  end: { x: 970, y: 478 },
+  c2: { x: 830, y: 505 },
+  end: { x: 970, y: 438 },
 };
 
 function point(x: number, y: number): Point {
@@ -196,6 +203,15 @@ function pathFromPoints(points: Point[]) {
   ].join(' ');
 }
 
+function openPathFromPoints(points: Point[]) {
+  const [first, ...rest] = points;
+
+  return [
+    `M ${first.x.toFixed(2)} ${first.y.toFixed(2)}`,
+    ...rest.map((item) => `L ${item.x.toFixed(2)} ${item.y.toFixed(2)}`),
+  ].join(' ');
+}
+
 function keySegmentPath(startT: number, endT: number, inset = 0) {
   const start = sampleKeyboardCurve(startT);
   const end = sampleKeyboardCurve(endT);
@@ -207,23 +223,93 @@ function keySegmentPath(startT: number, endT: number, inset = 0) {
   return pathFromPoints([topStart, topEnd, bottomEnd, bottomStart]);
 }
 
+function whiteKeyDividerPath(t: number) {
+  const sample = sampleKeyboardCurve(t);
+  const back = add(sample.top, scale(sample.normal, 8));
+  const front = sample.bottom;
+
+  return openPathFromPoints([back, front]);
+}
+
+function whiteKeyFrontPath(startT: number, endT: number, inset = 0) {
+  const start = sampleKeyboardCurve(startT);
+  const end = sampleKeyboardCurve(endT);
+  const frontStart = add(start.bottom, scale(start.tangent, inset));
+  const frontEnd = subtract(end.bottom, scale(end.tangent, inset));
+  const backEnd = subtract(frontEnd, scale(end.normal, WHITE_KEY_FRONT_DEPTH));
+  const backStart = subtract(
+    frontStart,
+    scale(start.normal, WHITE_KEY_FRONT_DEPTH),
+  );
+
+  return pathFromPoints([backStart, backEnd, frontEnd, frontStart]);
+}
+
 function blackKeyPath(centerT: number, keyStep: number) {
   const halfT = keyStep * BLACK_KEY_WIDTH_FACTOR * 0.5;
   const start = sampleKeyboardCurve(centerT - halfT);
   const end = sampleKeyboardCurve(centerT + halfT);
   const center = sampleKeyboardCurve(centerT);
-  const topStart = add(start.top, scale(start.normal, 10));
-  const topEnd = add(end.top, scale(end.normal, 10));
+  const topStart = subtract(
+    start.top,
+    scale(start.normal, BLACK_KEY_BACK_OVERHANG),
+  );
+  const topEnd = subtract(
+    end.top,
+    scale(end.normal, BLACK_KEY_BACK_OVERHANG),
+  );
   const bottomEnd = add(
     center.top,
-    add(scale(center.normal, BLACK_KEY_LENGTH), scale(center.tangent, 11)),
+    add(
+      scale(center.normal, BLACK_KEY_LENGTH),
+      scale(center.tangent, BLACK_KEY_FRONT_WIDTH),
+    ),
   );
   const bottomStart = add(
     center.top,
-    add(scale(center.normal, BLACK_KEY_LENGTH), scale(center.tangent, -11)),
+    add(
+      scale(center.normal, BLACK_KEY_LENGTH),
+      scale(center.tangent, -BLACK_KEY_FRONT_WIDTH),
+    ),
   );
 
   return pathFromPoints([topStart, topEnd, bottomEnd, bottomStart]);
+}
+
+function blackKeyCapPath(centerT: number) {
+  const center = sampleKeyboardCurve(centerT);
+  const backDistance = BLACK_KEY_LENGTH - BLACK_KEY_CAP_DEPTH;
+  const frontDistance = BLACK_KEY_LENGTH - 2;
+  const backLeft = add(
+    center.top,
+    add(
+      scale(center.normal, backDistance),
+      scale(center.tangent, -BLACK_KEY_SHOULDER_WIDTH),
+    ),
+  );
+  const backRight = add(
+    center.top,
+    add(
+      scale(center.normal, backDistance),
+      scale(center.tangent, BLACK_KEY_SHOULDER_WIDTH),
+    ),
+  );
+  const frontRight = add(
+    center.top,
+    add(
+      scale(center.normal, frontDistance),
+      scale(center.tangent, BLACK_KEY_FRONT_WIDTH),
+    ),
+  );
+  const frontLeft = add(
+    center.top,
+    add(
+      scale(center.normal, frontDistance),
+      scale(center.tangent, -BLACK_KEY_FRONT_WIDTH),
+    ),
+  );
+
+  return pathFromPoints([backLeft, backRight, frontRight, frontLeft]);
 }
 
 function getNaturalMidi(index: number) {
@@ -236,6 +322,7 @@ function getNaturalMidi(index: number) {
 function buildKeyboard() {
   const whiteKeys: HeroKey[] = [];
   const blackKeys: HeroKey[] = [];
+  const whiteKeyDividers: string[] = [];
   const keyStep = 1 / WHITE_KEY_COUNT;
 
   for (let index = 0; index < WHITE_KEY_COUNT; index++) {
@@ -248,8 +335,13 @@ function buildKeyboard() {
       midi: getNaturalMidi(index),
       kind: 'white',
       path: keySegmentPath(startT, endT, 1.2),
+      frontPath: whiteKeyFrontPath(startT, endT, 1.2),
       center,
     });
+  }
+
+  for (let index = 1; index < WHITE_KEY_COUNT; index++) {
+    whiteKeyDividers.push(whiteKeyDividerPath(index * keyStep));
   }
 
   for (let index = 0; index < WHITE_KEY_COUNT - 1; index++) {
@@ -264,6 +356,7 @@ function buildKeyboard() {
       midi: getNaturalMidi(index) + 1,
       kind: 'black',
       path: blackKeyPath(centerT, keyStep),
+      capPath: blackKeyCapPath(centerT),
       center: add(sample.top, scale(sample.normal, BLACK_KEY_LENGTH * 0.56)),
     });
   }
@@ -271,18 +364,19 @@ function buildKeyboard() {
   return {
     whiteKeys,
     blackKeys,
-    backingPath: buildBackingPath(),
+    whiteKeyDividers,
+    keyboardEdgePath: buildKeyboardEdgePath(),
   };
 }
 
-function buildBackingPath() {
+function buildKeyboardEdgePath() {
   const topPoints: Point[] = [];
   const bottomPoints: Point[] = [];
 
-  for (let index = 0; index <= 52; index++) {
-    const sample = sampleKeyboardCurve(index / 52);
-    topPoints.push(add(sample.top, scale(sample.normal, -14)));
-    bottomPoints.push(add(sample.bottom, scale(sample.normal, 18)));
+  for (let index = 0; index <= 72; index++) {
+    const sample = sampleKeyboardCurve(index / 72);
+    topPoints.push(sample.top);
+    bottomPoints.push(sample.bottom);
   }
 
   return pathFromPoints([...topPoints, ...bottomPoints.reverse()]);
@@ -295,26 +389,27 @@ function seededWave(x: number, y: number) {
 function buildParticles() {
   const particles: Particle[] = [];
   const step = 16;
+  const centerX = 560;
+  const centerY = 360;
+  const radius = 460;
 
-  for (let y = 58; y <= 665; y += step) {
-    for (let x = 135; x <= 970; x += step) {
-      const upper =
-        1 - ((x - 570) / 455) ** 2 - ((y - 215) / 185) ** 2;
-      const lower =
-        1 - ((x - 535) / 435) ** 2 - ((y - 515) / 220) ** 2;
-      const field = Math.max(upper, lower * 0.94);
+  for (let y = -55; y <= 775; y += step) {
+    for (let x = 5; x <= 1065; x += step) {
+      const distance = Math.hypot(x - centerX, y - centerY);
+      const field = 1 - distance / radius;
 
-      if (field <= 0) continue;
+      if (field <= 0.015) continue;
 
       const wobble = seededWave(x, y) % 1;
+      const softenedField = field ** 1.35;
 
       particles.push({
         x,
         y,
-        radius: Math.max(0.8, 1.2 + field * 6 + wobble * 0.9),
+        radius: Math.max(0.7, 0.8 + softenedField * 7 + wobble * 0.9),
         phase: (x * 0.018 + y * 0.027) % TAU,
         drift: 0.8 + Math.abs(wobble) * 1.8,
-        alpha: 0.38 + Math.min(0.42, field * 0.36),
+        alpha: 0.18 + Math.min(0.64, softenedField * 0.7),
       });
     }
   }
@@ -406,17 +501,9 @@ function DoubleNote() {
 
 function TrebleMark() {
   return (
-    <g fill="currentColor">
-      <path
-        d="M 55 8 C 35 34 35 66 60 84 C 89 104 104 63 70 62 C 40 61 27 96 53 118 C 84 145 119 116 101 78 C 90 53 68 40 51 20 C 34 1 26 23 35 49 C 45 76 75 102 86 134 C 97 168 64 188 38 162 C 17 142 33 108 64 125"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="7"
-      />
-      <ellipse cx="38" cy="162" rx="15" ry="21" transform="rotate(22 38 162)" />
-    </g>
+    <text className={styles.trebleClef} x="0" y="148">
+      𝄞
+    </text>
   );
 }
 
@@ -429,7 +516,7 @@ function renderDecorations(motionIsReduced: boolean, sceneBurstId: number) {
         motionIsReduced ? styles.reducedMotion : styles.sceneBurst,
       )}
     >
-      <g transform="translate(205 78) rotate(-8) scale(0.78)">
+      <g transform="translate(202 62) rotate(-8) scale(0.86)">
         <g className={styles.floatSlow} style={{ color: '#415ca9' }}>
           <TrebleMark />
         </g>
@@ -803,44 +890,76 @@ export default function AnimatedTeclasHero({
           </filter>
         </defs>
 
-        {renderDecorations(motionIsReduced, sceneBurstId)}
-
         <g filter="url(#teclasSoftShadow)">
-          <path className={styles.keyboardBack} d={keyboard.backingPath} />
           <g>
             {keyboard.whiteKeys.map((key) => (
               <path key={key.id} className={styles.whiteKey} d={key.path} />
             ))}
           </g>
           <g>
+            {keyboard.whiteKeys.map((key) =>
+              key.frontPath ? (
+                <path
+                  key={`${key.id}-front`}
+                  className={styles.whiteKeyFront}
+                  d={key.frontPath}
+                />
+              ) : null,
+            )}
+          </g>
+          <g>
+            {keyboard.whiteKeyDividers.map((path, index) => (
+              <path
+                key={`white-divider-${index}`}
+                className={styles.whiteKeyDivider}
+                d={path}
+              />
+            ))}
+          </g>
+          <path className={styles.keyboardEdge} d={keyboard.keyboardEdgePath} />
+          <g>
             {keyboard.blackKeys.map((key) => (
               <path key={key.id} className={styles.blackKey} d={key.path} />
             ))}
           </g>
+          <g>
+            {keyboard.blackKeys.map((key) =>
+              key.capPath ? (
+                <path
+                  key={`${key.id}-cap`}
+                  className={styles.blackKeyCap}
+                  d={key.capPath}
+                />
+              ) : null,
+            )}
+          </g>
           {pressedKey && (
             <path className={styles.pressedKey} d={pressedKey.path} />
           )}
-          <g>
-            {allKeys.map((key) => (
-              <path
-                key={`${key.id}-hit`}
-                aria-label={`Tocar ${midiNumberToNote(
-                  key.midi,
-                  undefined,
-                  true,
-                )}`}
-                className={styles.keyHitTarget}
-                d={key.path}
-                onKeyDown={(event) => handleKeyDown(event, key)}
-                onKeyUp={handleKeyUp}
-                onPointerCancel={handlePointerUp}
-                onPointerDown={(event) => handlePointerDown(event, key)}
-                onPointerUp={handlePointerUp}
-                role="button"
-                tabIndex={0}
-              />
-            ))}
-          </g>
+        </g>
+
+        {renderDecorations(motionIsReduced, sceneBurstId)}
+
+        <g>
+          {allKeys.map((key) => (
+            <path
+              key={`${key.id}-hit`}
+              aria-label={`Tocar ${midiNumberToNote(
+                key.midi,
+                undefined,
+                true,
+              )}`}
+              className={styles.keyHitTarget}
+              d={key.path}
+              onKeyDown={(event) => handleKeyDown(event, key)}
+              onKeyUp={handleKeyUp}
+              onPointerCancel={handlePointerUp}
+              onPointerDown={(event) => handlePointerDown(event, key)}
+              onPointerUp={handlePointerUp}
+              role="button"
+              tabIndex={0}
+            />
+          ))}
         </g>
       </svg>
     </div>

@@ -28,13 +28,10 @@
   overflow: visible;
 }
 
-.keyboardBack {
-  fill: rgba(250, 251, 245, 0.92);
-  stroke: #d2d3c8;
-  stroke-width: 5;
-}
-
 .whiteKey,
+.whiteKeyFront,
+.whiteKeyDivider,
+.keyboardEdge,
 .blackKey {
   pointer-events: none;
   transform-box: fill-box;
@@ -43,14 +40,41 @@
 
 .whiteKey {
   fill: url('#teclasWhiteKey');
-  stroke: #d2d3c8;
-  stroke-width: 2.3;
+  stroke: none;
+}
+
+.whiteKeyFront {
+  fill: #d8d9d0;
+  stroke: #c3c5bb;
+  stroke-linejoin: round;
+  stroke-width: 1.6;
+}
+
+.whiteKeyDivider {
+  fill: none;
+  stroke: #c9cbbf;
+  stroke-linecap: round;
+  stroke-width: 2.4;
+}
+
+.keyboardEdge {
+  fill: none;
+  stroke: #c8cabf;
+  stroke-linejoin: round;
+  stroke-width: 3.2;
 }
 
 .blackKey {
   fill: url('#teclasBlackKey');
   stroke: #2d2e33;
   stroke-width: 2.8;
+}
+
+.blackKeyCap {
+  fill: #62646a;
+  stroke: #3f4147;
+  stroke-width: 1.8;
+  pointer-events: none;
 }
 
 .keyHitTarget {
@@ -84,6 +108,14 @@
   transform-box: fill-box;
   transform-origin: center;
   will-change: transform;
+}
+
+.trebleClef {
+  fill: currentColor;
+  font-family: 'Apple Symbols', 'Noto Music', 'Times New Roman', serif;
+  font-size: 210px;
+  font-weight: 400;
+  line-height: 1;
 }
 
 .floatSlow {
