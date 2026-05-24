@@ -23,14 +23,38 @@ function getDifficultyLabel(d: 1 | 2 | 3): string {
   return '\u2B50'.repeat(d);
 }
 
+type InputSource = 'qwerty' | 'pointer' | 'midi' | 'microphone' | 'system';
+type NoteHandler = (
+  midi: number,
+  source?: InputSource,
+  velocity?: number,
+) => void;
+
+const MIN_PRESS_MS_BY_SOURCE: Record<InputSource, number> = {
+  qwerty: 90,
+  pointer: 75,
+  midi: 0,
+  microphone: 0,
+  system: 110,
+};
+
+const DEFAULT_VELOCITY_BY_SOURCE: Record<InputSource, number> = {
+  qwerty: 0.82,
+  pointer: 0.88,
+  midi: 0.9,
+  microphone: 0,
+  system: 0.72,
+};
+
 export default function EarTraining() {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
   const doneRef = useRef<HTMLDivElement>(null);
 
   // Bridge refs for microphone pitch detection
-  const notePressRef = useRef<((midi: number) => void) | null>(null);
-  const noteReleaseRef = useRef<((midi: number) => void) | null>(null);
+  const notePressRef = useRef<NoteHandler | null>(null);
+  const noteReleaseRef = useRef<NoteHandler | null>(null);
+  const getExpectedMidiRef = useRef<(() => number | null) | null>(null);
   const micMuteRef = useRef<(() => void) | null>(null);
   const micUnmuteRef = useRef<(() => void) | null>(null);
 
@@ -44,6 +68,7 @@ export default function EarTraining() {
   } = useMicrophonePitch({
     onNotePressRef: notePressRef,
     onNoteReleaseRef: noteReleaseRef,
+    getExpectedMidiRef,
   });
 
   // Keep mute/unmute refs current
@@ -59,8 +84,8 @@ export default function EarTraining() {
       stopListening();
       setMicEnabled(false);
     } else {
-      await startListening();
-      setMicEnabled(true);
+      const started = await startListening();
+      setMicEnabled(started);
     }
   }, [micEnabled, startListening, stopListening]);
 
@@ -146,19 +171,23 @@ export default function EarTraining() {
       document.addEventListener('keydown', startOnGesture, { once: true });
 
       // ---------- Sustain audio ----------
-      const attackNote = (midiNumber: number) => {
+      const attackNote = (
+        midiNumber: number,
+        source: InputSource,
+        velocity = DEFAULT_VELOCITY_BY_SOURCE[source],
+      ) => {
         if (!synth.loaded) return;
         const name = midiToName[midiNumber];
         if (!name) return;
-        micMuteRef.current?.();
+        if (source !== 'microphone') micMuteRef.current?.();
         try {
-          synth.triggerAttack(name, Tone.now());
+          synth.triggerAttack(name, Tone.now(), velocity);
         } catch (err) {
           console.error('Attack error:', err);
         }
       };
 
-      const releaseNote = (midiNumber: number) => {
+      const releaseNote = (midiNumber: number, source: InputSource) => {
         if (!synth.loaded) return;
         const name = midiToName[midiNumber];
         if (!name) return;
@@ -167,7 +196,9 @@ export default function EarTraining() {
         } catch {
           // ignore release errors
         }
-        setTimeout(() => micUnmuteRef.current?.(), 200);
+        if (source !== 'microphone') {
+          setTimeout(() => micUnmuteRef.current?.(), 220);
+        }
       };
 
       const playNoteForDuration = (midiNumber: number) => {
@@ -220,6 +251,13 @@ export default function EarTraining() {
       let canAnswer = false;
       let advanceTimer: ReturnType<typeof setTimeout> | null = null;
       const pressedMidi = new Set<number>();
+      const pressedAt = new Map<number, number>();
+      const pendingReleases = new Map<number, ReturnType<typeof setTimeout>>();
+      const sustainedMidi = new Set<number>();
+      let sustainPedalDown = false;
+
+      getExpectedMidiRef.current = () =>
+        canAnswer && pos < sequence.length ? sequence[pos] : null;
 
       // ---------- Octave shift ----------
       let midiOffset = 0;
@@ -399,9 +437,26 @@ export default function EarTraining() {
       };
 
       // ---------- Game logic ----------
-      const handleNotePress = (midiNumber: number) => {
-        attackNote(midiNumber);
+      const handleNotePress: NoteHandler = (
+        midiNumber,
+        source = 'system',
+        velocity = DEFAULT_VELOCITY_BY_SOURCE[source],
+      ) => {
+        const pendingRelease = pendingReleases.get(midiNumber);
+        if (pendingRelease) {
+          clearTimeout(pendingRelease);
+          pendingReleases.delete(midiNumber);
+        }
+
+        if (pressedMidi.has(midiNumber)) return;
+        if (source === 'midi') sustainedMidi.delete(midiNumber);
+
+        if (source !== 'microphone') {
+          attackNote(midiNumber, source, velocity);
+        }
         pressKey(midiNumber);
+        pressedMidi.add(midiNumber);
+        pressedAt.set(midiNumber, performance.now());
 
         if (!canAnswer || pos >= sequence.length) return;
 
@@ -453,9 +508,35 @@ export default function EarTraining() {
         }
       };
 
-      const handleNoteRelease = (midiNumber: number) => {
-        releaseNote(midiNumber);
-        releaseKey(midiNumber);
+      const handleNoteRelease: NoteHandler = (midiNumber, source = 'system') => {
+        const startedAt = pressedAt.get(midiNumber) ?? performance.now();
+        const heldFor = performance.now() - startedAt;
+        const minPressMs = MIN_PRESS_MS_BY_SOURCE[source];
+
+        const finishRelease = () => {
+          pendingReleases.delete(midiNumber);
+          pressedMidi.delete(midiNumber);
+          pressedAt.delete(midiNumber);
+          releaseKey(midiNumber);
+
+          if (source === 'microphone') return;
+          if (source === 'midi' && sustainPedalDown) {
+            sustainedMidi.add(midiNumber);
+            return;
+          }
+          releaseNote(midiNumber, source);
+        };
+
+        if (heldFor < minPressMs) {
+          const releaseTimer = setTimeout(
+            finishRelease,
+            minPressMs - heldFor,
+          );
+          pendingReleases.set(midiNumber, releaseTimer);
+          return;
+        }
+
+        finishRelease();
       };
 
       // Bridge refs for microphone pitch detection
@@ -484,8 +565,7 @@ export default function EarTraining() {
         if (physicalKeyMidi.has(key)) return;
         const midi = baseMidi + midiOffset;
         physicalKeyMidi.set(key, midi);
-        pressedMidi.add(midi);
-        handleNotePress(midi);
+        handleNotePress(midi, 'qwerty');
       };
 
       keyupListener = (e) => {
@@ -493,8 +573,7 @@ export default function EarTraining() {
         const midi = physicalKeyMidi.get(key);
         if (midi !== undefined) {
           physicalKeyMidi.delete(key);
-          pressedMidi.delete(midi);
-          handleNoteRelease(midi);
+          handleNoteRelease(midi, 'qwerty');
         }
       };
 
@@ -515,14 +594,14 @@ export default function EarTraining() {
         pianoDiv.setPointerCapture(e.pointerId);
         const midi = baseMidi + midiOffset;
         pointerMidi.set(e.pointerId, midi);
-        handleNotePress(midi);
+        handleNotePress(midi, 'pointer');
       };
 
       pointerUpListener = (e) => {
         const midi = pointerMidi.get(e.pointerId);
         if (midi !== undefined) {
           pointerMidi.delete(e.pointerId);
-          handleNoteRelease(midi);
+          handleNoteRelease(midi, 'pointer');
         }
       };
 
@@ -534,21 +613,31 @@ export default function EarTraining() {
       if (typeof navigator !== 'undefined' && navigator.requestMIDIAccess) {
         try {
           const access = await navigator.requestMIDIAccess();
+          const releaseSustainedNotes = () => {
+            sustainedMidi.forEach((midiNumber) =>
+              releaseNote(midiNumber, 'midi'),
+            );
+            sustainedMidi.clear();
+          };
+
           access.inputs.forEach((input) => {
             midiInputs.push(input);
-            input.onmidimessage = (event: WebMidi.MIDIMessageEvent) => {
+            input.onmidimessage = (event: MIDIMessageEvent) => {
               const data = event.data;
               if (!data || data.length < 3) return;
               const status = data[0] & 0xf0;
               const note = data[1];
               const velocity = data[2];
               if (status === 0x90 && velocity > 0) {
-                handleNotePress(note);
+                handleNotePress(note, 'midi', velocity / 127);
               } else if (
                 status === 0x80 ||
                 (status === 0x90 && velocity === 0)
               ) {
-                handleNoteRelease(note);
+                handleNoteRelease(note, 'midi');
+              } else if (status === 0xb0 && data[1] === 64) {
+                sustainPedalDown = velocity >= 64;
+                if (!sustainPedalDown) releaseSustainedNotes();
               }
             };
           });
@@ -559,10 +648,15 @@ export default function EarTraining() {
 
       // ---------- Reset ----------
       const resetGame = () => {
+        pendingReleases.forEach((timer) => clearTimeout(timer));
+        pendingReleases.clear();
+        sustainedMidi.clear();
+        sustainPedalDown = false;
         if (synth?.loaded) synth.releaseAll();
         pressedElements.forEach((el) => el.classList.remove(styles.pressed));
         pressedElements.clear();
         pressedMidi.clear();
+        pressedAt.clear();
         physicalKeyMidi.clear();
         if (advanceTimer) clearTimeout(advanceTimer);
         midiOffset = 0;
@@ -644,6 +738,7 @@ export default function EarTraining() {
       aborted = true;
       notePressRef.current = null;
       noteReleaseRef.current = null;
+      getExpectedMidiRef.current = null;
       if (keydownListener)
         document.removeEventListener('keydown', keydownListener);
       if (keyupListener) document.removeEventListener('keyup', keyupListener);
@@ -664,6 +759,7 @@ export default function EarTraining() {
       }
       midiInputs.forEach((input) => {
         try {
+          input.onmidimessage = null;
           input.close();
         } catch {}
       });

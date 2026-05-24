@@ -135,6 +135,81 @@
   margin-top: 0.5rem;
 }
 
+.songMeta {
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $light-text-color;
+}
+
+.inputStatus {
+  display: flex;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+
+.inputPill {
+  min-height: 1.55rem;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: white;
+  color: $light-text-color;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.inputPillActive {
+  border-color: rgba($success-color, 0.45);
+  background: #f0fdf4;
+  color: $success-color;
+}
+
+.qwertyControls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.qwertyLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $light-text-color;
+}
+
+.octaveBtn {
+  min-width: 1.85rem;
+  height: 1.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  color: $text-color;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+}
+
+.qwertyWindow {
+  min-width: 4.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: $text-color;
+}
+
 // ---------- Score cards ----------
 
 .scoreCards {
@@ -187,21 +262,156 @@
   color: #15803d;
 }
 
+// ---------- Song stages ----------
+
+.stagePanel {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.75rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.stageHeader,
+.stageCurrent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.stageHeader {
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+
+.stageMode,
+.stageProgress,
+.stageKind {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: $light-text-color;
+}
+
+.stageKind {
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 0.2rem 0.55rem;
+}
+
+.stageName {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: $text-color;
+}
+
+.stagePattern {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $light-text-color;
+}
+
+.stageTrack {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin-top: 0.65rem;
+}
+
+.stageChip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 6rem;
+  border: 1px solid #dbe3ed;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: $text-color;
+  padding: 0.45rem 0.55rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  span {
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  small {
+    margin-top: 0.12rem;
+    color: $light-text-color;
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  &:hover {
+    background: #eef6ff;
+    border-color: #bfdbfe;
+  }
+}
+
+.stageChipActive {
+  border-color: $primary-color;
+  background: #eff6ff;
+  box-shadow: inset 0 0 0 1px rgba($primary-color, 0.2);
+}
+
+.stageChipPractice {
+  border-color: $success-color;
+  background: #f0fdf4;
+}
+
 // ---------- Sheet music ----------
 
 .sheetWrapper {
   position: relative;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #fffef9, #fff);
+  border: 1px solid #d9d2bd;
   border-radius: 12px;
-  padding: 0.75rem;
+  padding: 0.9rem 1rem;
   margin-bottom: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .sheet {
   max-width: 700px;
   margin: 0 auto;
+  overflow-x: auto;
+
+  :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 210px;
+  }
+
+  :global(.abcjs-title) {
+    fill: #1f2937;
+    font-weight: 700;
+  }
+
+  :global(.abcjs-note),
+  :global(.abcjs-rest) {
+    transition:
+      fill 0.12s ease,
+      opacity 0.12s ease,
+      filter 0.12s ease;
+  }
+
+  :global(.abcjs-staff path),
+  :global(.abcjs-bar) {
+    stroke: #1f2937;
+  }
 }
 
 // ---------- Progress ----------
@@ -396,6 +606,10 @@
 }
 
 .keyLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12rem;
   font-size: $font-size-sm;
   color: #999;
   pointer-events: none;
@@ -403,8 +617,30 @@
   z-index: 1;
 }
 
+.keyLetter {
+  line-height: 1;
+}
+
+.keyFinger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.16);
+  color: #64748b;
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
 .black .keyLabel {
   color: #999;
+}
+
+.black .keyFinger {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
 }
 
 .pressed {
@@ -618,6 +854,19 @@
   color: $light-text-color;
 }
 
+.kbdFinger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: $text-color;
+  font-size: 0.6rem;
+  font-weight: 800;
+}
+
 // ---------- Loading ----------
 
 .loading {
@@ -695,6 +944,38 @@
 
   .scoreCardValue {
     font-size: 1.2rem;
+  }
+
+  .inputStatus {
+    gap: 0.35rem;
+  }
+
+  .inputPill {
+    padding: 0.18rem 0.5rem;
+    font-size: 0.68rem;
+  }
+
+  .qwertyControls {
+    gap: 0.35rem;
+  }
+
+  .stagePanel {
+    padding: 0.65rem;
+  }
+
+  .stageChip {
+    flex: 1 1 calc(50% - 0.45rem);
+    min-width: 0;
+  }
+
+  .sheetWrapper {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .sheet {
+    :global(svg) {
+      min-width: 520px;
+    }
   }
 
   .pianoWrapper {

@@ -10,7 +10,7 @@ $text-color: #222;            // Standard text color
 $dark-text-color: color.scale($primary-color, $lightness: -40%);
 $light-text-color: #666;      // Subdued text (for descriptions, secondary info)
 $green-color: #A5CE39;
-$purple-color: #ffe6a1;
+$purple-color: #8658A7;
 $yellow-color: #FFD122;
 $blue-color: #415CA9;
 $sky-color:#60C9DE;
@@ -32,11 +32,11 @@ $font-size-lg: $base-font-size * 1.5 !default;
 $font-size-xl: $base-font-size * 2 !default;
 $font-size-xxl: $base-font-size * 2.5 !default;
 
-// Colors
-$primary-color: #3b82f6;
-$success-color: #22c55e;
+// Semantic colors
+$primary-color: $blue-color;
+$success-color: $green-color;
 $error-color: #ef4444;
-$warning-color: #f59e0b;
+$warning-color: $orange-color;
 
 // Piano
 $white-key-color: #f8fafc;

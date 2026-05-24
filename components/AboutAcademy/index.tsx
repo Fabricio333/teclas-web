@@ -18,7 +18,7 @@ export default function AboutAcademy() {
                     <div className={styles.featuresGrid}>
                         <div className={styles.featureCard}>
                             <div className={styles.iconWrapper}>
-                                <FontAwesomeIcon icon={faMusic} className={styles.icon} size="2x"/>
+                                <FontAwesomeIcon icon={faMusic} className={styles.icon} />
                             </div>
                             <h3 className={styles.cardTitle}>Enfoque personalizado</h3>
                             <p className={styles.cardDescription}>
@@ -28,7 +28,7 @@ export default function AboutAcademy() {
 
                         <div className={styles.featureCard}>
                             <div className={styles.iconWrapper}>
-                                <FontAwesomeIcon icon={faAward} className={styles.icon} size="2x"/>
+                                <FontAwesomeIcon icon={faAward} className={styles.icon} />
                             </div>
                             <h3 className={styles.cardTitle}>Instrucción experta</h3>
                             <p className={styles.cardDescription}>
@@ -38,7 +38,7 @@ export default function AboutAcademy() {
 
                         <div className={styles.featureCard}>
                             <div className={styles.iconWrapper}>
-                                <FontAwesomeIcon icon={faUsers} className={styles.icon} size="2x"/>
+                                <FontAwesomeIcon icon={faUsers} className={styles.icon} />
                             </div>
                             <h3 className={styles.cardTitle}>Comunidad de apoyo</h3>
                             <p className={styles.cardDescription}>
@@ -59,4 +59,3 @@ export default function AboutAcademy() {
         </section>
     );
 }
-

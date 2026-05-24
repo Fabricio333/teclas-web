@@ -3,7 +3,11 @@
 @use "sass:color";
 
 .philosophy {
+  @extend .sectionPadding;
   text-align: center;
+  background-color: $primary-color;
+  color: #ffffff;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .sectionTitle {
@@ -22,7 +26,7 @@
 }
 
 .philosophyText {
-  color: #4b5563;
+  color: #e5e7eb;
 
   p {
     margin-bottom: 1.5rem;

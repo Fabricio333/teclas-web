@@ -4,8 +4,10 @@
 
 .about {
   @extend .sectionPadding;
-  background-color: color.scale($green-color, $lightness: +70%);
+  background-color: $primary-color;
+  color: #ffffff;
   text-align: center;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .instructorGrid {
@@ -48,7 +50,7 @@
 }
 
 .instructorBio {
-  color: #4b5563;
+  color: #e5e7eb;
 
   p {
     margin-bottom: 1rem;
@@ -66,7 +68,7 @@
 }
 
 .philosophyText {
-  color: #4b5563;
+  color: #e5e7eb;
 
   p {
     margin-bottom: 1.5rem;
@@ -79,7 +81,7 @@
   margin-top: 1.5rem;
 
   .icon {
-    color: $dark-text-color;
+    color: #ffffff;
     transition: color 0.3s;
 
     &:hover {

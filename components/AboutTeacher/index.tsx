@@ -3,7 +3,6 @@ import styles from "./AboutTeacher.module.scss";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInstagram, faYoutube } from "@fortawesome/free-brands-svg-icons";
-import Philosophy from "@/components/Philosophy";
 
 export default function AboutTeacher() {
     return (
@@ -60,7 +59,6 @@ export default function AboutTeacher() {
                     </div>
                 </div>
             </div>
-            <Philosophy/>
         </section>
     );
 }

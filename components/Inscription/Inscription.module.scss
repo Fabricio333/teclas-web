@@ -2,10 +2,9 @@
 @use "../../styles/components" as *;
 .inscriptionSection {
   @extend .sectionPadding;
-  background-color: $primary-color;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: $dark-text-color;
   text-align: center;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: 10;
 
   .sectionTitle {
@@ -19,7 +18,7 @@
 
   .sectionSubtitle {
     font-size: 1.25rem;
-    color: #d1d5db;
+    color: #4b5563;
     margin-bottom: 2rem;
   }
 }

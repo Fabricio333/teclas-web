@@ -6,12 +6,15 @@ import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import {
   LEVELS,
   DEBUG_LEVEL,
-  DEBUG_CANON,
   KEY_TO_MIDI,
   MIDI_TO_KEY,
   WHITE_KEYS,
   BLACK_KEYS,
+  getSectionForPosition,
+  getSongPatterns,
+  getSongSections,
 } from '@/lib/piano-player/songs';
+import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -21,12 +24,73 @@ import {
 
 const ALL_LEVELS =
   process.env.NODE_ENV === 'development'
-    ? [...LEVELS, DEBUG_LEVEL, DEBUG_CANON]
+    ? [...LEVELS, DEBUG_LEVEL]
     : LEVELS;
 
 function getDifficultyLabel(d: 1 | 2 | 3): string {
   return '\u2B50'.repeat(d);
 }
+
+function getMidiStatusLabel(status: MidiStatus): string {
+  switch (status) {
+    case 'connected':
+      return 'MIDI conectado';
+    case 'available':
+      return 'MIDI listo';
+    case 'unsupported':
+      return 'MIDI no disponible';
+    case 'checking':
+    default:
+      return 'Buscando MIDI';
+  }
+}
+
+function getSectionKindLabel(kind: SongSectionKind): string {
+  switch (kind) {
+    case 'intro':
+      return 'Intro';
+    case 'main':
+      return 'Principal';
+    case 'verse':
+      return 'Verso';
+    case 'chorus':
+      return 'Coro';
+    case 'bridge':
+      return 'Puente';
+    case 'ending':
+      return 'Final';
+    case 'practice':
+    default:
+      return 'Practica';
+  }
+}
+
+type InputSource = 'qwerty' | 'pointer' | 'midi' | 'microphone' | 'system';
+type NoteHandler = (
+  midi: number,
+  source?: InputSource,
+  velocity?: number,
+) => void;
+type MidiStatus = 'checking' | 'unsupported' | 'available' | 'connected';
+
+const MIN_PRESS_MS_BY_SOURCE: Record<InputSource, number> = {
+  qwerty: 90,
+  pointer: 75,
+  midi: 0,
+  microphone: 0,
+  system: 110,
+};
+
+const DEFAULT_VELOCITY_BY_SOURCE: Record<InputSource, number> = {
+  qwerty: 0.82,
+  pointer: 0.88,
+  midi: 0.9,
+  microphone: 0,
+  system: 0.72,
+};
+
+const MIN_QWERTY_OFFSET = -24;
+const MAX_QWERTY_OFFSET = 24;
 
 export default function PianoPlayer() {
   const pianoRef = useRef<HTMLDivElement>(null);
@@ -34,8 +98,9 @@ export default function PianoPlayer() {
   const doneRef = useRef<HTMLDivElement>(null);
 
   // Bridge refs for microphone pitch detection
-  const notePressRef = useRef<((midi: number) => void) | null>(null);
-  const noteReleaseRef = useRef<((midi: number) => void) | null>(null);
+  const notePressRef = useRef<NoteHandler | null>(null);
+  const noteReleaseRef = useRef<NoteHandler | null>(null);
+  const getExpectedMidiRef = useRef<(() => number | null) | null>(null);
   const micMuteRef = useRef<(() => void) | null>(null);
   const micUnmuteRef = useRef<(() => void) | null>(null);
 
@@ -44,11 +109,13 @@ export default function PianoPlayer() {
     startListening,
     stopListening,
     error: micError,
+    currentMidi: currentMicMidi,
     muteDetection,
     unmuteDetection,
   } = useMicrophonePitch({
     onNotePressRef: notePressRef,
     onNoteReleaseRef: noteReleaseRef,
+    getExpectedMidiRef,
   });
 
   // Keep mute/unmute refs current
@@ -58,14 +125,19 @@ export default function PianoPlayer() {
   }, [muteDetection, unmuteDetection]);
 
   const [micEnabled, setMicEnabled] = useState(false);
+  const [midiStatus, setMidiStatus] = useState<MidiStatus>('checking');
+  const micNoteLabel =
+    currentMicMidi !== null
+      ? midiNumberToNote(currentMicMidi, undefined, true)
+      : null;
 
   const toggleMic = useCallback(async () => {
     if (micEnabled) {
       stopListening();
       setMicEnabled(false);
     } else {
-      await startListening();
-      setMicEnabled(true);
+      const started = await startListening();
+      setMicEnabled(started);
     }
   }, [micEnabled, startListening, stopListening]);
 
@@ -76,6 +148,7 @@ export default function PianoPlayer() {
     let pointerDownListener: (e: PointerEvent) => void;
     let pointerUpListener: (e: PointerEvent) => void;
     let midiInputs: any[] = [];
+    let midiAccess: any;
     let abcjs: any;
     let aborted = false;
 
@@ -157,19 +230,23 @@ export default function PianoPlayer() {
       document.addEventListener('keydown', startOnGesture, { once: true });
 
       // ---------- Sustain audio: attack on press, release on lift ----------
-      const attackNote = (midiNumber: number) => {
+      const attackNote = (
+        midiNumber: number,
+        source: InputSource,
+        velocity = DEFAULT_VELOCITY_BY_SOURCE[source],
+      ) => {
         if (!synth.loaded) return;
         const name = midiToName[midiNumber];
         if (!name) return;
-        micMuteRef.current?.();
+        if (source !== 'microphone') micMuteRef.current?.();
         try {
-          synth.triggerAttack(name, Tone.now());
+          synth.triggerAttack(name, Tone.now(), velocity);
         } catch (err) {
           console.error('Attack error:', err);
         }
       };
 
-      const releaseNote = (midiNumber: number) => {
+      const releaseNote = (midiNumber: number, source: InputSource) => {
         if (!synth.loaded) return;
         const name = midiToName[midiNumber];
         if (!name) return;
@@ -179,7 +256,9 @@ export default function PianoPlayer() {
         } catch {
           // ignore release errors
         }
-        setTimeout(() => micUnmuteRef.current?.(), 200);
+        if (source !== 'microphone') {
+          setTimeout(() => micUnmuteRef.current?.(), 220);
+        }
       };
 
       // Track pressed elements by actual MIDI so release works across offset changes
@@ -208,6 +287,13 @@ export default function PianoPlayer() {
       let currentLevelIndex = 0;
       let level = ALL_LEVELS[currentLevelIndex];
       let SONG = level.notes;
+      let sections = getSongSections(level);
+      let patterns = getSongPatterns(level);
+      let activePracticeSection: SongSection | null = null;
+      let resetGame: (
+        startPosition?: number,
+        practiceSection?: SongSection | null,
+      ) => void = () => {};
       const IDLE_TIMEOUT_MS = 4500;
 
       let pos = 0;
@@ -219,6 +305,13 @@ export default function PianoPlayer() {
       let errorHighlighted = false;
       let highlighted = -1;
       const pressedMidi = new Set<number>();
+      const pressedAt = new Map<number, number>();
+      const pendingReleases = new Map<number, ReturnType<typeof setTimeout>>();
+      const sustainedMidi = new Set<number>();
+      let sustainPedalDown = false;
+
+      getExpectedMidiRef.current = () =>
+        pos < SONG.length ? SONG[pos] : null;
 
       // ---------- Octave shift ----------
       let midiOffset = 0; // added to base MIDI (KEY_TO_MIDI) to get actual MIDI
@@ -233,6 +326,109 @@ export default function PianoPlayer() {
           // Show/hide based on whether we're shifted
           el.style.opacity = midiOffset === 0 ? '0.5' : '1';
         }
+
+        const windowEl = document.getElementById('qwerty-window');
+        if (windowEl) {
+          const low = midiNumberToNote(60 + midiOffset, undefined, true);
+          const high = midiNumberToNote(71 + midiOffset, undefined, true);
+          windowEl.textContent = `${low}-${high}`;
+        }
+      };
+
+      const updateSongMeta = () => {
+        const el = document.getElementById('song-meta');
+        if (!el) return;
+        const noteCount = SONG.length;
+        const inputHint =
+          level.difficulty === 3
+            ? 'Ideal con teclado MIDI'
+            : 'QWERTY o MIDI';
+        el.textContent = `${noteCount} notas · ${sections.length} partes · ${patterns.length} patrones · ${inputHint}`;
+      };
+
+      const getCompletionTarget = () =>
+        activePracticeSection?.end ?? SONG.length;
+
+      const getCurrentSection = () =>
+        getSectionForPosition(level, Math.min(pos, SONG.length - 1));
+
+      const updateSectionProgress = () => {
+        const section = getCurrentSection();
+        const sectionNameEl = document.getElementById('stage-name');
+        const sectionKindEl = document.getElementById('stage-kind');
+        const sectionPatternEl = document.getElementById('stage-pattern');
+        const sectionProgressEl = document.getElementById('stage-progress');
+
+        if (sectionNameEl) sectionNameEl.textContent = section.name;
+        if (sectionKindEl)
+          sectionKindEl.textContent = getSectionKindLabel(section.kind);
+        if (sectionPatternEl)
+          sectionPatternEl.textContent = `Patron: ${section.patternName}`;
+        if (sectionProgressEl) {
+          const current = Math.min(
+            Math.max(pos - section.start, 0) + 1,
+            section.end - section.start,
+          );
+          sectionProgressEl.textContent = `${current}/${section.end - section.start}`;
+        }
+
+        const modeEl = document.getElementById('stage-mode');
+        if (modeEl) {
+          modeEl.textContent = activePracticeSection
+            ? `Practica: ${activePracticeSection.name}`
+            : 'Cancion completa';
+        }
+
+        const track = document.getElementById('stage-track');
+        if (track) {
+          track
+            .querySelectorAll<HTMLElement>('[data-section-id]')
+            .forEach((button) => {
+              button.classList.toggle(
+                styles.stageChipActive,
+                button.dataset.sectionId === section.id,
+              );
+              button.classList.toggle(
+                styles.stageChipPractice,
+                button.dataset.sectionId === activePracticeSection?.id,
+              );
+            });
+        }
+      };
+
+      const jumpToSection = (sectionId: string) => {
+        const section = sections.find((item) => item.id === sectionId);
+        if (!section) return;
+        resetGame(section.start, section);
+      };
+
+      const renderSectionTracker = () => {
+        const track = document.getElementById('stage-track');
+        if (!track) return;
+
+        track.innerHTML = '';
+        sections.forEach((section, index) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = styles.stageChip;
+          button.dataset.sectionId = section.id;
+          button.innerHTML = `<span>${index + 1}. ${section.name}</span><small>${getSectionKindLabel(section.kind)}</small>`;
+          button.addEventListener('click', () => jumpToSection(section.id));
+          track.appendChild(button);
+        });
+
+        updateSectionProgress();
+      };
+
+      const shiftQwertyOctave = (direction: -1 | 1) => {
+        const nextOffset = Math.min(
+          MAX_QWERTY_OFFSET,
+          Math.max(MIN_QWERTY_OFFSET, midiOffset + direction * 12),
+        );
+        if (nextOffset === midiOffset) return;
+        midiOffset = nextOffset;
+        updateOctaveIndicator();
+        highlightCurrent();
       };
 
       const showShiftPopup = (direction: 'down' | 'up') => {
@@ -287,7 +483,17 @@ export default function PianoPlayer() {
 
         const labelEl = document.createElement('span');
         labelEl.className = styles.keyLabel;
-        labelEl.textContent = white.label;
+
+        const letterEl = document.createElement('span');
+        letterEl.className = styles.keyLetter;
+        letterEl.textContent = white.label;
+        labelEl.appendChild(letterEl);
+
+        const fingerEl = document.createElement('span');
+        fingerEl.className = styles.keyFinger;
+        fingerEl.textContent = String(white.finger);
+        labelEl.appendChild(fingerEl);
+
         wEl.appendChild(labelEl);
 
         pianoDiv.appendChild(wEl);
@@ -301,7 +507,17 @@ export default function PianoPlayer() {
 
         const bLabel = document.createElement('span');
         bLabel.className = styles.keyLabel;
-        bLabel.textContent = black.label;
+
+        const bLetter = document.createElement('span');
+        bLetter.className = styles.keyLetter;
+        bLetter.textContent = black.label;
+        bLabel.appendChild(bLetter);
+
+        const bFinger = document.createElement('span');
+        bFinger.className = styles.keyFinger;
+        bFinger.textContent = String(black.finger);
+        bLabel.appendChild(bFinger);
+
         bEl.appendChild(bLabel);
 
         pianoDiv.appendChild(bEl);
@@ -313,7 +529,13 @@ export default function PianoPlayer() {
         if (sheetEl) sheetEl.innerHTML = '';
         abcjs.renderAbc('sheet', lev.abc, {
           add_classes: true,
+          paddingbottom: 14,
+          paddingleft: 12,
+          paddingright: 12,
+          paddingtop: 10,
           responsive: 'resize',
+          scale: 1.08,
+          staffwidth: 700,
         });
       };
 
@@ -397,6 +619,8 @@ export default function PianoPlayer() {
           const pct = Math.round((pos / SONG.length) * 100);
           progress.style.width = pct + '%';
         }
+
+        updateSectionProgress();
       };
 
       const markCorrect = (idx: number) => {
@@ -450,14 +674,36 @@ export default function PianoPlayer() {
         }, IDLE_TIMEOUT_MS);
       };
 
+      renderSectionTracker();
       highlightCurrent();
       updateOctaveIndicator();
+      updateSongMeta();
       startIdle();
 
       // ---------- Game logic ----------
-      const handleNotePress = (midiNumber: number) => {
-        attackNote(midiNumber);
+      const handleNotePress: NoteHandler = (
+        midiNumber,
+        source = 'system',
+        velocity = DEFAULT_VELOCITY_BY_SOURCE[source],
+      ) => {
+        const pendingRelease = pendingReleases.get(midiNumber);
+        if (pendingRelease) {
+          clearTimeout(pendingRelease);
+          pendingReleases.delete(midiNumber);
+        }
+
+        if (pressedMidi.has(midiNumber)) return;
+
+        if (source === 'midi') sustainedMidi.delete(midiNumber);
+
+        if (source !== 'microphone') {
+          attackNote(midiNumber, source, velocity);
+        }
+
         pressKey(midiNumber);
+        pressedMidi.add(midiNumber);
+        pressedAt.set(midiNumber, performance.now());
+
         if (pos >= SONG.length) return;
 
         const correct = midiNumber === SONG[pos];
@@ -479,12 +725,31 @@ export default function PianoPlayer() {
             errorHighlighted = false;
           }
 
-          if (pos === SONG.length) {
+          if (pos === getCompletionTarget()) {
             if (hintRef.current)
-              hintRef.current.textContent = '\u00A1Bien hecho!';
+              hintRef.current.textContent = activePracticeSection
+                ? 'Parte completada'
+                : '\u00A1Bien hecho!';
+            const doneText = document.getElementById('done-text');
+            if (doneText) {
+              doneText.textContent = activePracticeSection
+                ? 'Parte completada'
+                : '\u00A1Bien hecho!';
+            }
+            const doneNextBtn = document.getElementById('done-next-btn');
+            if (doneNextBtn) {
+              doneNextBtn.textContent = activePracticeSection
+                ? 'Continuar cancion'
+                : 'Siguiente cancion';
+              (doneNextBtn as HTMLButtonElement).style.display =
+                !activePracticeSection && currentLevelIndex >= ALL_LEVELS.length - 1
+                  ? 'none'
+                  : '';
+            }
             doneRef.current?.classList.add(styles.doneVisible);
             clearIdle();
             updateScoreUI();
+            updateSectionProgress();
             return;
           }
 
@@ -502,9 +767,35 @@ export default function PianoPlayer() {
         updateScoreUI();
       };
 
-      const handleNoteRelease = (midiNumber: number) => {
-        releaseNote(midiNumber);
-        releaseKey(midiNumber);
+      const handleNoteRelease: NoteHandler = (midiNumber, source = 'system') => {
+        const startedAt = pressedAt.get(midiNumber) ?? performance.now();
+        const heldFor = performance.now() - startedAt;
+        const minPressMs = MIN_PRESS_MS_BY_SOURCE[source];
+
+        const finishRelease = () => {
+          pendingReleases.delete(midiNumber);
+          pressedMidi.delete(midiNumber);
+          pressedAt.delete(midiNumber);
+          releaseKey(midiNumber);
+
+          if (source === 'microphone') return;
+          if (source === 'midi' && sustainPedalDown) {
+            sustainedMidi.add(midiNumber);
+            return;
+          }
+          releaseNote(midiNumber, source);
+        };
+
+        if (heldFor < minPressMs) {
+          const releaseTimer = setTimeout(
+            finishRelease,
+            minPressMs - heldFor,
+          );
+          pendingReleases.set(midiNumber, releaseTimer);
+          return;
+        }
+
+        finishRelease();
       };
 
       // Bridge refs for microphone pitch detection
@@ -515,13 +806,22 @@ export default function PianoPlayer() {
       keydownListener = (e) => {
         if (e.repeat) return;
         const key = e.key.toLowerCase();
+        if (key === 'z') {
+          e.preventDefault();
+          shiftQwertyOctave(-1);
+          return;
+        }
+        if (key === 'x') {
+          e.preventDefault();
+          shiftQwertyOctave(1);
+          return;
+        }
         const baseMidi = KEY_TO_MIDI[key];
         if (baseMidi === undefined) return;
         if (physicalKeyMidi.has(key)) return;
         const midi = baseMidi + midiOffset;
         physicalKeyMidi.set(key, midi);
-        pressedMidi.add(midi);
-        handleNotePress(midi);
+        handleNotePress(midi, 'qwerty');
       };
 
       keyupListener = (e) => {
@@ -529,8 +829,7 @@ export default function PianoPlayer() {
         const midi = physicalKeyMidi.get(key);
         if (midi !== undefined) {
           physicalKeyMidi.delete(key);
-          pressedMidi.delete(midi);
-          handleNoteRelease(midi);
+          handleNoteRelease(midi, 'qwerty');
         }
       };
 
@@ -551,14 +850,14 @@ export default function PianoPlayer() {
         pianoDiv.setPointerCapture(e.pointerId);
         const midi = baseMidi + midiOffset;
         pointerMidi.set(e.pointerId, midi);
-        handleNotePress(midi);
+        handleNotePress(midi, 'pointer');
       };
 
       pointerUpListener = (e) => {
         const midi = pointerMidi.get(e.pointerId);
         if (midi !== undefined) {
           pointerMidi.delete(e.pointerId);
-          handleNoteRelease(midi);
+          handleNoteRelease(midi, 'pointer');
         }
       };
 
@@ -570,48 +869,93 @@ export default function PianoPlayer() {
       if (typeof navigator !== 'undefined' && navigator.requestMIDIAccess) {
         try {
           const access = await navigator.requestMIDIAccess();
-          access.inputs.forEach((input) => {
-            midiInputs.push(input);
-            input.onmidimessage = (event: WebMidi.MIDIMessageEvent) => {
-              const data = event.data;
-              if (!data || data.length < 3) return;
-              const status = data[0] & 0xf0;
-              const note = data[1];
-              const velocity = data[2];
-              if (status === 0x90 && velocity > 0) {
-                handleNotePress(note);
-              } else if (
-                status === 0x80 ||
-                (status === 0x90 && velocity === 0)
-              ) {
-                handleNoteRelease(note);
-              }
-            };
-          });
+          midiAccess = access;
+
+          const releaseSustainedNotes = () => {
+            sustainedMidi.forEach((midiNumber) =>
+              releaseNote(midiNumber, 'midi'),
+            );
+            sustainedMidi.clear();
+          };
+
+          const attachMidiInputs = () => {
+            midiInputs.forEach((input) => {
+              input.onmidimessage = null;
+            });
+            midiInputs = [];
+
+            access.inputs.forEach((input: any) => {
+              midiInputs.push(input);
+              input.onmidimessage = (event: MIDIMessageEvent) => {
+                const data = event.data;
+                if (!data || data.length < 3) return;
+                const status = data[0] & 0xf0;
+                const note = data[1];
+                const velocity = data[2];
+                if (status === 0x90 && velocity > 0) {
+                  handleNotePress(note, 'midi', velocity / 127);
+                } else if (
+                  status === 0x80 ||
+                  (status === 0x90 && velocity === 0)
+                ) {
+                  handleNoteRelease(note, 'midi');
+                } else if (status === 0xb0 && data[1] === 64) {
+                  sustainPedalDown = velocity >= 64;
+                  if (!sustainPedalDown) releaseSustainedNotes();
+                }
+              };
+            });
+
+            setMidiStatus(midiInputs.length > 0 ? 'connected' : 'available');
+          };
+
+          attachMidiInputs();
+          access.onstatechange = attachMidiInputs;
         } catch {
-          // MIDI not available — that's fine
+          setMidiStatus('unsupported');
         }
+      } else {
+        setMidiStatus('unsupported');
       }
 
       // ---------- Shared reset helper ----------
-      const resetGame = () => {
+      resetGame = (
+        startPosition = 0,
+        practiceSection: SongSection | null = activePracticeSection,
+      ) => {
         // Release any held notes
+        pendingReleases.forEach((timer) => clearTimeout(timer));
+        pendingReleases.clear();
+        sustainedMidi.clear();
+        sustainPedalDown = false;
         if (synth?.loaded) synth.releaseAll();
         pressedElements.forEach((el) => el.classList.remove(styles.pressed));
         pressedElements.clear();
         pressedMidi.clear();
+        pressedAt.clear();
         physicalKeyMidi.clear();
         midiOffset = 0;
-        pos = 0;
+        pos = startPosition;
         score = 0;
         hits = 0;
         attempts = 0;
         streak = 0;
         highlighted = -1;
         errorHighlighted = false;
+        activePracticeSection = practiceSection;
         updateScoreUI();
         updateOctaveIndicator();
+        updateSongMeta();
+        renderSectionTracker();
         doneRef.current?.classList.remove(styles.doneVisible);
+        const doneText = document.getElementById('done-text');
+        if (doneText) doneText.textContent = '\u00A1Bien hecho!';
+        const doneNextBtn = document.getElementById('done-next-btn');
+        if (doneNextBtn) {
+          doneNextBtn.textContent = activePracticeSection
+            ? 'Continuar cancion'
+            : 'Siguiente cancion';
+        }
         renderSheet(level);
         setTimeout(() => {
           highlightCurrent();
@@ -624,6 +968,9 @@ export default function PianoPlayer() {
         currentLevelIndex = idx;
         level = ALL_LEVELS[idx];
         SONG = level.notes;
+        sections = getSongSections(level);
+        patterns = getSongPatterns(level);
+        activePracticeSection = null;
         const songSelect = document.getElementById(
           'level-select',
         ) as HTMLSelectElement | null;
@@ -633,7 +980,7 @@ export default function PianoPlayer() {
           (nextBtn as HTMLButtonElement).style.display =
             idx >= ALL_LEVELS.length - 1 ? 'none' : '';
         }
-        resetGame();
+        resetGame(0, null);
       };
 
       // ---------- Level select ----------
@@ -647,21 +994,42 @@ export default function PianoPlayer() {
         });
       }
 
+      const octaveDownBtn = document.getElementById('qwerty-octave-down');
+      const octaveUpBtn = document.getElementById('qwerty-octave-up');
+      octaveDownBtn?.addEventListener('click', () => shiftQwertyOctave(-1));
+      octaveUpBtn?.addEventListener('click', () => shiftQwertyOctave(1));
+
       // ---------- Restart ----------
       const restartBtn = document.getElementById('restart-btn');
       if (restartBtn) {
-        restartBtn.addEventListener('click', resetGame);
+        restartBtn.addEventListener('click', () => resetGame(0, null));
       }
 
       // ---------- Done overlay buttons ----------
       const doneReplayBtn = document.getElementById('done-replay-btn');
       if (doneReplayBtn) {
-        doneReplayBtn.addEventListener('click', resetGame);
+        doneReplayBtn.addEventListener('click', () =>
+          resetGame(activePracticeSection?.start ?? 0, activePracticeSection),
+        );
       }
 
       const doneNextBtn = document.getElementById('done-next-btn');
       if (doneNextBtn) {
         doneNextBtn.addEventListener('click', () => {
+          if (activePracticeSection) {
+            if (activePracticeSection.end >= SONG.length) {
+              if (currentLevelIndex < ALL_LEVELS.length - 1) {
+                switchLevel(currentLevelIndex + 1);
+              } else {
+                resetGame(0, null);
+              }
+              return;
+            }
+
+            resetGame(activePracticeSection.end, null);
+            return;
+          }
+
           if (currentLevelIndex < ALL_LEVELS.length - 1) {
             switchLevel(currentLevelIndex + 1);
           }
@@ -679,6 +1047,7 @@ export default function PianoPlayer() {
       aborted = true;
       notePressRef.current = null;
       noteReleaseRef.current = null;
+      getExpectedMidiRef.current = null;
       if (keydownListener)
         document.removeEventListener('keydown', keydownListener);
       if (keyupListener) document.removeEventListener('keyup', keyupListener);
@@ -699,9 +1068,11 @@ export default function PianoPlayer() {
       }
       midiInputs.forEach((input) => {
         try {
+          input.onmidimessage = null;
           input.close();
         } catch {}
       });
+      if (midiAccess) midiAccess.onstatechange = null;
       if (synth) {
         synth.releaseAll();
         synth.dispose();
@@ -755,6 +1126,49 @@ export default function PianoPlayer() {
             />
           </button>
         </div>
+        <p id="song-meta" className={styles.songMeta}>
+          {ALL_LEVELS[0].notes.length} notas · QWERTY o MIDI
+        </p>
+        <div className={styles.inputStatus} aria-live="polite">
+          <span
+            className={`${styles.inputPill} ${
+              micStatus === 'listening' ? styles.inputPillActive : ''
+            }`}
+          >
+            Mic{micNoteLabel ? `: ${micNoteLabel}` : ''}
+          </span>
+          <span
+            className={`${styles.inputPill} ${
+              midiStatus === 'connected' ? styles.inputPillActive : ''
+            }`}
+          >
+            {getMidiStatusLabel(midiStatus)}
+          </span>
+        </div>
+        <div className={styles.qwertyControls}>
+          <span className={styles.qwertyLabel}>QWERTY</span>
+          <button
+            id="qwerty-octave-down"
+            type="button"
+            className={styles.octaveBtn}
+            aria-label="Bajar octava QWERTY"
+            title="Bajar octava QWERTY (Z)"
+          >
+            Z
+          </button>
+          <span id="qwerty-window" className={styles.qwertyWindow}>
+            C4-B4
+          </span>
+          <button
+            id="qwerty-octave-up"
+            type="button"
+            className={styles.octaveBtn}
+            aria-label="Subir octava QWERTY"
+            title="Subir octava QWERTY (X)"
+          >
+            X
+          </button>
+        </div>
         {micError && <p className={styles.micErrorText}>{micError}</p>}
       </div>
 
@@ -778,6 +1192,30 @@ export default function PianoPlayer() {
             {'\u2014'}
           </span>
         </div>
+      </div>
+
+      {/* Song structure */}
+      <div className={styles.stagePanel}>
+        <div className={styles.stageHeader}>
+          <span id="stage-mode" className={styles.stageMode}>
+            Cancion completa
+          </span>
+          <span id="stage-progress" className={styles.stageProgress}>
+            1/1
+          </span>
+        </div>
+        <div className={styles.stageCurrent}>
+          <span id="stage-kind" className={styles.stageKind}>
+            Principal
+          </span>
+          <span id="stage-name" className={styles.stageName}>
+            Principal
+          </span>
+          <span id="stage-pattern" className={styles.stagePattern}>
+            Patron: Idea central
+          </span>
+        </div>
+        <div id="stage-track" className={styles.stageTrack} />
       </div>
 
       {/* Play area: sheet (left) + piano (right) on desktop */}
@@ -816,7 +1254,9 @@ export default function PianoPlayer() {
       <div ref={doneRef} className={styles.done}>
         <div className={styles.doneCard}>
           <span className={styles.doneIcon}>{'\u2713'}</span>
-          <span className={styles.doneText}>{'\u00A1Bien hecho!'}</span>
+          <span id="done-text" className={styles.doneText}>
+            {'\u00A1Bien hecho!'}
+          </span>
           <div className={styles.doneActions}>
             <button id="done-replay-btn" className={styles.doneBtn}>
               Repetir
@@ -833,11 +1273,12 @@ export default function PianoPlayer() {
 
       {/* Keyboard reference */}
       <div className={styles.keyboardRef}>
-        <span className={styles.keyboardRefTitle}>Teclas:</span>
+        <span className={styles.keyboardRefTitle}>Teclas / dedos:</span>
         {WHITE_KEYS.map((k) => (
           <span key={k.midi} className={styles.kbdGroup}>
             <kbd className={styles.kbd}>{k.label}</kbd>
             <span className={styles.kbdNote}>{k.note}</span>
+            <span className={styles.kbdFinger}>{k.finger}</span>
           </span>
         ))}
       </div>
