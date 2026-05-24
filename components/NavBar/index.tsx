@@ -94,6 +94,9 @@ interface NavLinksProps {
 }
 
 function NavLinks({ handleSmoothScroll }: NavLinksProps) {
+  const inscriptionFormUrl =
+    'https://docs.google.com/forms/d/e/1FAIpQLSenT_EzJoCuNDeRN6dQN38OdeJ8RBybZvxOkESqKQBYAObf8w/viewform?usp=dialog';
+
   return (
     <>
       <a
@@ -110,13 +113,9 @@ function NavLinks({ handleSmoothScroll }: NavLinksProps) {
       >
         La Profesora
       </a>
-      <a
-        href="/#inscription"
-        className={styles.navLink}
-        onClick={(e) => handleSmoothScroll(e, '#inscription')}
-      >
+      <Link href={inscriptionFormUrl} className={styles.navLink}>
         Inscripción
-      </a>
+      </Link>
       {/*
             <Link href="/events" className={styles.navLink}>
                 Eventos
