@@ -1,61 +1,121 @@
 @use '../../../styles/variables' as *;
 
 .faqItem {
-  display: flex;
-  flex-direction: column;
+  list-style: none;
 }
 
-.faqHeader {
-  position: relative;
-  padding-left: 2rem;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
+.faqDisclosure {
+  background: #fff;
+  border: 1px solid rgba($blue-color, 0.18);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.75rem 2rem rgba($dark-text-color, 0.08);
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
-  .icon {
-    position: absolute;
-    left: 0;
-    top: 0.25rem;
-    transition: transform 0.25s ease-in-out;
-  }
+  &[open] {
+    border-color: rgba($green-color, 0.48);
+    box-shadow: 0 1rem 2.5rem rgba($dark-text-color, 0.12);
 
-  &[data-open='true'] {
     .icon {
+      color: $green-color;
       transform: rotate(90deg);
+    }
+
+    .title {
+      color: $dark-text-color;
     }
   }
 }
 
-.title {
-  color: $light-text-color;
-  margin: 0;
+.faqHeader {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr;
+  gap: 0.875rem;
+  align-items: center;
+  width: 100%;
+  padding: 1.125rem 1.25rem;
+  cursor: pointer;
+  list-style: none;
 
-  &[data-open='true'] {
-    color: $text-color;
+  &::-webkit-details-marker {
+    display: none;
   }
 
-  @media (max-width: $tablet-breakpoint) {
-    font-size: 1rem;
+  &:focus-visible {
+    outline: 3px solid rgba($yellow-color, 0.75);
+    outline-offset: -3px;
   }
 }
 
-.description {
-  color: $light-text-color;
-  overflow: hidden;
-  max-height: 0;
-  transition: all 0.25s ease-in-out;
-  opacity: 0;
-  visibility: hidden;
-  z-index: -1;
+.icon {
+  color: $blue-color;
+  font-size: 0.875rem;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
 
-  &[data-open='true'] {
-    opacity: 1;
-    visibility: visible;
-    z-index: 10;
-    margin-top: 1rem;
+.title {
+  color: $text-color;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  border-top: 1px solid rgba($blue-color, 0.12);
+  color: $light-text-color;
+  font-size: 1rem;
+  line-height: 1.7;
+  padding: 0 1.25rem 1.25rem 3.375rem;
+
+  p {
+    max-width: 42rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (min-width: $tablet-breakpoint) {
+  .faqHeader {
+    padding: 1.35rem 1.5rem;
   }
 
-  @media (max-width: $tablet-breakpoint) {
-    font-size: 0.875rem;
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .description {
+    padding: 0 1.5rem 1.35rem 3.625rem;
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .faqHeader {
+    grid-template-columns: 1rem 1fr;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .description {
+    font-size: 0.9375rem;
+    padding: 0 1rem 1rem 2.75rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .title {
+    font-size: 0.9375rem;
+    max-width: 18rem;
+  }
+
+  .description {
+    p {
+      max-width: 18rem;
+    }
   }
 }
