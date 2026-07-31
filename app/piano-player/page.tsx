@@ -6,12 +6,12 @@ export const metadata = pianoPlayerMetadata;
 
 export default function PianoPlayerPage() {
   return (
-    <main>
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(pianoPlayerJsonLd) }}
       />
       <PianoPlayer />
-    </main>
+    </>
   );
 }

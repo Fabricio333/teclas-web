@@ -3,10 +3,16 @@
 
 .faqSection {
   @extend .sectionPadding;
-  min-height: 100vh;
-  padding-top: 7rem;
+  // dvh, not vh: iOS Safari's collapsing URL bar makes 100vh taller than the
+  // visible viewport. Subtracting the header stops the page scrolling when its
+  // content already fits, now that `main` carries the offset.
+  min-height: calc(100dvh - var(--header-height));
   background:
-    linear-gradient(180deg, rgba($sky-color, 0.16), rgba($background-color, 0) 24rem),
+    linear-gradient(
+      180deg,
+      rgba($sky-color, 0.16),
+      rgba($background-color, 0) 24rem
+    ),
     $background-color;
 }
 

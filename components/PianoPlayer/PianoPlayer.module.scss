@@ -4,10 +4,12 @@
 .gameSection {
   max-width: 800px;
   margin: 0 auto;
-  padding: 6rem 1.5rem 2rem;
+  // The 6rem top padding here was a one-off navbar-overlap patch (930eda9).
+  // `main { padding-top }` now handles that globally.
+  padding: var(--space-8) var(--space-6);
   text-align: center;
   position: relative;
-  min-height: 80vh;
+  min-height: calc(80dvh - var(--header-height));
 }
 
 // ---------- Header ----------
@@ -732,7 +734,9 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
-  z-index: 100;
+  // Was 100 — tied with the header, so whether this modal or the navbar
+  // painted on top depended on DOM order.
+  z-index: var(--z-modal);
 }
 
 .doneVisible {

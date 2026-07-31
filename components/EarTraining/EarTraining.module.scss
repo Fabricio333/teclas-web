@@ -4,10 +4,13 @@
 .gameSection {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  // This 2rem used to sit under an ~87px fixed header with no compensation
+  // anywhere, which put the "Entrenamiento Auditivo" heading entirely behind
+  // the navbar. `main { padding-top }` now clears it globally.
+  padding: var(--space-8) var(--space-6);
   text-align: center;
   position: relative;
-  min-height: 80vh;
+  min-height: calc(80dvh - var(--header-height));
 }
 
 // ---------- Header ----------
@@ -488,7 +491,8 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s;
-  z-index: 100;
+  // Was 100 — tied with the header (see PianoPlayer.module.scss).
+  z-index: var(--z-modal);
 }
 
 .doneVisible {

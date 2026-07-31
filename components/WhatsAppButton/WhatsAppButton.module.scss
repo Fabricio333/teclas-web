@@ -1,10 +1,12 @@
-@use "sass:color";
+@use 'sass:color';
 .whatsappButton {
   position: fixed;
   right: 1.5rem;
   bottom: 1.5rem;
-  z-index: 200;
-  background-color: #25D366;
+  // Was 200, which painted this over the fixed header. It belongs above page
+  // content but below the header and any modal.
+  z-index: var(--z-fab);
+  background-color: #25d366;
   color: white;
   width: 3.5rem;
   height: 3.5rem;
@@ -16,6 +18,6 @@
   transition: background-color 0.3s;
 
   &:hover {
-    background-color: color.scale(#25D366, $lightness: -5%);
+    background-color: color.scale(#25d366, $lightness: -5%);
   }
 }

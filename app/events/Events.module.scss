@@ -1,0 +1,51 @@
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
+
+.eventsSection {
+  @extend .sectionPadding;
+  min-height: calc(100dvh - var(--header-height));
+}
+
+.title {
+  font-size: $font-size-xl;
+  color: $dark-text-color;
+  margin-bottom: var(--space-6);
+  text-align: center;
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: $font-size-xxl;
+  }
+}
+
+.eventCard {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  border: 1px solid rgba($blue-color, 0.16);
+  border-radius: 0.75rem;
+  background-color: $background-color;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.eventTitle {
+  font-size: $font-size-lg;
+  color: $primary-color;
+  margin-bottom: var(--space-2);
+}
+
+.eventMeta {
+  color: $light-text-color;
+  margin-bottom: var(--space-1);
+}
+
+.eventLink {
+  display: inline-block;
+  margin-top: var(--space-4);
+  color: $primary-color;
+  text-decoration: underline;
+  transition: color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: $yellow-color;
+  }
+}

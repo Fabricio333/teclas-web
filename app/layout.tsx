@@ -88,8 +88,13 @@ export default function RootLayout({
           }}
         />
       </head>
+      {/*
+        `font-serif bg-white text-gray-900` were Tailwind utilities. Tailwind
+        emits no CSS in this project (no config, no @tailwind directive), so
+        they were inert. Styling lives in styles/globals.scss.
+      */}
       <body
-        className={`${delius.variable} ${comicNeue.variable} ${lobster.variable} font-serif bg-white text-gray-900`}
+        className={`${delius.variable} ${comicNeue.variable} ${lobster.variable}`}
       >
         <NavBar />
         <main>{children}</main>

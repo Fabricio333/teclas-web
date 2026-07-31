@@ -1,10 +1,38 @@
+@use './tokens'; // emits :root — must be @use'd HERE ONLY, see _tokens.scss
 @use './components' as *;
+
+html {
+  // `clip` rather than `hidden`: `overflow-x: hidden` can promote the element
+  // to a scroll container, which breaks `scroll-padding-top` below (and any
+  // future `position: sticky`). `max-width: 100vw` was also removed — with a
+  // visible scrollbar `100vw > 100%`, so it *caused* the horizontal overflow
+  // it was trying to hide.
+  overflow-x: clip;
+
+  // The single global fix for anchor navigation landing under the fixed
+  // header. Applied to the scrollport, this covers plain `href="#id"` links,
+  // Next's hash restoration, AND `element.scrollIntoView()` in NavBar — so no
+  // per-target `scroll-margin-top` is needed anywhere.
+  scroll-padding-top: var(--scroll-offset);
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  // Also needed on body, not just html: the hero artwork sets `overflow:
+  // visible` deliberately (its glow paints outside its box) and spills ~38px
+  // past the viewport at 360px. `clip` contains it without creating a scroll
+  // container, so `scroll-padding-top` on html keeps working.
+  overflow-x: clip;
 }
 
 body {
@@ -13,6 +41,13 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 0;
+}
+
+// The single global offset for the fixed header. Every page used to improvise
+// its own top padding (6rem / 7rem / 2rem / none), which is why the ear
+// training title sat behind the navbar and `/events` had no clearance at all.
+main {
+  padding-top: var(--header-height);
 }
 
 * {
@@ -35,13 +70,28 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
 p {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
 button {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+// Global keyboard-focus ring. Previously only 5 rules in the entire codebase
+// had focus styles, two of which used bare `:focus` (which also fires on mouse
+// click). `:focus-visible` shows the ring for keyboard users only.
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: 2px;
 }

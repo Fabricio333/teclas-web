@@ -1,0 +1,82 @@
+// ---------------------------------------------------------------------------
+// Design tokens.
+//
+// IMPORTANT: this file emits a `:root` block. It must be `@use`d from
+// `styles/globals.scss` and NOWHERE ELSE. A SCSS module that `@use`s it would
+// re-emit the entire `:root` block into that module's stylesheet — the same
+// duplication bug that `_components.scss` already causes across 7 modules.
+//
+// SCSS modules reference these as plain `var(--x)`; no import is needed.
+// ---------------------------------------------------------------------------
+
+:root {
+  // ---- layout -------------------------------------------------------------
+  // 5.5rem == 88px, matching the navbar's previously-implicit ~87.2px height
+  // (1rem padding-block + a 55.2px tall .logoText). Locking it as a token
+  // removes the font-swap and narrow-viewport reflow that used to change it.
+  --header-height: 5.5rem;
+  --header-height-compact: 4rem;
+  --container-max: 75rem; // 1200px, == $container-width
+  --container-narrow: 48rem;
+  --scroll-offset: calc(var(--header-height) + 1rem);
+
+  // ---- z-index scale ------------------------------------------------------
+  // Ordering here fixes two live conflicts: the WhatsApp FAB used to sit at
+  // 200 (above the header), and the two game completion overlays sat at 100
+  // (tied with the header, so occlusion depended on DOM order).
+  --z-below: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-sticky: 100;
+  --z-fab: 150;
+  --z-header: 200;
+  --z-drawer: 300;
+  --z-scrim: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-toast: 700;
+
+  // ---- spacing ------------------------------------------------------------
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-section: clamp(3rem, 7vw, 5rem);
+
+  // ---- motion -------------------------------------------------------------
+  // Durations live here specifically so the reduced-motion block below can
+  // neutralise the *expressive* tier while leaving functional feedback
+  // (key presses, focus rings) intact.
+  --dur-instant: 80ms;
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 360ms;
+  --dur-celebrate: 640ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  // ---- focus --------------------------------------------------------------
+  --color-focus-ring: #ffd122;
+  --focus-ring: 0 0 0 3px rgb(255 209 34 / 0.55);
+}
+
+// Expressive motion only. Functional feedback keeps its short durations, so a
+// reduced-motion user still sees a key depress when they play a note.
+// Deliberately NOT the blanket `* { animation-duration: .01ms !important }`
+// reset, which would strip that feedback too.
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-slow: 1ms;
+    --dur-celebrate: 1ms;
+    --ease-spring: linear;
+  }
+}

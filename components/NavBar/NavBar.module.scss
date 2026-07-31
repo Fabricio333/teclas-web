@@ -1,13 +1,21 @@
-@use "../../styles/components" as *;
-@use "../../styles/variables" as *;
+@use '../../styles/components' as *;
+@use '../../styles/variables' as *;
 
 .header {
-  padding: 1rem 0;
+  // Height is locked to the token rather than being an emergent result of
+  // padding + tallest child. That kills two CLS sources: the Lobster ->
+  // `cursive` font-swap metric shift, and `.logoRight` wrapping on narrow
+  // viewports. It is also what `main { padding-top }` is compensating for, so
+  // the two must not be able to drift apart.
+  height: var(--header-height);
+  padding-block: 0;
+  display: flex;
+  align-items: center;
   position: fixed;
-  top: 0;
-  width: 100%;
+  inset-block-start: 0;
+  inset-inline: 0;
   transition: transform 0.3s ease-in-out;
-  z-index: 100;
+  z-index: var(--z-header);
   background-color: $green-color;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
@@ -25,6 +33,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+  height: 100%;
 }
 
 .logo {
@@ -54,25 +64,36 @@
   font-family: var(--font-lobster), Arial, Helvetica, sans-serif;
   font-size: 1.5rem;
   margin-left: 0.5rem;
+  // Without this it wraps to a second line below ~340px and grows the header
+  // past its locked height, clipping the logo.
+  white-space: nowrap;
+
+  @media (max-width: 400px) {
+    display: none;
+  }
 }
 
 .mobileMenuButton {
-  display: none;
+  display: block;
   background: none;
   border: none;
   cursor: pointer;
 
-  @media (max-width: $mobile-breakpoint) {
-    display: block;
+  // 767.98px, not 768px. The previous `max-width: 768px` here paired with
+  // `min-width: 768px` on .mobileNavContainer meant that at exactly 768px the
+  // hamburger showed, the desktop nav was hidden, and the dropdown was
+  // display:none — leaving no navigation at all.
+  @media (min-width: 768px) {
+    display: none;
   }
 }
 
 .desktopNav {
-  display: flex;
+  display: none;
   gap: 2rem;
 
-  @media (max-width: $mobile-breakpoint) {
-    display: none;
+  @media (min-width: 768px) {
+    display: flex;
   }
 }
 
@@ -80,12 +101,16 @@
   text-decoration: none;
   color: inherit;
   transition: color 0.3s ease;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
   font-size: 1.0625rem;
   font-weight: 500;
 
+  // Was `var(--gold)`, which is defined nowhere in the codebase — the hover
+  // was a silent no-op.
   &:hover {
-    color: var(--gold);
+    color: var(--color-focus-ring);
   }
 }
 
@@ -96,7 +121,8 @@
   right: 0;
   background-color: #ffffff;
   border-bottom: 1px solid #f3f4f6;
-  z-index: 50;
+  // Inside the header's own stacking context, so a low value is enough.
+  z-index: var(--z-raised);
 
   @media (min-width: 768px) {
     display: none;
