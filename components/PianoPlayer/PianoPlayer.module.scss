@@ -449,27 +449,66 @@
 .playArea:fullscreen {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 0.75rem;
+  // Load-bearing. At >=1024px the grid rule below sets `align-items: start`,
+  // and overriding `display` alone leaves that in force — in a *column* flex
+  // container `align-items` governs the cross axis, i.e. width, so every child
+  // shrank to its content: the sheet wrapper collapsed to 34px and the score
+  // to 0. It only reproduced above the tablet breakpoint, which is why a
+  // narrow headless viewport reported the layout as fine.
+  align-items: stretch;
+  gap: 0.6rem;
   height: 100dvh;
-  padding: 1.5rem clamp(1rem, 4vw, 3rem);
+  padding: 0.85rem clamp(0.75rem, 3vw, 2.5rem);
   background: #fffef9;
   overflow: hidden;
 
+  // The sheet takes everything the piano does not. `min-height: 0` is the
+  // load-bearing line: without it a flex child refuses to shrink below its
+  // content, so the score pushes the keyboard off the bottom of the display.
   .sheetWrapper {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     margin-bottom: 0;
     border-radius: var(--radius-md);
-    // The score should use the width it is given; 700px is a page constraint,
-    // not a fullscreen one.
-    .sheet {
-      max-width: min(1400px, 100%);
-    }
+  }
+
+  // Centres a score shorter than the box. Paired with the `fitsEntirely` case
+  // in followCurrentSystem(), which stops translating once everything fits.
+  .sheetViewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  // 700px is a page constraint, not a fullscreen one — let the score use the
+  // width it is given, which also makes the staff proportionally taller.
+  .sheet {
+    max-width: 100%;
   }
 
   .pianoWrapper {
     flex: 0 0 auto;
     margin-top: 0;
+  }
+
+  // A 336px octave under a 1500px score looked like an afterthought. `zoom`
+  // rather than `transform: scale()` because it reflows — the wrapper actually
+  // grows, so the sheet's `flex: 1` gives up the space instead of the keys
+  // overlapping the staff. Ignored by browsers without `zoom`, which just
+  // leaves the keyboard at its normal size.
+  .piano {
+    zoom: 1.3;
+  }
+
+  // The progress bar is the least important thing on a fullscreen practice
+  // view and it costs a whole row.
+  .progressSection {
+    display: none;
   }
 }
 

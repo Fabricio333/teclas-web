@@ -674,46 +674,39 @@ export default function PianoPlayer() {
       const sheetScroller = () => document.getElementById('sheet-scroller');
 
       /**
+       * How many systems are actually visible.
+       *
+       * Inline, the viewport is sized from the student's line-count setting.
+       * In fullscreen the sizing is inverted: flexbox gives the sheet whatever
+       * height the piano leaves, and this reads that height back to decide how
+       * far to scroll.
+       *
+       * The first attempt computed the height in JS instead — piano height plus
+       * toolbar plus a guessed 64px of padding — and produced a 69px viewport
+       * on an 800x544 screen, i.e. the score clipped through the middle of a
+       * staff with 140px of the display left empty. Measuring beats guessing.
+       */
+      const visibleLines = (layout: SheetLayout): number => {
+        if (document.fullscreenElement === null) return sheetLinesRef.current;
+
+        const viewport = sheetViewport();
+        const height = viewport?.getBoundingClientRect().height ?? 0;
+        if (height <= 0 || layout.pitch <= 0) return 1;
+
+        return Math.max(
+          1,
+          Math.min(
+            layout.systems.length,
+            Math.floor((height - layout.tallestSystem) / layout.pitch) + 1,
+          ),
+        );
+      };
+
+      /**
        * Re-measure the rendered score and resize the viewport. Must run after
        * any render, resize or fullscreen change, because abcjs is responsive
        * and every system moves when the box width changes.
        */
-      /**
-       * How many systems fit in fullscreen.
-       *
-       * Previously this was `max(configuredLines, systems.length)` — i.e. "show
-       * the whole score" — which assumed the sheet owned the entire display.
-       * Now that the piano is inside the fullscreen element too, the sheet only
-       * gets the height the keyboard leaves, otherwise it pushes the piano off
-       * the bottom of the screen.
-       */
-      const fullscreenLines = (layout: SheetLayout): number => {
-        const stage = document.getElementById('play-stage');
-        if (!stage || layout.pitch <= 0) return layout.systems.length;
-
-        const pianoBox = document
-          .getElementById('piano-wrapper')
-          ?.getBoundingClientRect();
-        const toolbarBox = document
-          .getElementById('sheet-toolbar')
-          ?.getBoundingClientRect();
-
-        // 64px covers the stage's own padding plus the progress bar.
-        const reserved =
-          (pianoBox?.height ?? 0) + (toolbarBox?.height ?? 0) + 64;
-        const available = stage.getBoundingClientRect().height - reserved;
-
-        const fits = Math.floor(
-          (available - layout.tallestSystem) / layout.pitch + 1,
-        );
-        return Math.max(1, Math.min(layout.systems.length, fits));
-      };
-
-      const visibleLines = (layout: SheetLayout): number =>
-        document.fullscreenElement !== null
-          ? fullscreenLines(layout)
-          : sheetLinesRef.current;
-
       const relayoutSheet = () => {
         const scroller = sheetScroller();
         const viewport = sheetViewport();
@@ -727,9 +720,17 @@ export default function PianoPlayer() {
         );
         if (sheetLayout.systems.length === 0) return;
 
-        const lines = visibleLines(sheetLayout);
+        if (document.fullscreenElement !== null) {
+          // Hand the height back to CSS: the wrapper is a flex child that
+          // already fills the space left over by the piano. An inline height
+          // here would fight it and win, which is exactly what clipped the
+          // staff.
+          viewport.style.removeProperty('height');
+        } else {
+          const lines = sheetLinesRef.current;
+          viewport.style.height = `${Math.ceil(viewportHeightFor(sheetLayout, lines))}px`;
+        }
 
-        viewport.style.height = `${Math.ceil(viewportHeightFor(sheetLayout, lines))}px`;
         followCurrentSystem(true);
       };
 
@@ -745,7 +746,17 @@ export default function PianoPlayer() {
           sheetLayout,
           Math.min(pos, SONG.length - 1),
         );
-        const offset = scrollOffsetFor(sheetLayout, system, lines);
+
+        // When the whole score already fits — the common case in fullscreen —
+        // don't translate at all and let the viewport centre it. Otherwise the
+        // score is pinned to the top with the leftover space dumped below it,
+        // which on a short piece looked like the sheet had failed to load.
+        const fitsEntirely =
+          document.fullscreenElement !== null &&
+          sheetLayout.systems.length <= lines;
+        const offset = fitsEntirely
+          ? 0
+          : scrollOffsetFor(sheetLayout, system, lines);
 
         scroller.style.transition = immediate
           ? 'none'
@@ -761,9 +772,21 @@ export default function PianoPlayer() {
       const onRelayout = () => requestAnimationFrame(relayoutSheet);
       window.addEventListener('teclas:relayout-sheet', onRelayout);
       window.addEventListener('resize', onRelayout);
+
+      // `fullscreenchange` fires before the element has been resized to fill
+      // the display, so the single rAF above measures the old box. Observing
+      // the stage catches the real resize whenever it lands — on entering
+      // fullscreen, on leaving it, and on an ordinary window resize.
+      const stage = document.getElementById('play-stage');
+      const stageObserver = stage
+        ? new ResizeObserver(() => requestAnimationFrame(relayoutSheet))
+        : null;
+      if (stage && stageObserver) stageObserver.observe(stage);
+
       cleanupFns.push(() => {
         window.removeEventListener('teclas:relayout-sheet', onRelayout);
         window.removeEventListener('resize', onRelayout);
+        stageObserver?.disconnect();
       });
 
       /**
