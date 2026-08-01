@@ -85,11 +85,18 @@ export function settingsFromProfile(
     overrides.minRmsGate = Math.max(0.004, profile.noise.rmsP95 * 1.6);
   }
 
-  // A piano 30 cents flat needs a wider window than the 50-cent default, or
-  // every note reads as ambiguous between two semitones.
-  const drift = Math.abs(profile.globalCentsOffset);
-  if (drift > 15) {
-    overrides.expectedNoteToleranceCents = Math.min(85, 50 + drift * 0.8);
+  // The measured concert pitch. This is the correction that actually matters
+  // and it was never being passed on: the detector mapped every frequency
+  // against a hard-coded A440, so a flat piano had every note rounded to the
+  // wrong semitone no matter how carefully it had been calibrated.
+  //
+  // What used to happen instead was that a large drift *widened* the
+  // note-matching window to ±85 cents. That does not make detection more
+  // accurate — it makes it less discriminating, to the point where a student
+  // playing the wrong key could be told they were right. Correct the
+  // reference; keep the window tight.
+  if (profile.tuningA4Hz >= 415 && profile.tuningA4Hz <= 466) {
+    overrides.tuningA4Hz = profile.tuningA4Hz;
   }
 
   // Voice and whistle have soft onsets compared with a hammer strike.

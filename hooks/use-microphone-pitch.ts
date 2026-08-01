@@ -35,6 +35,15 @@ export interface MicDetectorSettings {
   onsetRmsRatio: number;
   onsetRmsDelta: number;
   expectedNoteToleranceCents: number;
+  /**
+   * The instrument's actual concert pitch, in Hz.
+   *
+   * This is the single most important calibration output and it was being
+   * measured and then discarded: every frequency was mapped to a note against
+   * a hard-coded A440. A piano tuned 60 cents flat therefore rounded every
+   * note to the semitone *below* the one that was played.
+   */
+  tuningA4Hz: number;
 }
 
 export interface MicDebugFrame {
@@ -74,24 +83,49 @@ interface UseMicrophonePitchReturn {
   unmuteDetection: () => void;
 }
 
-const FFT_SIZE = 8192;
+/**
+ * 4096 samples ≈ 85ms at 48kHz.
+ *
+ * Was 8192 ≈ 170ms, which put a hard floor under how fast repeated notes could
+ * be told apart: two strikes 150ms apart landed inside a single analysis
+ * window and read as one. 4096 still contains two full periods of 24Hz, below
+ * the lowest note on a piano, so nothing in range loses accuracy.
+ */
+const FFT_SIZE = 4096;
 const MIN_FREQUENCY = 27.5;
 const MAX_FREQUENCY = 4186;
 const MIN_MIDI = 21;
 const MAX_MIDI = 108;
 
+/**
+ * Timing defaults are deliberately permissive.
+ *
+ * The student should be able to play as fast as they like and have every note
+ * register. These values exist only to stop a *single* hammer strike being
+ * reported twice — they are not a rhythm judgement, and nothing here should be
+ * used to decide whether a note was played "in time". That belongs to a
+ * metronome or backing track, which a level opts into via `Level.tempo`.
+ *
+ * Previous values, and what they cost: repeatAfterMs 280 capped repeated notes
+ * at 3.5 per second (a semiquaver run at 100bpm needs 6.7); changeDebounceMs
+ * 120 swallowed fast melodic movement; stableFrames 3 added ~50ms on top of
+ * the analysis window.
+ */
 export const DEFAULT_MIC_DETECTOR_SETTINGS: MicDetectorSettings = {
   minRmsGate: 0.009,
   noiseGateMultiplier: 4.5,
   releaseGateRatio: 0.7,
   clarityThreshold: 0.84,
-  stableFrames: 3,
-  changeDebounceMs: 120,
-  releaseAfterMs: 240,
-  repeatAfterMs: 280,
-  onsetRmsRatio: 1.45,
-  onsetRmsDelta: 0.012,
+  stableFrames: 2,
+  changeDebounceMs: 35,
+  releaseAfterMs: 150,
+  // ~11 repeats/second: past what a student can play on one key, and short
+  // enough that it never gates real playing.
+  repeatAfterMs: 90,
+  onsetRmsRatio: 1.3,
+  onsetRmsDelta: 0.008,
   expectedNoteToleranceCents: 50,
+  tuningA4Hz: 440,
 };
 
 function getInitialNoiseFloor(settings: MicDetectorSettings): number {
@@ -114,16 +148,24 @@ function resolveSettings(
     repeatAfterMs: Math.max(80, merged.repeatAfterMs),
     onsetRmsRatio: Math.max(1.05, merged.onsetRmsRatio),
     onsetRmsDelta: Math.max(0.001, merged.onsetRmsDelta),
-    expectedNoteToleranceCents: Math.max(5, merged.expectedNoteToleranceCents),
+    // Capped at 50: half a semitone. Anything wider lets a genuinely wrong
+    // note snap onto the expected one, which is a false "correct" — the fix
+    // for a mistuned instrument is the reference pitch below, not a wider net.
+    expectedNoteToleranceCents: Math.min(
+      50,
+      Math.max(5, merged.expectedNoteToleranceCents),
+    ),
+    // Anything outside this is a bad fit rather than a real instrument.
+    tuningA4Hz: Math.min(466, Math.max(415, merged.tuningA4Hz)),
   };
 }
 
-function frequencyToMidi(freq: number): number {
-  return Math.round(12 * Math.log2(freq / 440) + 69);
+function frequencyToMidi(freq: number, a4 = 440): number {
+  return Math.round(12 * Math.log2(freq / a4) + 69);
 }
 
-function midiToFrequency(midi: number): number {
-  return 440 * 2 ** ((midi - 69) / 12);
+function midiToFrequency(midi: number, a4 = 440): number {
+  return a4 * 2 ** ((midi - 69) / 12);
 }
 
 function centsBetween(a: number, b: number): number {
@@ -197,29 +239,44 @@ function getMicrophoneErrorMessage(err: unknown): string {
   }
 }
 
+/**
+ * Maps a frequency to a note, correcting for the one error a pitch detector
+ * actually makes: reporting the octave below (or above) the played note.
+ *
+ * It deliberately does NOT snap a different pitch class onto the expected
+ * note. That is what the old ±85-cent window did once calibration widened it,
+ * and it meant a student playing the wrong key could be told they were right.
+ * Mistuning is corrected at the source now — via `tuningA4Hz` — so the window
+ * here can stay inside half a semitone, where it cannot reach a neighbour.
+ */
 function normalizeDetectedMidi(
   frequency: number,
   expectedMidi: number | null | undefined,
   toleranceCents: number,
+  a4: number,
 ): number {
-  if (expectedMidi === null || expectedMidi === undefined) {
-    return frequencyToMidi(frequency);
+  const detected = frequencyToMidi(frequency, a4);
+  if (expectedMidi === null || expectedMidi === undefined) return detected;
+  if (detected === expectedMidi) return detected;
+
+  const samePitchClass = (((detected - expectedMidi) % 12) + 12) % 12 === 0;
+  if (!samePitchClass || Math.abs(detected - expectedMidi) > 24) {
+    return detected;
   }
 
-  const expectedFrequency = midiToFrequency(expectedMidi);
-  const likelyFrequencies = [
-    expectedFrequency,
-    expectedFrequency * 2,
-    expectedFrequency / 2,
-  ];
-
-  for (const targetFrequency of likelyFrequencies) {
-    if (Math.abs(centsBetween(frequency, targetFrequency)) <= toleranceCents) {
+  // Same note name, wrong octave — accept it as the expected note only if the
+  // frequency really does sit on one of those octaves.
+  const expectedFrequency = midiToFrequency(expectedMidi, a4);
+  for (const octave of [1, 2, 0.5, 4, 0.25]) {
+    if (
+      Math.abs(centsBetween(frequency, expectedFrequency * octave)) <=
+      toleranceCents
+    ) {
       return expectedMidi;
     }
   }
 
-  return frequencyToMidi(frequency);
+  return detected;
 }
 
 export function useMicrophonePitch({
@@ -308,7 +365,6 @@ export function useMicrophonePitch({
 
     const buffer = bufferRef.current;
     const detector = detectorRef.current;
-
     const updateNoiseFloor = (rms: number) => {
       const detectorSettings = settingsRef.current;
       noiseFloorRef.current = Math.min(
@@ -460,7 +516,9 @@ export function useMicrophonePitch({
         Number.isFinite(frequency) &&
         frequency >= MIN_FREQUENCY &&
         frequency <= MAX_FREQUENCY;
-      const rawMidi = frequencyIsUsable ? frequencyToMidi(frequency) : null;
+      const rawMidi = frequencyIsUsable
+        ? frequencyToMidi(frequency, detectorSettings.tuningA4Hz)
+        : null;
 
       if (!frequencyIsUsable || clarity < detectorSettings.clarityThreshold) {
         if (currentNoteRef.current === null) {
@@ -497,6 +555,7 @@ export function useMicrophonePitch({
         frequency,
         expectedMidi,
         detectorSettings.expectedNoteToleranceCents,
+        detectorSettings.tuningA4Hz,
       );
 
       if (midi < MIN_MIDI || midi > MAX_MIDI) {

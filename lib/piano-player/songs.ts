@@ -29,11 +29,37 @@ interface SongSectionSpec {
   focus?: string;
 }
 
+/**
+ * Present only on levels that are meant to be played *in time*.
+ *
+ * Nothing in the note detector may judge rhythm. A student practising a piece
+ * should be able to take it as slowly or as quickly as they like and have
+ * every note register — the microphone's timing constants exist solely to stop
+ * one hammer strike being counted twice.
+ *
+ * Timing only becomes meaningful once the app is giving the student a pulse to
+ * play against: a metronome, or a backing track. That is what this describes,
+ * and a level without it is untimed by definition.
+ */
+export interface SongTempo {
+  bpm: number;
+  /** Beats per bar, matching the `M:` field of the level's ABC. */
+  beatsPerBar: number;
+  /** Bars of count-in before the first note is expected. */
+  countInBars?: number;
+  /** Backing instruments, when the level has them. */
+  backingTrackUrl?: string;
+  /** Click on every beat. Off means the backing track carries the pulse. */
+  metronome?: boolean;
+}
+
 export interface Level {
   id: string;
   name: string;
   difficulty: 1 | 2 | 3;
   abc: string;
+  /** See `SongTempo`. Absent on every level today, so nothing is timed yet. */
+  tempo?: SongTempo;
   /**
    * MIDI numbers in order for the right hand — the voice the game follows by
    * default. Index i of this array must correspond to note element i of voice
@@ -59,6 +85,14 @@ export interface Level {
 /** True when the level carries a second (bass) voice. */
 export function isGrandStaff(level: Level): boolean {
   return Array.isArray(level.leftNotes) && level.leftNotes.length > 0;
+}
+
+/**
+ * True when the level gives the student a pulse to play against, and is
+ * therefore the only case in which anything may judge *when* a note arrived.
+ */
+export function isTimedLevel(level: Level): boolean {
+  return level.tempo !== undefined && level.tempo.bpm > 0;
 }
 
 /**
