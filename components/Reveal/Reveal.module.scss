@@ -1,0 +1,58 @@
+.reveal {
+  // 520ms rather than --dur-slow: entrances read as sluggish below ~400ms of
+  // travel and twitchy above ~600ms.
+  transition:
+    opacity 520ms var(--ease-out),
+    transform 620ms var(--ease-out);
+  will-change: opacity, transform;
+}
+
+// The hidden start state is gated on `scripting: enabled` so that the page can
+// never be left with invisible body copy. Three cases, all safe:
+//   - JS on, browser supports the query  -> hidden, then revealed on scroll
+//   - JS off                             -> query fails, content just shows
+//   - browser predates the query (< 2023)-> block ignored, content just shows
+// The alternative — hiding unconditionally in CSS and relying on JS to undo it
+// — turns any hydration failure into a blank landing page.
+@media (scripting: enabled) {
+  .up {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+
+  .left {
+    opacity: 0;
+    transform: translate3d(-32px, 0, 0);
+  }
+
+  .right {
+    opacity: 0;
+    transform: translate3d(32px, 0, 0);
+  }
+
+  .scale {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+
+  .fade {
+    opacity: 0;
+  }
+
+  // Same specificity as the start states above, and later in source order, so
+  // it wins without needing an `!important` or a doubled selector.
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// The component already short-circuits to `visible` for these visitors; this
+// removes the transition as well, so nothing eases even mid-flight.
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

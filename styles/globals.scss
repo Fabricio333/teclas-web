@@ -95,3 +95,258 @@ button {
   box-shadow: var(--focus-ring);
   border-radius: 2px;
 }
+
+// ---------------------------------------------------------------------------
+// Shared keyframes.
+//
+// These live in globals.scss rather than in a partial because every `.module
+// .scss` that `@use`s a partial re-emits the partial's contents into its own
+// stylesheet — the duplication already documented in _tokens.scss. Declared
+// here they are emitted exactly once, and modules can still reference them by
+// name: css-loader only rewrites an `animation-name` when a matching local
+// `@keyframes` exists in the *same* file, so these pass through untouched.
+// ---------------------------------------------------------------------------
+
+// Vertical bob for the floating background SVGs.
+@keyframes teclas-float-y {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--spin-from, 0deg));
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 0), var(--drift-y, -26px), 0)
+      rotate(var(--spin-to, 6deg));
+  }
+}
+
+// Slow horizontal wander, offset from the bob so the two never resync into a
+// single obvious loop.
+@keyframes teclas-drift-x {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--wander, 34px), 0, 0);
+  }
+}
+
+// Opacity flicker — what makes the shapes read as volatile rather than as a
+// static decal that happens to move.
+@keyframes teclas-twinkle {
+  0%,
+  100% {
+    opacity: var(--twinkle-min, 0.16);
+  }
+  50% {
+    opacity: var(--twinkle-max, 0.5);
+  }
+}
+
+// One-shot specular sweep across a button on hover.
+@keyframes teclas-sheen {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+// Expanding halo behind feature icons.
+@keyframes teclas-pulse-ring {
+  0% {
+    transform: scale(0.82);
+    opacity: 0.55;
+  }
+  70% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+// Pans a wide gradient across its own box (background-position, so it is
+// compositor-cheap and never triggers layout).
+@keyframes teclas-gradient-pan {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+
+// Entrance used by the hero, which animates on load rather than on scroll.
+@keyframes teclas-rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+// The hero's scroll cue.
+@keyframes teclas-nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Button system.
+//
+// Also global-only, for the same emit-once reason, and because every call site
+// uses these as plain string class names (`className="btnPrimary"`) rather
+// than through a CSS-module import.
+// ---------------------------------------------------------------------------
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.95rem 2.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  line-height: 1.15;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  // Contains the ::after sweep and gives the element its own stacking context,
+  // so the sweep can never paint over neighbouring content.
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px 0;
+    z-index: 1;
+    width: 45%;
+    background: linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0) 0%,
+      rgb(255 255 255 / 0.62) 50%,
+      rgb(255 255 255 / 0) 100%
+    );
+    transform: translateX(-120%) skewX(-18deg);
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+  }
+
+  &:hover::after {
+    animation: teclas-sheen var(--dur-celebrate) var(--ease-out);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.985);
+    transition-duration: var(--dur-instant);
+  }
+}
+
+// Primary CTA. Brand green fill with near-black green text — 5.7:1, versus the
+// 1.9:1 that white-on-green would have given.
+.btnPrimary {
+  @extend .btn;
+  background-image: var(--grad-green);
+  color: var(--green-900);
+  border-color: rgb(var(--green-deep-rgb) / 0.22);
+  box-shadow: var(--shadow-green);
+
+  &:hover {
+    box-shadow: var(--shadow-green-lifted);
+  }
+}
+
+// Secondary CTA: the brand blue, for pages where a green button would compete
+// with a green surface.
+.btnSecondary {
+  @extend .btn;
+  background-image: var(--grad-blue);
+  color: var(--neutral-0);
+  border-color: rgb(255 255 255 / 0.16);
+  box-shadow: var(--shadow-md);
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+// For use on the dark coloured bands, where any filled colour loses contrast
+// against the background. Solid white, deep-green label: 15.5:1.
+.btnLight {
+  @extend .btn;
+  background-color: var(--neutral-0);
+  color: var(--green-900);
+  border-color: rgb(255 255 255 / 0.9);
+  box-shadow:
+    0 6px 16px rgb(var(--green-deep-rgb) / 0.34),
+    0 18px 40px rgb(var(--green-deep-rgb) / 0.28);
+
+  &:hover {
+    color: var(--green-800);
+    box-shadow:
+      0 10px 22px rgb(var(--green-deep-rgb) / 0.42),
+      0 26px 56px rgb(var(--green-deep-rgb) / 0.34);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:hover {
+    transform: none;
+  }
+
+  .btn:hover::after {
+    animation: none;
+  }
+}
+
+// The rule under every section title. Was a flat 6rem yellow block; now it
+// carries the brand gradient and drifts, which ties the section headers to the
+// buttons without adding any new colour.
+.decorativeLine {
+  width: 6rem;
+  height: 0.3rem;
+  margin: 0 auto;
+  border-radius: var(--radius-pill);
+  background-image: var(--grad-line);
+  background-size: 200% 100%;
+  animation: teclas-gradient-pan 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decorativeLine {
+    animation: none;
+  }
+}

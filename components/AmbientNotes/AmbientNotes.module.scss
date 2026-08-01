@@ -1,0 +1,86 @@
+.layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  // Never intercept a click, a text selection or a hit test — this sits on top
+  // of section backgrounds and, in some sections, under interactive content.
+  pointer-events: none;
+  // The single switch that `prefers-reduced-motion` flips to 0 in _tokens.scss.
+  opacity: var(--ambient-opacity);
+  overflow: hidden;
+
+  // Holds the glyphs out to the margins. Without this they drift straight
+  // across the reading column: a white note landing mid-paragraph on the blue
+  // band made the text genuinely harder to read. The centre is knocked back to
+  // 12% rather than to zero so the field still reads as continuous.
+  --ambient-mask: linear-gradient(
+    90deg,
+    rgb(0 0 0 / 1) 0%,
+    rgb(0 0 0 / 1) 16%,
+    rgb(0 0 0 / 0.12) 34%,
+    rgb(0 0 0 / 0.12) 66%,
+    rgb(0 0 0 / 1) 84%,
+    rgb(0 0 0 / 1) 100%
+  );
+  -webkit-mask-image: var(--ambient-mask);
+  mask-image: var(--ambient-mask);
+}
+
+// On a phone the section *is* the reading column — there are no margins to
+// hide in, so the field drops to a faint texture across the whole width
+// instead. 0.3 is the point at which a glyph passing behind a line of body
+// copy stops registering as a separate object.
+@media (max-width: 767.98px) {
+  .layer {
+    --ambient-mask: none;
+    opacity: calc(var(--ambient-opacity) * 0.3);
+  }
+}
+
+.toneLight {
+  color: #fff;
+}
+
+.toneBrand {
+  color: var(--green-500);
+}
+
+.toneInk {
+  color: var(--blue-500);
+}
+
+// Outer wrapper owns the horizontal wander only, so it can compose with the
+// inner element's vertical bob — two `transform` animations cannot share an
+// element.
+.drifter {
+  position: absolute;
+  display: block;
+  animation-name: teclas-drift-x;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.floater {
+  display: block;
+  animation-name: teclas-float-y, teclas-twinkle;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    // Softens the edges just enough that the glyphs read as atmosphere rather
+    // than as clip art sitting on top of the section.
+    filter: blur(0.15px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drifter,
+  .floater {
+    animation: none;
+  }
+}

@@ -1,9 +1,23 @@
-@use "../../styles/variables" as *;
-@use "../../styles/components" as *;
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
+
 .featuresSection {
   @extend .sectionPadding;
+  position: relative;
+  overflow: hidden;
+  // A whisper of green at the top edge so the band below the blue section does
+  // not start as flat white.
   background-color: #ffffff;
-  z-index: 10;
+  background-image: radial-gradient(
+    52rem 26rem at 50% -6%,
+    rgb(var(--green-rgb) / 0.14),
+    transparent 64%
+  );
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
 .sectionHeader {
@@ -14,7 +28,9 @@
 .sectionTitle {
   font-size: 2rem;
   margin-bottom: 1rem;
-  color: $dark-text-color;
+  color: var(--blue-900);
+  line-height: var(--leading-snug);
+  text-wrap: balance;
 
   @media (min-width: 768px) {
     font-size: 2.5rem;
@@ -25,50 +41,108 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3.5rem;
 }
 
 .featureCard {
-  background-color: #ffffff;
-  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  // The grid item is the <Reveal> wrapper; the card has to fill it so that
+  // three cards of unequal text length still line up.
+  height: 100%;
+  padding: 2.5rem 2rem;
   text-align: center;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background-color: #ffffff;
+  // Was `inset 0 2px 6px rgba(0,0,0,.2), 0 4px 12px rgba(0,0,0,.3)` — an inset
+  // dark ring that made every card look pressed-in and muddy.
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
 
-  &:nth-child(1) {
-    .iconWrapper {
-      background-color: rgba($blue-color, 0.1);
-      border-color: rgba($blue-color, 0.24);
-    }
-
-    .icon {
-      color: $blue-color;
-    }
+  // Accent bar along the top edge, scaled in on hover from the centre.
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: 4px;
+    background-image: var(--grad-line);
+    background-size: 200% 100%;
+    transform: scaleX(0);
+    transition: transform var(--dur-base) var(--ease-out);
   }
 
-  &:nth-child(2) {
-    .iconWrapper {
-      background-color: rgba($purple-color, 0.1);
-      border-color: rgba($purple-color, 0.24);
-    }
-
-    .icon {
-      color: $purple-color;
-    }
+  &:hover {
+    transform: translateY(-8px);
+    border-color: rgb(var(--green-rgb) / 0.5);
+    box-shadow: var(--shadow-lg);
   }
 
-  &:nth-child(3) {
-    .iconWrapper {
-      background-color: rgba($orange-color, 0.1);
-      border-color: rgba($orange-color, 0.24);
-    }
+  &:hover::before {
+    transform: scaleX(1);
+  }
 
-    .icon {
-      color: $orange-color;
-    }
+  &:hover .iconWrapper {
+    transform: scale(1.06) rotate(-4deg);
+  }
+
+  // Halo that expands out of the icon circle on hover.
+  &:hover .iconWrapper::after {
+    animation: teclas-pulse-ring 1.4s var(--ease-out) infinite;
+  }
+}
+
+.accentBlue {
+  .iconWrapper {
+    background-color: rgba($blue-color, 0.1);
+    border-color: rgba($blue-color, 0.24);
+  }
+
+  .iconWrapper::after {
+    border-color: rgba($blue-color, 0.5);
+  }
+
+  .icon {
+    color: $blue-color;
+  }
+}
+
+.accentPurple {
+  .iconWrapper {
+    background-color: rgba($purple-color, 0.1);
+    border-color: rgba($purple-color, 0.24);
+  }
+
+  .iconWrapper::after {
+    border-color: rgba($purple-color, 0.5);
+  }
+
+  .icon {
+    color: $purple-color;
+  }
+}
+
+.accentOrange {
+  .iconWrapper {
+    background-color: rgba($orange-color, 0.1);
+    border-color: rgba($orange-color, 0.24);
+  }
+
+  .iconWrapper::after {
+    border-color: rgba($orange-color, 0.5);
+  }
+
+  .icon {
+    color: $orange-color;
   }
 }
 
 .iconWrapper {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -77,6 +151,17 @@
   border: 2px solid rgba($blue-color, 0.18);
   border-radius: 50%;
   margin-bottom: 1.5rem;
+  transition: transform var(--dur-base) var(--ease-spring);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    opacity: 0;
+    pointer-events: none;
+  }
 }
 
 .icon {
@@ -88,10 +173,12 @@
 .cardTitle {
   font-size: 1.25rem;
   margin-bottom: 1rem;
+  color: var(--blue-900);
 }
 
 .cardDescription {
-  color: #4b5563;
+  color: var(--neutral-600);
+  line-height: var(--leading-normal);
 }
 
 .mapWrapper {
@@ -99,13 +186,32 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
 
   iframe {
+    display: block;
     width: 100%;
     height: 300px;
 
     @media (min-width: $mobile-breakpoint) {
       height: 450px;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featureCard:hover {
+    transform: none;
+  }
+
+  .featureCard:hover .iconWrapper {
+    transform: none;
+  }
+
+  .featureCard:hover .iconWrapper::after {
+    animation: none;
   }
 }

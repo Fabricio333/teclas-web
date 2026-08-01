@@ -1,5 +1,37 @@
 @use '../../styles/variables' as *;
 
+.hero {
+  position: relative;
+  // Two very wide, very soft brand washes. They read as light in the room
+  // rather than as shapes, and cost one paint — no extra DOM, no blur filter.
+  background-image:
+    radial-gradient(
+      58rem 34rem at 10% 4%,
+      rgb(var(--green-rgb) / 0.2),
+      transparent 62%
+    ),
+    radial-gradient(
+      46rem 30rem at 92% 82%,
+      rgb(var(--blue-rgb) / 0.14),
+      transparent 60%
+    ),
+    radial-gradient(
+      34rem 24rem at 62% 40%,
+      rgb(var(--yellow-rgb) / 0.1),
+      transparent 66%
+    );
+  background-size: 160% 160%;
+  // Deliberately no `overflow: hidden` here: the piano artwork sets
+  // `overflow: visible` so its glow can paint outside its box. The ambient
+  // layer clips itself instead.
+  isolation: isolate;
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+}
+
 .heroGrid {
   display: grid;
   grid-template-columns: 1fr;
@@ -31,9 +63,16 @@
 }
 
 .heroTitle {
-  font-size: 1.75rem;
+  // Was a flat 1.75rem. The two lines are `white-space: nowrap`, so at 390px
+  // "Ciudad Jardín, Buenos Aires" ran ~12px past the right edge of the
+  // viewport and the final "s" was clipped. Scaling with the viewport keeps
+  // the nowrap intact — which is what stops the city from splitting across
+  // lines — while guaranteeing it fits down to 320px.
+  font-size: clamp(1.25rem, 5.8vw, 1.75rem);
   margin-bottom: 1.5rem;
   text-wrap: balance;
+  color: var(--blue-900);
+  line-height: var(--leading-tight);
 
   @media (min-width: $tablet-breakpoint) {
     font-size: 2.25rem;
@@ -45,8 +84,105 @@
   }
 }
 
+.heroRule {
+  margin-bottom: 1.5rem;
+}
+
 .heroSubtitle {
   font-size: 1.25rem;
   margin-bottom: 2rem;
-  color: #4b5563;
+  color: var(--neutral-600);
+  max-width: 34rem;
+  line-height: var(--leading-normal);
+}
+
+.scrollCue {
+  display: none;
+
+  // Only meaningful where there is a fold to scroll past.
+  @media (min-width: $mobile-breakpoint) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 2.5rem auto 0;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgb(var(--blue-rgb) / 0.24);
+    color: var(--blue-500);
+    background-color: rgb(255 255 255 / 0.7);
+    transition:
+      transform var(--dur-base) var(--ease-spring),
+      border-color var(--dur-base) var(--ease-out);
+
+    svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    &:hover {
+      transform: translateY(3px);
+      border-color: var(--green-500);
+    }
+  }
+}
+
+// Everything above the fold animates on load; the sections below animate on
+// scroll via <Reveal>. Nested in `no-preference` so the default — for anyone
+// who has asked for less motion — is the finished state, with no animation to
+// override.
+@media (prefers-reduced-motion: no-preference) {
+  .heroTitle,
+  .heroRule,
+  .heroSubtitle,
+  .heroCta,
+  .scrollCue {
+    animation: teclas-rise-in 700ms var(--ease-out) both;
+  }
+
+  .heroTitle {
+    animation-delay: 60ms;
+  }
+
+  .heroRule {
+    animation-delay: 180ms;
+  }
+
+  .heroSubtitle {
+    animation-delay: 260ms;
+  }
+
+  .heroCta {
+    animation-delay: 380ms;
+  }
+
+  .scrollCue {
+    animation-delay: 520ms;
+  }
+
+  .scrollCue svg {
+    animation: teclas-nudge-down 2.2s var(--ease-in-out) infinite;
+    animation-delay: 1.4s;
+  }
+
+  .hero {
+    animation: teclas-hero-wash 26s var(--ease-in-out) infinite alternate;
+  }
+}
+
+// Pans the three washes as one. `background-position` on a compositor-friendly
+// layer, so no layout and no repaint of the content above it.
+@keyframes teclas-hero-wash {
+  from {
+    background-position:
+      0% 0%,
+      100% 100%,
+      50% 50%;
+  }
+  to {
+    background-position:
+      18% 12%,
+      82% 88%,
+      38% 62%;
+  }
 }

@@ -1,18 +1,34 @@
-@use "../../styles/variables" as *;
-@use "../../styles/components" as *;
-@use "sass:color";
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
 
 .philosophy {
   @extend .sectionPadding;
+  position: relative;
+  overflow: hidden;
   text-align: center;
-  background-color: $primary-color;
+  // Mirrored against the gradient on `AboutTeacher`, so the two blue bands read
+  // as a pair rather than as a repeat.
+  background-image: linear-gradient(200deg, var(--blue-700), var(--blue-500));
   color: #ffffff;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 -4px 12px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
 .sectionTitle {
   font-size: 2rem;
   margin-bottom: 1.5rem;
+  line-height: var(--leading-snug);
+  text-wrap: balance;
+
+  @media (min-width: $mobile-breakpoint) {
+    font-size: 2.5rem;
+  }
 }
 
 .textCenter {
@@ -21,15 +37,28 @@
 }
 
 .philosophyContent {
+  position: relative;
   max-width: 48rem;
   margin: 0 auto;
 }
 
 .philosophyText {
   color: #e5e7eb;
+  line-height: var(--leading-normal);
 
   p {
     margin-bottom: 1.5rem;
   }
 }
 
+// The closing sentence is the emotional beat of the section, so it gets the
+// weight the other three paragraphs do not.
+.closingLine {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgb(255 255 255 / 0.18);
+  color: #ffffff;
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  text-wrap: balance;
+}

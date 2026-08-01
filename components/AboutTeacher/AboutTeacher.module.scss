@@ -1,13 +1,23 @@
-@use "../../styles/variables" as *;
-@use "../../styles/components" as *;
-@use "sass:color";
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
 
 .about {
   @extend .sectionPadding;
-  background-color: $primary-color;
+  position: relative;
+  // Was a flat `$primary-color`. The gradient gives the band depth and lets the
+  // white ambient glyphs read against a range of values instead of one.
+  background-image: var(--grad-blue);
   color: #ffffff;
   text-align: center;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  box-shadow:
+    0 -4px 12px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
 .instructorGrid {
@@ -15,7 +25,6 @@
   grid-template-columns: 1fr;
   gap: 3rem;
   align-items: center;
-  margin-bottom: 5rem;
 
   @media (min-width: $mobile-breakpoint) {
     grid-template-columns: repeat(2, 1fr);
@@ -27,7 +36,16 @@
   width: 100%;
   height: 500px;
   overflow: hidden;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-xl);
+  // A hairline of brand green around the portrait, echoing the buttons.
+  border: 1px solid rgb(var(--green-rgb) / 0.45);
+  box-shadow:
+    0 10px 24px rgb(var(--ink-rgb) / 0.34),
+    0 24px 60px rgb(var(--ink-rgb) / 0.3);
+
+  &:hover .instructorImage {
+    transform: scale(1.045);
+  }
 }
 
 .instructorImage {
@@ -36,6 +54,7 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transition: transform var(--dur-slow) var(--ease-out);
 }
 
 .instructorText {
@@ -47,10 +66,16 @@
 .sectionTitle {
   font-size: 2rem;
   margin-bottom: 1.5rem;
+  line-height: var(--leading-snug);
 }
 
 .instructorBio {
   color: #e5e7eb;
+  line-height: var(--leading-normal);
+  // The section is centre-aligned, which is right for the heading and wrong for
+  // two dense biography paragraphs — a ragged left edge forces the eye to hunt
+  // for the start of every line.
+  text-align: left;
 
   p {
     margin-bottom: 1rem;
@@ -62,31 +87,42 @@
   margin-bottom: 3rem;
 }
 
-.philosophyContent {
-  max-width: 48rem;
-  margin: 0 auto;
-}
-
-.philosophyText {
-  color: #e5e7eb;
-
-  p {
-    margin-bottom: 1.5rem;
-  }
-}
-
 .socialLinks {
   display: flex;
-  justify-content: space-around;
-  margin-top: 1.5rem;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
 
-  .icon {
-    color: #ffffff;
-    transition: color 0.3s;
+// Circular chips rather than bare glyphs: a bigger, more obvious hit target
+// (48px, above the 44px minimum) and somewhere for the hover to happen.
+.socialLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgb(255 255 255 / 0.28);
+  background-color: rgb(255 255 255 / 0.1);
+  color: #ffffff;
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
 
-    &:hover {
-      color: $yellow-color;
-    }
+  &:hover {
+    transform: translateY(-4px);
+    background-color: var(--green-500);
+    border-color: var(--green-300);
+    color: var(--green-900);
   }
+}
 
+@media (prefers-reduced-motion: reduce) {
+  .socialLink:hover,
+  .imageWrapper:hover .instructorImage {
+    transform: none;
+  }
 }

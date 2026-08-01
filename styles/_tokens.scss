@@ -78,10 +78,15 @@
   --blue-700: #2a3c6f;
   --blue-900: #141d36;
   --green-50: #f4f9e6;
+  --green-100: #e7f2c8;
   --green-300: #c9e07f;
   --green-500: #a5ce39;
   --green-600: #87ab2a;
   --green-700: #6a861f;
+  // 800/900 exist so the brand green can carry white text at AA. --green-700
+  // on white is only 4.2:1; --green-900 is 10.6:1. Same hue, no new colour.
+  --green-800: #4d6216;
+  --green-900: #35450f;
   --yellow-300: #ffe37a;
   --yellow-500: #ffd122;
   --yellow-600: #e0b400;
@@ -105,6 +110,8 @@
 
   --blue-rgb: 65 92 169;
   --green-rgb: 165 206 57;
+  --green-deep-rgb: 53 69 15;
+  --white-rgb: 255 255 255;
   --yellow-rgb: 255 209 34;
   --purple-rgb: 134 88 167;
   --sky-rgb: 96 201 222;
@@ -182,6 +189,44 @@
   // ---- focus --------------------------------------------------------------
   --color-focus-ring: var(--yellow-500);
   --focus-ring: 0 0 0 3px rgb(var(--yellow-rgb) / 0.55);
+
+  // ---- brand gradients ----------------------------------------------------
+  // One place to change the look of every CTA and coloured band. All three
+  // stay inside the existing brand hues — no new colours were introduced.
+  --grad-green: linear-gradient(
+    135deg,
+    var(--green-300),
+    var(--green-500) 55%,
+    var(--green-600)
+  );
+  --grad-green-deep: linear-gradient(
+    160deg,
+    var(--green-700),
+    var(--green-900)
+  );
+  --grad-blue: linear-gradient(160deg, var(--blue-500), var(--blue-700));
+  --grad-line: linear-gradient(
+    90deg,
+    var(--green-500),
+    var(--yellow-500),
+    var(--green-500)
+  );
+
+  // Green CTAs get a coloured glow instead of a neutral drop shadow so the
+  // button reads as lit rather than pasted on.
+  --shadow-green:
+    0 6px 14px rgb(var(--green-rgb) / 0.34),
+    0 14px 32px rgb(var(--green-deep-rgb) / 0.22);
+  --shadow-green-lifted:
+    0 10px 20px rgb(var(--green-rgb) / 0.42),
+    0 22px 48px rgb(var(--green-deep-rgb) / 0.3);
+
+  // ---- ambient motion -----------------------------------------------------
+  // The decorative floating-SVG layer. Kept as tokens so the whole background
+  // ambience can be slowed, calmed or switched off from one place.
+  --dur-drift: 18s;
+  --dur-drift-slow: 27s;
+  --ambient-opacity: 1;
 }
 
 // Dark theme overrides the SEMANTIC layer only, never the primitives.
@@ -216,5 +261,8 @@
     --dur-slow: 1ms;
     --dur-celebrate: 1ms;
     --ease-spring: linear;
+    // The ambient layer is purely decorative, so it is removed outright rather
+    // than merely sped up — a drifting note at 1ms would strobe.
+    --ambient-opacity: 0;
   }
 }

@@ -16,8 +16,18 @@
   inset-inline: 0;
   transition: transform 0.3s ease-in-out;
   z-index: var(--z-header);
+  // Same brand green, given a slight vertical fall so the bar has a top light
+  // and doesn't read as a flat rectangle.
   background-color: $green-color;
+  background-image: linear-gradient(
+    180deg,
+    var(--green-300),
+    var(--green-500) 62%,
+    var(--green-600)
+  );
+  border-bottom: 1px solid rgb(var(--green-deep-rgb) / 0.22);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  color: var(--green-900);
 }
 
 .visible {
@@ -98,6 +108,8 @@
 }
 
 .navLink {
+  position: relative;
+  padding-block: 0.35rem;
   text-decoration: none;
   color: inherit;
   transition: color 0.3s ease;
@@ -107,10 +119,29 @@
   font-size: 1.0625rem;
   font-weight: 500;
 
+  // Underline that wipes in from the left. `transform` rather than `width`, so
+  // it animates on the compositor and never reflows the nav.
+  &::after {
+    content: '';
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
   // Was `var(--gold)`, which is defined nowhere in the codebase — the hover
   // was a silent no-op.
   &:hover {
-    color: var(--color-focus-ring);
+    color: var(--green-900);
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
   }
 }
 
@@ -121,11 +152,35 @@
   right: 0;
   background-color: #ffffff;
   border-bottom: 1px solid #f3f4f6;
+  box-shadow: var(--shadow-md);
+  transform-origin: top center;
+  animation: drop-in var(--dur-base) var(--ease-out) both;
   // Inside the header's own stacking context, so a low value is enough.
   z-index: var(--z-raised);
 
   @media (min-width: 768px) {
     display: none;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobileNavContainer {
+    animation: none;
+  }
+
+  .navLink::after {
+    transition: none;
   }
 }
 
