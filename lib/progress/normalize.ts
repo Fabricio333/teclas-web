@@ -24,7 +24,12 @@ import {
  * quarantines those.
  */
 
-function num(v: unknown, fallback: number, min = -Infinity, max = Infinity): number {
+function num(
+  v: unknown,
+  fallback: number,
+  min = -Infinity,
+  max = Infinity,
+): number {
   return typeof v === 'number' && Number.isFinite(v)
     ? Math.min(max, Math.max(min, v))
     : fallback;
@@ -50,7 +55,11 @@ function optionalStr(v: unknown): string | undefined {
   return typeof v === 'string' ? v : undefined;
 }
 
-function oneOf<T extends string>(v: unknown, allowed: readonly T[], fallback: T): T {
+function oneOf<T extends string>(
+  v: unknown,
+  allowed: readonly T[],
+  fallback: T,
+): T {
   return typeof v === 'string' && (allowed as readonly string[]).includes(v)
     ? (v as T)
     : fallback;
@@ -66,7 +75,13 @@ function arr(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
 }
 
-const INPUT_SOURCES = ['qwerty', 'pointer', 'midi', 'microphone', 'system'] as const;
+const INPUT_SOURCES = [
+  'qwerty',
+  'pointer',
+  'midi',
+  'microphone',
+  'system',
+] as const;
 const HANDS = ['right', 'left', 'both'] as const;
 
 function normalizeSong(raw: unknown): SongProgress {
@@ -134,7 +149,8 @@ export function normalizeProgress(raw: unknown): ProgressDoc {
   const stats = obj(o.stats);
 
   const songs: ProgressDoc['songs'] = {};
-  for (const [id, v] of Object.entries(obj(o.songs))) songs[id] = normalizeSong(v);
+  for (const [id, v] of Object.entries(obj(o.songs)))
+    songs[id] = normalizeSong(v);
 
   const exercises: ProgressDoc['exercises'] = {};
   for (const [id, v] of Object.entries(obj(o.exercises))) {
@@ -175,10 +191,17 @@ export function normalizeProgress(raw: unknown): ProgressDoc {
       achievements,
     },
     settings: {
-      noteNaming: oneOf(settings.noteNaming, ['solfege', 'letters'] as const, 'solfege'),
+      noteNaming: oneOf(
+        settings.noteNaming,
+        ['solfege', 'letters'] as const,
+        'solfege',
+      ),
       showKeyLabels: bool(settings.showKeyLabels, true),
       metronome: bool(settings.metronome, false),
       volume: num(settings.volume, 0.8, 0, 1),
+      showPiano: bool(settings.showPiano, true),
+      sheetLines: Math.min(4, Math.max(1, int(settings.sheetLines, 2, 1))) as
+        1 | 2 | 3 | 4,
       gamificationLevel: oneOf(
         settings.gamificationLevel,
         ['full', 'minimal', 'off'] as const,

@@ -171,6 +171,23 @@ export const progresoMetadata: Metadata = {
   },
 };
 
+/**
+ * Device-specific setup flow — nothing to index, and it only means anything
+ * to the person sitting at that microphone.
+ */
+export const calibracionMetadata: Metadata = {
+  title: 'Calibrar el micrófono | TECLAS Ciudad Jardín',
+  description:
+    'Calibrá el micrófono con tu piano para que Teclas reconozca mejor las notas que tocás.',
+  alternates: {
+    canonical: 'https://teclasciudadjardin.com.ar/calibracion',
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
+
 export default {
   homeMetadata,
   eventsMetadata,
@@ -179,4 +196,5 @@ export default {
   pianoPlayerMetadata,
   earTrainingMetadata,
   progresoMetadata,
+  calibracionMetadata,
 };

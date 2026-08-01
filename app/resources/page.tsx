@@ -4,6 +4,7 @@ import {
   faMusic,
   faHeadphones,
   faChartLine,
+  faSliders,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { resourcesMetadata } from '@/lib/metadata';
@@ -40,6 +41,18 @@ export default function ResourcesPage() {
             <p className={styles.cardDescription}>
               Escuchá las notas y encontralas en el piano. Mejorá tu oído
               musical con ejercicios interactivos.
+            </p>
+            <span className={styles.arrow}>
+              <FontAwesomeIcon icon={faArrowRight} />
+            </span>
+          </Link>
+
+          <Link href="/calibracion" className={styles.card}>
+            <FontAwesomeIcon icon={faSliders} className={styles.cardIcon} />
+            <h2 className={styles.cardTitle}>Calibrar el micrófono</h2>
+            <p className={styles.cardDescription}>
+              Escuchamos tu piano un ratito para reconocer mejor las notas que
+              tocás, aunque esté un poco desafinado.
             </p>
             <span className={styles.arrow}>
               <FontAwesomeIcon icon={faArrowRight} />

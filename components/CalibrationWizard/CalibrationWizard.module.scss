@@ -1,0 +1,235 @@
+@use '../../styles/variables' as *;
+
+.wizard {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.panel {
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.panelTitle {
+  font-size: var(--text-xl);
+  color: $primary-color;
+  margin-bottom: var(--space-2);
+}
+
+.panelText {
+  color: var(--color-text-muted);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-5);
+}
+
+.fieldset {
+  border: 0;
+  margin-bottom: var(--space-5);
+}
+
+.legend {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-2);
+}
+
+.option {
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: var(--color-primary-soft);
+  }
+}
+
+.optionActive {
+  background: $primary-color;
+  border-color: $primary-color;
+  color: #fff;
+
+  &:hover {
+    background: $primary-color;
+  }
+}
+
+.meter {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-sunken);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.meterFill {
+  height: 100%;
+  background: linear-gradient(90deg, $green-color, $yellow-color, $orange-color);
+  transition: width 60ms linear;
+}
+
+.meterFillCalm {
+  height: 100%;
+  background: $sky-color;
+  transition: width 120ms linear;
+}
+
+.verdict {
+  min-height: 1.5rem;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.bigNote {
+  font-size: clamp(2.5rem, 10vw, 4rem);
+  font-weight: var(--weight-bold);
+  color: $primary-color;
+  line-height: 1.1;
+  margin: var(--space-4) 0;
+}
+
+.coverage {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: var(--space-4);
+}
+
+.coverageDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-bg-sunken);
+  border: 1px solid var(--color-border);
+}
+
+.coverageDone {
+  background: $green-color;
+  border-color: $green-color;
+}
+
+.coverageCurrent {
+  background: $yellow-color;
+  border-color: $orange-color;
+  transform: scale(1.3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: var(--color-primary-soft);
+  }
+}
+
+.primaryBtn {
+  background: $primary-color;
+  border-color: $primary-color;
+  color: #fff;
+
+  &:hover {
+    background: color-mix(in srgb, #{$primary-color} 85%, black);
+  }
+}
+
+.linkBtn {
+  border: 0;
+  background: none;
+  color: $primary-color;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+}
+
+.error {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-danger);
+  background: rgba(229, 72, 77, 0.08);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+}
+
+.existing {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.noteList {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  text-align: left;
+}
+
+.noteRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.noteName {
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+
+.noteDetail {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.savedNote {
+  color: var(--color-success);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+}

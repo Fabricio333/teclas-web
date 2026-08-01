@@ -13,11 +13,14 @@ import {
   generateRound,
 } from '@/lib/ear-training/levels';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
+import { useCalibrationSettings } from '@/hooks/use-calibration-settings';
 import { recordRun } from '@/lib/progress';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMicrophone,
   faMicrophoneSlash,
+  faSliders,
 } from '@fortawesome/free-solid-svg-icons';
 
 function getDifficultyLabel(d: 1 | 2 | 3): string {
@@ -59,6 +62,10 @@ export default function EarTraining() {
   const micMuteRef = useRef<(() => void) | null>(null);
   const micUnmuteRef = useRef<(() => void) | null>(null);
 
+  // Detector tuning measured from the student's own instrument and room.
+  const { settings: calibrationSettings, isCalibrated } =
+    useCalibrationSettings();
+
   const {
     status: micStatus,
     startListening,
@@ -70,6 +77,7 @@ export default function EarTraining() {
     onNotePressRef: notePressRef,
     onNoteReleaseRef: noteReleaseRef,
     getExpectedMidiRef,
+    settings: calibrationSettings,
   });
 
   // Keep mute/unmute refs current
@@ -843,6 +851,21 @@ export default function EarTraining() {
               }
             />
           </button>
+
+          <Link
+            href="/calibracion"
+            className={`${styles.calibrateBtn} ${isCalibrated ? styles.calibrateBtnDone : ''}`}
+            title={
+              isCalibrated
+                ? 'Tu micrófono está calibrado. Tocá para recalibrar.'
+                : 'Calibrar el micrófono con tu instrumento'
+            }
+          >
+            <FontAwesomeIcon icon={faSliders} />
+            <span className={styles.calibrateLabel}>
+              {isCalibrated ? 'Calibrado' : 'Calibrar'}
+            </span>
+          </Link>
         </div>
         {micError && <p className={styles.micErrorText}>{micError}</p>}
       </div>

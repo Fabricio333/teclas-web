@@ -16,11 +16,25 @@ import {
 } from '@/lib/piano-player/songs';
 import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
-import { recordRun } from '@/lib/progress';
+import { useCalibrationSettings } from '@/hooks/use-calibration-settings';
+import { recordRun, updateSettings, useSettings } from '@/lib/progress';
+import {
+  computeSheetLayout,
+  scrollOffsetFor,
+  systemIndexForNote,
+  viewportHeightFor,
+  type SheetLayout,
+} from '@/lib/piano-player/sheetSystems';
+import Link from 'next/link';
+import { useOnClickOutside } from '@/hooks/use-on-click-outside';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMicrophone,
   faMicrophoneSlash,
+  faExpand,
+  faCompress,
+  faGear,
+  faSliders,
 } from '@fortawesome/free-solid-svg-icons';
 
 const ALL_LEVELS =
@@ -103,6 +117,10 @@ export default function PianoPlayer() {
   const micMuteRef = useRef<(() => void) | null>(null);
   const micUnmuteRef = useRef<(() => void) | null>(null);
 
+  // Detector tuning measured from the student's own instrument and room.
+  const { settings: calibrationSettings, isCalibrated } =
+    useCalibrationSettings();
+
   const {
     status: micStatus,
     startListening,
@@ -115,6 +133,7 @@ export default function PianoPlayer() {
     onNotePressRef: notePressRef,
     onNoteReleaseRef: noteReleaseRef,
     getExpectedMidiRef,
+    settings: calibrationSettings,
   });
 
   // Keep mute/unmute refs current
@@ -125,6 +144,61 @@ export default function PianoPlayer() {
 
   const [micEnabled, setMicEnabled] = useState(false);
   const [midiStatus, setMidiStatus] = useState<MidiStatus>('checking');
+
+  // ---------- Sheet view ----------
+  const sheetWrapperRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const settings = useSettings();
+  const showPiano = settings.showPiano;
+  const sheetLines = settings.sheetLines;
+
+  useOnClickOutside(settingsRef, () => setSettingsOpen(false));
+
+  const toggleFullscreen = useCallback(async () => {
+    const el = sheetWrapperRef.current;
+    if (!el) return;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await el.requestFullscreen();
+      }
+    } catch (err) {
+      // Fullscreen can be refused (iOS Safari has no element fullscreen).
+      // Not fatal — the sheet is still usable inline.
+      console.warn('Fullscreen unavailable:', err);
+    }
+  }, []);
+
+  // Mirror the browser's fullscreen state rather than assuming our toggle won
+  // it: Escape and the browser's own UI can exit without going through us.
+  useEffect(() => {
+    const onChange = () => {
+      const active = document.fullscreenElement === sheetWrapperRef.current;
+      setIsFullscreen(active);
+      // Re-measure: the SVG is responsive, so its systems move when the box
+      // resizes, and the follow offset would otherwise point at stale
+      // coordinates.
+      window.dispatchEvent(new Event('teclas:relayout-sheet'));
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  // The engine reads these from refs; it lives in a closure that never re-runs.
+  const sheetLinesRef = useRef(sheetLines);
+  useEffect(() => {
+    sheetLinesRef.current = sheetLines;
+    window.dispatchEvent(new Event('teclas:relayout-sheet'));
+  }, [sheetLines]);
+
+  useEffect(() => {
+    // Hiding the piano changes the sheet's available height.
+    window.dispatchEvent(new Event('teclas:relayout-sheet'));
+  }, [showPiano]);
   const micNoteLabel =
     currentMicMidi !== null
       ? midiNumberToNote(currentMicMidi, undefined, true)
@@ -150,6 +224,12 @@ export default function PianoPlayer() {
     let midiAccess: any;
     let abcjs: any;
     let aborted = false;
+    /**
+     * Teardown for listeners registered inside the async body. The existing
+     * cleanup below can only see the variables hoisted out here, and the sheet
+     * viewport binds its own window listeners deeper in.
+     */
+    const cleanupFns: (() => void)[] = [];
 
     (async () => {
       const [Tone, abcjsModule] = await Promise.all([
@@ -540,7 +620,76 @@ export default function PianoPlayer() {
         });
       };
 
+      // ---------- Sheet viewport: show N systems and follow the current one ----------
+      let sheetLayout: SheetLayout | null = null;
+
+      const sheetViewport = () => document.getElementById('sheet-viewport');
+      const sheetScroller = () => document.getElementById('sheet-scroller');
+
+      /**
+       * Re-measure the rendered score and resize the viewport. Must run after
+       * any render, resize or fullscreen change, because abcjs is responsive
+       * and every system moves when the box width changes.
+       */
+      const relayoutSheet = () => {
+        const scroller = sheetScroller();
+        const viewport = sheetViewport();
+        if (!scroller || !viewport) return;
+
+        const sheetEl = document.getElementById('sheet');
+        sheetLayout = computeSheetLayout(
+          scroller,
+          noteElems(),
+          sheetEl ?? scroller,
+        );
+        if (sheetLayout.systems.length === 0) return;
+
+        // In fullscreen the box is as tall as the display, so show everything
+        // that fits instead of the configured line count.
+        const inFullscreen = document.fullscreenElement !== null;
+        const lines = inFullscreen
+          ? Math.max(sheetLinesRef.current, sheetLayout.systems.length)
+          : sheetLinesRef.current;
+
+        viewport.style.height = `${Math.ceil(viewportHeightFor(sheetLayout, lines))}px`;
+        followCurrentSystem(true);
+      };
+
+      /** Scroll so the current note's system is at the top of the viewport. */
+      const followCurrentSystem = (immediate = false) => {
+        const scroller = sheetScroller();
+        if (!scroller || !sheetLayout || sheetLayout.systems.length === 0)
+          return;
+
+        const inFullscreen = document.fullscreenElement !== null;
+        const lines = inFullscreen
+          ? Math.max(sheetLinesRef.current, sheetLayout.systems.length)
+          : sheetLinesRef.current;
+
+        const system = systemIndexForNote(
+          sheetLayout,
+          Math.min(pos, SONG.length - 1),
+        );
+        const offset = scrollOffsetFor(sheetLayout, system, lines);
+
+        scroller.style.transition = immediate
+          ? 'none'
+          : 'transform var(--dur-base) var(--ease-out)';
+        scroller.style.transform = `translateY(${-offset}px)`;
+      };
+
       renderSheet(level);
+      // abcjs finishes laying out synchronously, but fonts can still be
+      // swapping; measure on the next frame so note boxes are final.
+      requestAnimationFrame(relayoutSheet);
+
+      const onRelayout = () => requestAnimationFrame(relayoutSheet);
+      window.addEventListener('teclas:relayout-sheet', onRelayout);
+      window.addEventListener('resize', onRelayout);
+      cleanupFns.push(() => {
+        window.removeEventListener('teclas:relayout-sheet', onRelayout);
+        window.removeEventListener('resize', onRelayout);
+      });
 
       // Find note elements in the SVG rendered by abcjs
       const noteElems = (): SVGElement[] => {
@@ -601,6 +750,9 @@ export default function PianoPlayer() {
           applyClass(elems[pos], styles.sheetHighlight);
           highlighted = pos;
         }
+
+        // Keep the line being played in view.
+        followCurrentSystem();
 
         // hint key outline on piano (use base MIDI for DOM lookup)
         const prevHint = pianoDiv.querySelector<HTMLElement>(
@@ -981,6 +1133,9 @@ export default function PianoPlayer() {
             : 'Siguiente cancion';
         }
         renderSheet(level);
+        // A different song has a different system layout, so re-measure
+        // before the first highlight tries to scroll to it.
+        requestAnimationFrame(relayoutSheet);
         setTimeout(() => {
           highlightCurrent();
           startIdle();
@@ -1069,6 +1224,8 @@ export default function PianoPlayer() {
 
     return () => {
       aborted = true;
+      cleanupFns.forEach((fn) => fn());
+      cleanupFns.length = 0;
       notePressRef.current = null;
       noteReleaseRef.current = null;
       getExpectedMidiRef.current = null;
@@ -1149,6 +1306,75 @@ export default function PianoPlayer() {
               }
             />
           </button>
+
+          <Link
+            href="/calibracion"
+            className={`${styles.calibrateBtn} ${isCalibrated ? styles.calibrateBtnDone : ''}`}
+            title={
+              isCalibrated
+                ? 'Tu micrófono está calibrado. Tocá para recalibrar.'
+                : 'Calibrar el micrófono con tu piano'
+            }
+          >
+            <FontAwesomeIcon icon={faSliders} />
+            <span className={styles.calibrateLabel}>
+              {isCalibrated ? 'Calibrado' : 'Calibrar'}
+            </span>
+          </Link>
+
+          <div className={styles.settingsMenu} ref={settingsRef}>
+            <button
+              type="button"
+              className={styles.settingsBtn}
+              onClick={() => setSettingsOpen((v) => !v)}
+              aria-expanded={settingsOpen}
+              aria-haspopup="true"
+              aria-label="Ajustes de la vista"
+              title="Ajustes de la vista"
+            >
+              <FontAwesomeIcon icon={faGear} />
+            </button>
+
+            {settingsOpen && (
+              <div className={styles.settingsPanel} role="menu">
+                <label className={styles.settingsRow}>
+                  <input
+                    type="checkbox"
+                    checked={showPiano}
+                    onChange={(e) =>
+                      updateSettings({ showPiano: e.target.checked })
+                    }
+                  />
+                  <span>Mostrar el piano</span>
+                </label>
+
+                <label className={styles.settingsRow}>
+                  <span className={styles.settingsRowLabel}>
+                    Renglones visibles
+                  </span>
+                  <select
+                    className={styles.settingsSelect}
+                    value={sheetLines}
+                    onChange={(e) =>
+                      updateSettings({
+                        sheetLines: Number(e.target.value) as 1 | 2 | 3 | 4,
+                      })
+                    }
+                  >
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                    <option value={3}>3</option>
+                    <option value={4}>4</option>
+                  </select>
+                </label>
+
+                <p className={styles.settingsHint}>
+                  Si tocás en un piano de verdad, ocultá el teclado para ver más
+                  partitura.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
         <p id="song-meta" className={styles.songMeta}>
           {ALL_LEVELS[0].notes.length} notas · QWERTY o MIDI
@@ -1244,9 +1470,39 @@ export default function PianoPlayer() {
 
       {/* Play area: sheet (left) + piano (right) on desktop */}
       <div className={styles.playArea}>
-        {/* Sheet music */}
-        <div id="sheet-wrapper" className={styles.sheetWrapper}>
-          <div id="sheet" className={styles.sheet} />
+        {/* Sheet music. The wrapper is the fullscreen target; the viewport
+            clips to N systems and the inner scroller is translated to follow
+            the current line. */}
+        <div
+          id="sheet-wrapper"
+          ref={sheetWrapperRef}
+          className={styles.sheetWrapper}
+        >
+          <div className={styles.sheetToolbar}>
+            <button
+              type="button"
+              className={styles.sheetToolBtn}
+              onClick={toggleFullscreen}
+              aria-pressed={isFullscreen}
+              title={
+                isFullscreen
+                  ? 'Salir de pantalla completa'
+                  : 'Ver la partitura en pantalla completa'
+              }
+              aria-label={
+                isFullscreen
+                  ? 'Salir de pantalla completa'
+                  : 'Pantalla completa'
+              }
+            >
+              <FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} />
+            </button>
+          </div>
+          <div id="sheet-viewport" className={styles.sheetViewport}>
+            <div id="sheet-scroller" className={styles.sheetScroller}>
+              <div id="sheet" className={styles.sheet} />
+            </div>
+          </div>
           <div id="octave-popup" className={styles.octavePopup} />
         </div>
 
@@ -1262,8 +1518,13 @@ export default function PianoPlayer() {
           </div>
         </div>
 
-        {/* Piano */}
-        <div className={styles.pianoWrapper}>
+        {/* Piano. Kept mounted when hidden — the engine binds pointer
+            handlers to this node and drives it imperatively, so unmounting it
+            would tear down that wiring. Hidden with CSS instead. */}
+        <div
+          className={`${styles.pianoWrapper} ${showPiano ? '' : styles.pianoHidden}`}
+          aria-hidden={!showPiano}
+        >
           <span id="octave-indicator" className={styles.octaveIndicator}>
             Octava 4
           </span>

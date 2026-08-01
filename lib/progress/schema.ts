@@ -26,11 +26,7 @@ export type StarCount = 0 | 1 | 2 | 3;
 
 /** Mirrors the InputSource union in the practice engines. */
 export type InputSource =
-  | 'qwerty'
-  | 'pointer'
-  | 'midi'
-  | 'microphone'
-  | 'system';
+  'qwerty' | 'pointer' | 'midi' | 'microphone' | 'system';
 
 export interface BestRun {
   score: number;
@@ -86,6 +82,14 @@ export interface SettingsState {
   showKeyLabels: boolean;
   metronome: boolean;
   volume: number;
+  /**
+   * Hide the on-screen keyboard. Students playing a real piano (MIDI or
+   * microphone) don't need it, and reclaiming that vertical space is what
+   * makes the sheet usable on a laptop.
+   */
+  showPiano: boolean;
+  /** How many staff systems the sheet viewport shows at once. */
+  sheetLines: 1 | 2 | 3 | 4;
   /**
    * Adult beginners frequently find XP and badges patronising, and this is a
    * music school's site — the whole layer must be switchable off.
@@ -148,7 +152,11 @@ export const MAX_PRACTICE_DAYS = 400;
 function deepFreeze<T>(value: T): T {
   Object.getOwnPropertyNames(value as object).forEach((key) => {
     const inner = (value as Record<string, unknown>)[key];
-    if (inner !== null && typeof inner === 'object' && !Object.isFrozen(inner)) {
+    if (
+      inner !== null &&
+      typeof inner === 'object' &&
+      !Object.isFrozen(inner)
+    ) {
       deepFreeze(inner);
     }
   });
@@ -184,6 +192,8 @@ export const EMPTY_PROGRESS: ProgressDoc = deepFreeze<ProgressDoc>({
     showKeyLabels: true,
     metronome: false,
     volume: 0.8,
+    showPiano: true,
+    sheetLines: 2,
     gamificationLevel: 'full',
   },
   sessions: [],

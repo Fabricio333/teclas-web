@@ -719,3 +719,43 @@
     padding: 2rem;
   }
 }
+
+// ---------- Calibration entry ----------
+
+.calibrateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid $primary-color;
+  color: $primary-color;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: $primary-color;
+    color: #fff;
+  }
+}
+
+.calibrateBtnDone {
+  border-color: $success-color;
+  color: $success-color;
+
+  &:hover {
+    background: $success-color;
+    color: #fff;
+  }
+}
+
+.calibrateLabel {
+  @media (max-width: $mobile-breakpoint) {
+    display: none;
+  }
+}

@@ -385,6 +385,77 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
+// Clips the score to the configured number of systems. Height is set from JS
+// once the layout has been measured (see lib/piano-player/sheetSystems.ts).
+.sheetViewport {
+  position: relative;
+  overflow: hidden;
+  // Deliberately small: JS sets the real height once the score has been
+  // measured, and anything larger than a single staff would floor that value
+  // and stop a 1-line viewport from actually being one line. This only exists
+  // so the box doesn't collapse to zero before the first measurement.
+  min-height: 48px;
+}
+
+// Translated vertically to bring the active system to the top.
+.sheetScroller {
+  will-change: transform;
+}
+
+.sheetToolbar {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: var(--z-raised);
+  display: flex;
+  gap: 0.35rem;
+}
+
+.sheetToolBtn {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid #d9d2bd;
+  background: rgba(255, 255, 255, 0.85);
+  color: $primary-color;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: $primary-color;
+    color: #fff;
+  }
+}
+
+// Fullscreen: the wrapper becomes the whole display, so let the score use it.
+.sheetWrapper:fullscreen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2.5rem;
+  border-radius: 0;
+  background: #fffef9;
+
+  .sheetViewport {
+    height: auto !important;
+    max-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .sheetScroller {
+    // Following a single line is pointless when the whole piece is visible.
+    transform: none !important;
+  }
+
+  .sheet {
+    max-width: min(1400px, 100%);
+  }
+}
+
 .sheet {
   max-width: 700px;
   margin: 0 auto;
@@ -1032,5 +1103,122 @@
 
   .doneCard {
     padding: 2rem;
+  }
+}
+
+// ---------- Settings menu + calibration entry ----------
+
+.settingsMenu {
+  position: relative;
+  display: inline-flex;
+}
+
+.settingsBtn {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: $primary-color;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: $primary-color;
+    color: #fff;
+  }
+}
+
+.settingsPanel {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: var(--z-popover);
+  width: 15rem;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+}
+
+.settingsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  color: $text-color;
+  cursor: pointer;
+}
+
+.settingsRowLabel {
+  flex: 1;
+}
+
+.settingsSelect {
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  font-size: 0.85rem;
+}
+
+.settingsHint {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: $light-text-color;
+}
+
+.calibrateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid $primary-color;
+  color: $primary-color;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: $primary-color;
+    color: #fff;
+  }
+}
+
+.calibrateLabel {
+  @media (max-width: $mobile-breakpoint) {
+    display: none;
+  }
+}
+
+// Hiding the keyboard is what makes the sheet usable on a laptop. Kept in the
+// DOM (the engine binds handlers to it) but removed from layout and a11y.
+.pianoHidden {
+  display: none;
+}
+
+.calibrateBtnDone {
+  border-color: $success-color;
+  color: $success-color;
+
+  &:hover {
+    background: $success-color;
+    color: #fff;
   }
 }
