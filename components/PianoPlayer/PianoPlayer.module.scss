@@ -446,7 +446,7 @@
 // Note the JS counterpart: `fullscreenLines()` measures the piano and sizes the
 // sheet viewport to what is left, so the two panes share the display rather
 // than the score claiming all of it.
-.playArea:fullscreen {
+@mixin fullscreen-play-area {
   display: flex;
   flex-direction: column;
   // Load-bearing. At >=1024px the grid rule below sets `align-items: start`,
@@ -510,6 +510,31 @@
   .progressSection {
     display: none;
   }
+}
+
+// The layout above is applied two ways, deliberately.
+//
+// `:fullscreen` is the correct selector but it is not matched by every WebKit
+// version, and the prefixed spellings cannot be folded into the same selector
+// list — one unrecognised pseudo-class makes a browser drop the entire list,
+// so `:fullscreen, :-webkit-full-screen` would break the rule everywhere.
+//
+// `.playAreaFullscreen` comes from the `fullscreenchange` handler, so it is
+// browser-independent. The component was already applying it; there was simply
+// no rule behind it, which left the play area in the >=1024px two-column grid
+// while the browser really was fullscreen — the score squeezed into a half
+// column with the piano beside it, reading as "the sheet is gone".
+//
+// It is written `.playArea.playAreaFullscreen` rather than
+// `.playAreaFullscreen` alone because that media-query grid is defined further
+// down this file; at equal specificity the later rule would win and `display`
+// would stay `grid`.
+.playArea:fullscreen {
+  @include fullscreen-play-area;
+}
+
+.playArea.playAreaFullscreen {
+  @include fullscreen-play-area;
 }
 
 // The visible on-state. An `aria-pressed` icon button is correct for a screen

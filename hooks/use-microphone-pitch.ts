@@ -6,6 +6,9 @@ import { PitchDetector } from 'pitchy';
 
 export type MicStatus = 'idle' | 'listening' | 'error';
 
+/** pitchy does not export its detector type, so name it off the factory. */
+type Float32Detector = ReturnType<typeof PitchDetector.forFloat32Array>;
+
 export type MicrophoneNoteHandler = (
   midi: number,
   source?: 'microphone',
@@ -96,6 +99,38 @@ const MIN_FREQUENCY = 27.5;
 const MAX_FREQUENCY = 4186;
 const MIN_MIDI = 21;
 const MAX_MIDI = 108;
+
+/**
+ * Loudness is measured over the newest ~43ms, NOT over the whole pitch window.
+ *
+ * This is the fix for "it won't let me play fast". Measuring RMS across all
+ * 4096 samples averages the attack over 85ms, so a key struck while the
+ * previous note is still ringing raises the average by roughly 20% — under the
+ * 30% that `onsetRmsRatio` needs — and the repeat is dropped. Over 2048 the
+ * same strike clears it, because the new energy occupies the whole window
+ * instead of half of it.
+ *
+ * Not shorter than this. RMS over a window holding less than ~2 periods swings
+ * with the waveform's phase, and 1024 samples is under 2 periods below 94Hz —
+ * every note beneath F#2 would then produce phantom attacks and retrigger
+ * itself. 2048 stays stable down to G1 and still doubles the responsiveness.
+ *
+ * The gate uses it too: RMS is a mean, so a quiet room measures the same here
+ * as it did over 4096, and note boundaries stop being mushy.
+ */
+const ONSET_WINDOW = 2048;
+
+/**
+ * Pitch is tried on the newest ~43ms first, and only falls back to the full
+ * 85ms window when that is too short to trust.
+ *
+ * Two notes inside one window read as one blended pitch, which is why fast
+ * runs came back as wrong notes. Halving the window halves that overlap. It is
+ * only safe above ~130Hz: 2048 samples is 5+ periods of C3 but barely one
+ * period of A0, so the bottom octave still needs the long window.
+ */
+const FAST_PITCH_WINDOW = 2048;
+const FAST_PITCH_MIN_HZ = 130;
 
 /**
  * Timing defaults are deliberately permissive.
@@ -310,7 +345,8 @@ export function useMicrophonePitch({
   const rmsEnvelopeRef = useRef(0);
   const mutedRef = useRef(false);
   const bufferRef = useRef<Float32Array | null>(null);
-  const detectorRef = useRef<any>(null);
+  const detectorRef = useRef<Float32Detector | null>(null);
+  const fastDetectorRef = useRef<Float32Detector | null>(null);
 
   const resetDetectionState = useCallback((now = 0) => {
     candidateNoteRef.current = null;
@@ -361,14 +397,25 @@ export function useMicrophonePitch({
     if (!bufferRef.current || bufferRef.current.length !== analyser.fftSize) {
       bufferRef.current = new Float32Array(analyser.fftSize);
       detectorRef.current = PitchDetector.forFloat32Array(analyser.fftSize);
+      fastDetectorRef.current =
+        PitchDetector.forFloat32Array(FAST_PITCH_WINDOW);
     }
 
     const buffer = bufferRef.current;
     const detector = detectorRef.current;
+    const fastDetector = fastDetectorRef.current;
+    if (!buffer || !detector || !fastDetector) return;
+
     const updateNoiseFloor = (rms: number) => {
       const detectorSettings = settingsRef.current;
+      // Clamp against the noise FLOOR's own starting point, not against the
+      // gate. `minRmsGate * 2.2` let the floor drift up to the gate level
+      // itself, and since the gate is `floor * noiseGateMultiplier` it could
+      // then climb to ~10x the calibrated value — so calibrating in a room
+      // with any real noise raised the bar until soft notes stopped
+      // registering at all. Capped here, the gate stays within 2.2x.
       noiseFloorRef.current = Math.min(
-        detectorSettings.minRmsGate * 2.2,
+        getInitialNoiseFloor(detectorSettings) * 2.2,
         noiseFloorRef.current * 0.98 + rms * 0.02,
       );
     };
@@ -418,11 +465,14 @@ export function useMicrophonePitch({
 
       analyser.getFloatTimeDomainData(buffer);
 
+      // Newest samples only — see ONSET_WINDOW. The transient has to be
+      // visible while it is still a transient.
+      const onsetStart = Math.max(0, buffer.length - ONSET_WINDOW);
       let sumSq = 0;
-      for (let i = 0; i < buffer.length; i += 1) {
+      for (let i = onsetStart; i < buffer.length; i += 1) {
         sumSq += buffer[i] * buffer[i];
       }
-      const rms = Math.sqrt(sumSq / buffer.length);
+      const rms = Math.sqrt(sumSq / (buffer.length - onsetStart));
 
       const previousEnvelope = rmsEnvelopeRef.current;
       const freshAttack =
@@ -507,10 +557,22 @@ export function useMicrophonePitch({
         return;
       }
 
-      const [frequency, clarity] = detector.findPitch(
-        buffer,
-        analyser.context.sampleRate,
+      // Short window first so two fast notes don't average into one pitch;
+      // fall back to the full window when the result is weak or low enough
+      // that 2048 samples cannot hold enough periods to be trusted.
+      const sampleRate = analyser.context.sampleRate;
+      let [frequency, clarity] = fastDetector.findPitch(
+        buffer.subarray(buffer.length - FAST_PITCH_WINDOW),
+        sampleRate,
       );
+
+      if (
+        clarity < detectorSettings.clarityThreshold ||
+        !Number.isFinite(frequency) ||
+        frequency < FAST_PITCH_MIN_HZ
+      ) {
+        [frequency, clarity] = detector.findPitch(buffer, sampleRate);
+      }
 
       const frequencyIsUsable =
         Number.isFinite(frequency) &&
@@ -739,6 +801,7 @@ export function useMicrophonePitch({
     resetDetectionState();
     mutedRef.current = false;
     detectorRef.current = null;
+    fastDetectorRef.current = null;
     bufferRef.current = null;
 
     sourceRef.current?.disconnect();

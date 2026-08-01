@@ -1018,6 +1018,12 @@ export default function PianoPlayer() {
                   : '';
             }
             doneRef.current?.classList.add(styles.doneVisible);
+            // `highlightCurrent` draws the bar from `pos`, and it never runs
+            // again once the piece is finished — so a flawless run topped out
+            // at 93% (13 of 14 notes) and looked like something had been
+            // missed. Fill it here, where completion is actually known.
+            const progressEl = document.getElementById('progress');
+            if (progressEl) progressEl.style.width = '100%';
             clearIdle();
             updateScoreUI();
             updateSectionProgress();
