@@ -114,10 +114,7 @@ function resolveSettings(
     repeatAfterMs: Math.max(80, merged.repeatAfterMs),
     onsetRmsRatio: Math.max(1.05, merged.onsetRmsRatio),
     onsetRmsDelta: Math.max(0.001, merged.onsetRmsDelta),
-    expectedNoteToleranceCents: Math.max(
-      5,
-      merged.expectedNoteToleranceCents,
-    ),
+    expectedNoteToleranceCents: Math.max(5, merged.expectedNoteToleranceCents),
   };
 }
 
@@ -377,9 +374,7 @@ export function useMicrophonePitch({
         rms > previousEnvelope * detectorSettings.onsetRmsRatio &&
         rms - previousEnvelope > detectorSettings.onsetRmsDelta;
       rmsEnvelopeRef.current =
-        previousEnvelope === 0
-          ? rms
-          : previousEnvelope * 0.85 + rms * 0.15;
+        previousEnvelope === 0 ? rms : previousEnvelope * 0.85 + rms * 0.15;
 
       const expectedMidi = getExpectedMidiRef?.current?.() ?? null;
 
@@ -410,7 +405,10 @@ export function useMicrophonePitch({
         }
 
         if (belowGateSinceRef.current === 0) belowGateSinceRef.current = now;
-        if (now - belowGateSinceRef.current >= detectorSettings.releaseAfterMs) {
+        if (
+          now - belowGateSinceRef.current >=
+          detectorSettings.releaseAfterMs
+        ) {
           releaseCurrentNote(now);
           resetDetectionState(now);
           emitDebugFrame(now, {

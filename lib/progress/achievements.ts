@@ -43,8 +43,12 @@ function a(
  * shaming the absence.
  */
 export const ACHIEVEMENTS: Achievement[] = [
-  a('primera-nota', 'Primera nota', 'Tocaste tu primera nota', 'bronce', (d) =>
-    d.stats.totalNotes > 0,
+  a(
+    'primera-nota',
+    'Primera nota',
+    'Tocaste tu primera nota',
+    'bronce',
+    (d) => d.stats.totalNotes > 0,
   ),
   a(
     'primera-cancion',
@@ -53,23 +57,47 @@ export const ACHIEVEMENTS: Achievement[] = [
     'bronce',
     (d) => Object.values(d.songs).some((s) => s.stars > 0),
   ),
-  a('cien-notas', 'Cien notas', 'Tocaste 100 notas', 'bronce', (d) =>
-    d.stats.totalNotes >= 100,
+  a(
+    'cien-notas',
+    'Cien notas',
+    'Tocaste 100 notas',
+    'bronce',
+    (d) => d.stats.totalNotes >= 100,
   ),
-  a('mil-notas', 'Mil notas', 'Tocaste 1000 notas', 'plata', (d) =>
-    d.stats.totalNotes >= 1000,
+  a(
+    'mil-notas',
+    'Mil notas',
+    'Tocaste 1000 notas',
+    'plata',
+    (d) => d.stats.totalNotes >= 1000,
   ),
-  a('racha-3', 'Tres días seguidos', 'Practicaste 3 días seguidos', 'bronce', (d) =>
-    d.streak.current >= 3,
+  a(
+    'racha-3',
+    'Tres días seguidos',
+    'Practicaste 3 días seguidos',
+    'bronce',
+    (d) => d.streak.current >= 3,
   ),
-  a('racha-7', 'Una semana entera', 'Practicaste 7 días seguidos', 'plata', (d) =>
-    d.streak.current >= 7,
+  a(
+    'racha-7',
+    'Una semana entera',
+    'Practicaste 7 días seguidos',
+    'plata',
+    (d) => d.streak.current >= 7,
   ),
-  a('racha-30', 'Un mes sin faltar', 'Practicaste 30 días seguidos', 'oro', (d) =>
-    d.streak.current >= 30,
+  a(
+    'racha-30',
+    'Un mes sin faltar',
+    'Practicaste 30 días seguidos',
+    'oro',
+    (d) => d.streak.current >= 30,
   ),
-  a('racha-100', 'Cien días', 'Practicaste 100 días seguidos', 'oro', (d) =>
-    d.streak.current >= 100,
+  a(
+    'racha-100',
+    'Cien días',
+    'Practicaste 100 días seguidos',
+    'oro',
+    (d) => d.streak.current >= 100,
   ),
   a(
     'impecable',
@@ -99,10 +127,18 @@ export const ACHIEVEMENTS: Achievement[] = [
     'plata',
     (d) => Object.keys(d.songs).length >= 20,
   ),
-  a('madrugadora', 'Madrugador/a', 'Practicaste antes de las 8 de la mañana', 'bronce',
+  a(
+    'madrugadora',
+    'Madrugador/a',
+    'Practicaste antes de las 8 de la mañana',
+    'bronce',
     (_d, c) => c.hour < 8,
   ),
-  a('noctambula', 'Noctámbulo/a', 'Practicaste después de las 11 de la noche', 'bronce',
+  a(
+    'noctambula',
+    'Noctámbulo/a',
+    'Practicaste después de las 11 de la noche',
+    'bronce',
     (_d, c) => c.hour >= 23,
   ),
   a(

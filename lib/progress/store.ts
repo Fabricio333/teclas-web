@@ -1,4 +1,8 @@
-import { EMPTY_PROGRESS, createEmptyProgress, type ProgressDoc } from './schema';
+import {
+  EMPTY_PROGRESS,
+  createEmptyProgress,
+  type ProgressDoc,
+} from './schema';
 import { clampDoc, safeRead, safeWrite } from './storage';
 
 type Listener = () => void;

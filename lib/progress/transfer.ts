@@ -44,10 +44,7 @@ export function exportToFile(doc: ProgressDoc): void {
 }
 
 export type ImportFailure =
-  | 'not-json'
-  | 'not-teclas'
-  | 'future-version'
-  | 'invalid';
+  'not-json' | 'not-teclas' | 'future-version' | 'invalid';
 
 export type ImportResult =
   | { ok: true; doc: ProgressDoc }
@@ -100,14 +97,25 @@ export function mergeDocs(a: ProgressDoc, b: ProgressDoc): ProgressDoc {
   for (const id of songIds) {
     const x = a.songs[id];
     const y = b.songs[id];
-    if (!x) { songs[id] = y!; continue; }
-    if (!y) { songs[id] = x; continue; }
+    if (!x) {
+      songs[id] = y!;
+      continue;
+    }
+    if (!y) {
+      songs[id] = x;
+      continue;
+    }
     songs[id] = {
       totalPlays: x.totalPlays + y.totalPlays,
       totalNotes: x.totalNotes + y.totalNotes,
       stars: Math.max(x.stars, y.stars) as 0 | 1 | 2 | 3,
-      firstPlayedAt: [x.firstPlayedAt, y.firstPlayedAt].filter(Boolean).sort()[0],
-      lastPlayedAt: [x.lastPlayedAt, y.lastPlayedAt].filter(Boolean).sort().pop(),
+      firstPlayedAt: [x.firstPlayedAt, y.firstPlayedAt]
+        .filter(Boolean)
+        .sort()[0],
+      lastPlayedAt: [x.lastPlayedAt, y.lastPlayedAt]
+        .filter(Boolean)
+        .sort()
+        .pop(),
       best: { ...x.best, ...y.best },
     };
   }
@@ -120,15 +128,24 @@ export function mergeDocs(a: ProgressDoc, b: ProgressDoc): ProgressDoc {
   for (const id of exIds) {
     const x = a.exercises[id];
     const y = b.exercises[id];
-    if (!x) { exercises[id] = y!; continue; }
-    if (!y) { exercises[id] = x; continue; }
+    if (!x) {
+      exercises[id] = y!;
+      continue;
+    }
+    if (!y) {
+      exercises[id] = x;
+      continue;
+    }
     exercises[id] = {
       attempts: x.attempts + y.attempts,
       itemsSeen: x.itemsSeen + y.itemsSeen,
       itemsCorrect: x.itemsCorrect + y.itemsCorrect,
       bestAccuracy: Math.max(x.bestAccuracy, y.bestAccuracy),
       bestStreak: Math.max(x.bestStreak, y.bestStreak),
-      lastPlayedAt: [x.lastPlayedAt, y.lastPlayedAt].filter(Boolean).sort().pop(),
+      lastPlayedAt: [x.lastPlayedAt, y.lastPlayedAt]
+        .filter(Boolean)
+        .sort()
+        .pop(),
       mastery: Math.max(x.mastery, y.mastery),
     };
   }
@@ -144,7 +161,10 @@ export function mergeDocs(a: ProgressDoc, b: ProgressDoc): ProgressDoc {
         .filter(Boolean)
         .sort()
         .pop() ?? null,
-    freezesRemaining: Math.max(a.streak.freezesRemaining, b.streak.freezesRemaining),
+    freezesRemaining: Math.max(
+      a.streak.freezesRemaining,
+      b.streak.freezesRemaining,
+    ),
     freezeRefilledMonth:
       [a.streak.freezeRefilledMonth, b.streak.freezeRefilledMonth]
         .filter(Boolean)
@@ -173,7 +193,10 @@ export function mergeDocs(a: ProgressDoc, b: ProgressDoc): ProgressDoc {
       totalNotes: a.stats.totalNotes + b.stats.totalNotes,
       totalCorrect: a.stats.totalCorrect + b.stats.totalCorrect,
       songsPlayed: Math.max(a.stats.songsPlayed, b.stats.songsPlayed),
-      exerciseSessions: Math.max(a.stats.exerciseSessions, b.stats.exerciseSessions),
+      exerciseSessions: Math.max(
+        a.stats.exerciseSessions,
+        b.stats.exerciseSessions,
+      ),
     },
   };
 }

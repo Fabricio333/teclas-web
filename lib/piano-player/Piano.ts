@@ -104,9 +104,7 @@ export class Piano {
     this.releaseAll();
   }
 
-  public addOnNoteListener(
-    listener: (midi: number, release: boolean) => void,
-  ) {
+  public addOnNoteListener(listener: (midi: number, release: boolean) => void) {
     this.onNoteListeners.push(listener);
   }
 

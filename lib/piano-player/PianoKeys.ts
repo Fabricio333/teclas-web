@@ -56,9 +56,7 @@ export class PianoKeys {
     // natural keys
     let absoluteIndex = 0;
     for (let i = 0; i < numNaturalKeys; i++) {
-      if (
-        this.piano.isNoteDown(this.piano.getMidiAtIndex(absoluteIndex))
-      ) {
+      if (this.piano.isNoteDown(this.piano.getMidiAtIndex(absoluteIndex))) {
         ctx.fillStyle = highlight;
       } else {
         ctx.fillStyle = '#fff';
@@ -96,9 +94,7 @@ export class PianoKeys {
     // sharp keys
     absoluteIndex = 1;
     for (let i = 0; i < numNaturalKeys; i++) {
-      if (
-        this.piano.isNoteDown(this.piano.getMidiAtIndex(absoluteIndex))
-      ) {
+      if (this.piano.isNoteDown(this.piano.getMidiAtIndex(absoluteIndex))) {
         ctx.fillStyle = highlightDark;
       } else {
         ctx.fillStyle = '#000';
@@ -122,8 +118,7 @@ export class PianoKeys {
     ctx.lineWidth = pianoKeyOutlineWidth;
     ctx.strokeStyle = '#000';
     for (let i = 0; i < numNaturalKeys; i++) {
-      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1)
-        continue;
+      if (i % 7 === 2 || i % 7 === 6 || i === numNaturalKeys - 1) continue;
       ctx.strokeRect(
         naturalKeyWidth * i + naturalKeyWidth - sharpKeyWidth / 2,
         0,

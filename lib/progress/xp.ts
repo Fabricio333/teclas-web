@@ -65,13 +65,17 @@ export function xpForRun(opts: {
   isFirstEverCompletion: boolean;
 }): number {
   const base = 5 + Math.min(55, opts.notesCorrect);
-  const accuracyBonus = opts.accuracy >= 0.98 ? 20 : opts.accuracy >= 0.9 ? 10 : 0;
+  const accuracyBonus =
+    opts.accuracy >= 0.98 ? 20 : opts.accuracy >= 0.9 ? 10 : 0;
   const total = base + accuracyBonus;
   return opts.isFirstEverCompletion ? total * 2 : total;
 }
 
 /** 0..3 stars for a run. Stars are per hand; a song shows the min across hands. */
-export function starsForRun(accuracy: number, completed: boolean): 0 | 1 | 2 | 3 {
+export function starsForRun(
+  accuracy: number,
+  completed: boolean,
+): 0 | 1 | 2 | 3 {
   if (!completed) return 0;
   if (accuracy >= 0.98) return 3;
   if (accuracy >= 0.9) return 2;

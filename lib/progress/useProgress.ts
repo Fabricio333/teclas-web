@@ -40,7 +40,11 @@ export function useProgress<T>(select: (doc: ProgressDoc) => T): T {
  * until this flips, otherwise the static HTML and the hydrated tree disagree.
  */
 export function useHydrated(): boolean {
-  return useSyncExternalStore(subscribeHydration, getHydrated, getHydratedServer);
+  return useSyncExternalStore(
+    subscribeHydration,
+    getHydrated,
+    getHydratedServer,
+  );
 }
 
 /** Mount once, near the root, to load storage. */

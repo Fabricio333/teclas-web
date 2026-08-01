@@ -6,8 +6,17 @@ import {
   type SessionRecord,
 } from './schema';
 import { dayKey, registerPractice } from './streak';
-import { levelForXp, starsForRun, xpForRun, XP_FIRST_SESSION_OF_DAY } from './xp';
-import { newlyEarned, type Achievement, type AchievementContext } from './achievements';
+import {
+  levelForXp,
+  starsForRun,
+  xpForRun,
+  XP_FIRST_SESSION_OF_DAY,
+} from './xp';
+import {
+  newlyEarned,
+  type Achievement,
+  type AchievementContext,
+} from './achievements';
 import { update } from './store';
 
 export interface RunReport {
@@ -52,13 +61,16 @@ function uid(): string {
 export function recordRun(report: RunReport, now = new Date()): void {
   update((doc) => {
     const accuracy =
-      report.notesAttempted > 0 ? report.notesCorrect / report.notesAttempted : 0;
+      report.notesAttempted > 0
+        ? report.notesCorrect / report.notesAttempted
+        : 0;
     const today = dayKey(now, doc.profile.timeZone);
 
     const previousSession = doc.sessions[doc.sessions.length - 1];
     const daysSinceLastSession = previousSession
       ? Math.round(
-          (now.getTime() - new Date(previousSession.startedAt).getTime()) / 86_400_000,
+          (now.getTime() - new Date(previousSession.startedAt).getTime()) /
+            86_400_000,
         )
       : null;
 
@@ -163,7 +175,9 @@ export function recordRun(report: RunReport, now = new Date()): void {
         totalNotes: doc.stats.totalNotes + report.notesAttempted,
         totalCorrect: doc.stats.totalCorrect + report.notesCorrect,
         songsPlayed:
-          report.kind === 'song' ? doc.stats.songsPlayed + 1 : doc.stats.songsPlayed,
+          report.kind === 'song'
+            ? doc.stats.songsPlayed + 1
+            : doc.stats.songsPlayed,
         exerciseSessions:
           report.kind === 'exercise'
             ? doc.stats.exerciseSessions + 1
@@ -191,7 +205,10 @@ export function recordRun(report: RunReport, now = new Date()): void {
           achievements: {
             ...next.rewards.achievements,
             ...Object.fromEntries(
-              earned.map((x) => [x.id, { unlockedAt: now.toISOString(), seen: false }]),
+              earned.map((x) => [
+                x.id,
+                { unlockedAt: now.toISOString(), seen: false },
+              ]),
             ),
           },
         },
@@ -201,7 +218,8 @@ export function recordRun(report: RunReport, now = new Date()): void {
 
     lastOutcome = {
       xpEarned,
-      leveledUpTo: next.rewards.level > previousLevel ? next.rewards.level : null,
+      leveledUpTo:
+        next.rewards.level > previousLevel ? next.rewards.level : null,
       stars,
       achievements: earned,
     };

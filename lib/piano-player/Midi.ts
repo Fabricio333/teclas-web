@@ -11,9 +11,7 @@ export class Midi {
 
   public async readBlob(blob: Blob) {
     const midiFileParser = new MidiParser();
-    const tmp = midiFileParser.parse(
-      new Uint8Array(await blob.arrayBuffer()),
-    );
+    const tmp = midiFileParser.parse(new Uint8Array(await blob.arrayBuffer()));
     if (!tmp) return;
     this.read(tmp as MIDI);
   }
@@ -21,9 +19,7 @@ export class Midi {
   public async readFile(file: File) {
     if (file === undefined) return;
     const midiFileParser = new MidiParser();
-    const tmp = midiFileParser.parse(
-      new Uint8Array(await file.arrayBuffer()),
-    );
+    const tmp = midiFileParser.parse(new Uint8Array(await file.arrayBuffer()));
     if (!tmp) return;
     this.read(tmp as MIDI);
   }
@@ -81,7 +77,9 @@ export type Note = {
 };
 
 function parseMidi(
-  tracks: Array<{ event: { data: number[]; deltaTime: number; type: number }[] }>,
+  tracks: Array<{
+    event: { data: number[]; deltaTime: number; type: number }[];
+  }>,
 ): Note[] {
   const track = tracks[0];
   const res: Note[] = [];
@@ -137,13 +135,9 @@ export function midiNumberToNote(
 ) {
   let notes;
   if (!useFlats) {
-    notes = [
-      'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B',
-    ];
+    notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   } else {
-    notes = [
-      'C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B',
-    ];
+    notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
   }
 
   const octave = Math.floor(midi / 12) - 1;

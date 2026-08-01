@@ -26,8 +26,10 @@ const _atob = function (string: string) {
   string += '=='.slice(2 - (string.length & 3));
   let bitmap,
     result = '';
-  let r1, r2, i = 0;
-  for (; i < string.length; ) {
+  let r1,
+    r2,
+    i = 0;
+  for (; i < string.length;) {
     bitmap =
       (b64.indexOf(string.charAt(i++)) << 18) |
       (b64.indexOf(string.charAt(i++)) << 12) |
@@ -172,8 +174,7 @@ export class MidiParser {
       midi.timeDivision = [];
       midi.timeDivision[0] = timeDivisionByte1 - 128;
       midi.timeDivision[1] = timeDivisionByte2;
-    } else
-      midi.timeDivision = timeDivisionByte1 * 256 + timeDivisionByte2;
+    } else midi.timeDivision = timeDivisionByte1 * 256 + timeDivisionByte2;
 
     for (let t = 1; t <= midi.tracks; t++) {
       midi.track[t - 1] = { event: [] };
@@ -267,10 +268,7 @@ export class MidiParser {
           statusByte = statusByte.toString(16).split('');
           if (!statusByte[1]) statusByte.unshift('0');
           midi.track[t - 1].event[e - 1].type = parseInt(statusByte[0], 16);
-          midi.track[t - 1].event[e - 1].channel = parseInt(
-            statusByte[1],
-            16,
-          );
+          midi.track[t - 1].event[e - 1].channel = parseInt(statusByte[1], 16);
           switch (midi.track[t - 1].event[e - 1].type) {
             case 0xf: {
               if (this.customInterpreter !== null) {

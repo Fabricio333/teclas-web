@@ -48,7 +48,10 @@ function shed(doc: ProgressDoc, tier: number): ProgressDoc {
     return {
       ...doc,
       sessions: doc.sessions.slice(-20),
-      streak: { ...doc.streak, practiceDays: doc.streak.practiceDays.slice(-120) },
+      streak: {
+        ...doc.streak,
+        practiceDays: doc.streak.practiceDays.slice(-120),
+      },
     };
   }
   return {
@@ -66,7 +69,10 @@ export function safeWrite(doc: ProgressDoc): WriteResult {
   }
   for (let tier = 0; tier <= 2; tier++) {
     try {
-      s.setItem(STORAGE_KEY, JSON.stringify(tier === 0 ? doc : shed(doc, tier)));
+      s.setItem(
+        STORAGE_KEY,
+        JSON.stringify(tier === 0 ? doc : shed(doc, tier)),
+      );
       degraded = false;
       return 'ok';
     } catch (e) {

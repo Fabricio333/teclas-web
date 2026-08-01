@@ -1,4 +1,8 @@
-import { PROGRESS_SCHEMA_VERSION, createEmptyProgress, type ProgressDoc } from './schema';
+import {
+  PROGRESS_SCHEMA_VERSION,
+  createEmptyProgress,
+  type ProgressDoc,
+} from './schema';
 import { normalizeProgress } from './normalize';
 
 /**

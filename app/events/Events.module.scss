@@ -24,7 +24,9 @@
   border: 1px solid rgba($blue-color, 0.16);
   border-radius: 0.75rem;
   background-color: $background-color;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 8px 20px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
 .eventTitle {

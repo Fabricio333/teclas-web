@@ -4,11 +4,7 @@ export const CALIBRATION_SCHEMA_VERSION = 1;
 export const CALIBRATION_KEY = 'teclas.calibration.v1';
 
 export type SourceKind =
-  | 'acoustic-piano'
-  | 'digital-piano'
-  | 'voice'
-  | 'whistle'
-  | 'other';
+  'acoustic-piano' | 'digital-piano' | 'voice' | 'whistle' | 'other';
 
 export const SOURCE_LABELS: Record<SourceKind, string> = {
   'acoustic-piano': 'Piano acústico',
@@ -105,6 +101,8 @@ export function settingsFromProfile(
   return overrides;
 }
 
-export function isProfileUsable(p: CalibrationProfile | null): p is CalibrationProfile {
+export function isProfileUsable(
+  p: CalibrationProfile | null,
+): p is CalibrationProfile {
   return p !== null && p.notes.length > 0;
 }

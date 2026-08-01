@@ -172,13 +172,7 @@ function sampleKeyboardCurve(t: number): CurveSample {
     localT,
   );
   const tangent = normalize(
-    cubicDerivative(
-      segment.start,
-      segment.c1,
-      segment.c2,
-      segment.end,
-      localT,
-    ),
+    cubicDerivative(segment.start, segment.c1, segment.c2, segment.end, localT),
   );
   const normal = normalize(point(-tangent.y, tangent.x));
   const top = subtract(center, scale(normal, KEY_HALF_WIDTH));
@@ -254,10 +248,7 @@ function blackKeyPath(centerT: number, keyStep: number) {
     start.top,
     scale(start.normal, BLACK_KEY_BACK_OVERHANG),
   );
-  const topEnd = subtract(
-    end.top,
-    scale(end.normal, BLACK_KEY_BACK_OVERHANG),
-  );
+  const topEnd = subtract(end.top, scale(end.normal, BLACK_KEY_BACK_OVERHANG));
   const bottomEnd = add(
     center.top,
     add(
@@ -448,7 +439,8 @@ function starPoints(
     const radius = index % 2 === 0 ? outerRadius : innerRadius;
     points.push(
       `${(centerX + Math.cos(angle) * radius).toFixed(1)},${(
-        centerY + Math.sin(angle) * radius
+        centerY +
+        Math.sin(angle) * radius
       ).toFixed(1)}`,
     );
   }
@@ -879,7 +871,13 @@ export default function AnimatedTeclasHero({
             <stop offset="58%" stopColor="#202126" />
             <stop offset="100%" stopColor="#0d0e12" />
           </linearGradient>
-          <filter id="teclasSoftShadow" x="-20%" y="-20%" width="140%" height="150%">
+          <filter
+            id="teclasSoftShadow"
+            x="-20%"
+            y="-20%"
+            width="140%"
+            height="150%"
+          >
             <feDropShadow
               dx="0"
               dy="7"

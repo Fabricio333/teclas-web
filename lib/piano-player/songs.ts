@@ -1,11 +1,5 @@
 export type SongSectionKind =
-  | 'intro'
-  | 'main'
-  | 'verse'
-  | 'chorus'
-  | 'bridge'
-  | 'ending'
-  | 'practice';
+  'intro' | 'main' | 'verse' | 'chorus' | 'bridge' | 'ending' | 'practice';
 
 export interface SongSection {
   id: string;
@@ -183,7 +177,10 @@ export function getSectionForPosition(
   position: number,
 ): SongSection {
   const sections = getSongSections(level);
-  const boundedPosition = Math.max(0, Math.min(position, level.notes.length - 1));
+  const boundedPosition = Math.max(
+    0,
+    Math.min(position, level.notes.length - 1),
+  );
 
   return (
     sections.find(

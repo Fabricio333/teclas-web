@@ -59,7 +59,12 @@ interface Band {
 function findSystemBands(
   root: HTMLElement,
   containerTop: number,
-  measured: readonly { top: number; bottom: number; center: number; height: number }[],
+  measured: readonly {
+    top: number;
+    bottom: number;
+    center: number;
+    height: number;
+  }[],
 ): Band[] {
   const wrappers = root.querySelectorAll<SVGGraphicsElement>(
     '.abcjs-staff-wrapper',

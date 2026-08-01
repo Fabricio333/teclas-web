@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
-import styles from "./WhatsAppButton.module.scss";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import styles from './WhatsAppButton.module.scss';
 
 export default function WhatsAppButton() {
   return (

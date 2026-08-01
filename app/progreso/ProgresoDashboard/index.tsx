@@ -28,9 +28,10 @@ function formatMinutes(ms: number): string {
 export default function ProgresoDashboard() {
   const hydrated = useHydrated();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [status, setStatus] = useState<{ tone: 'ok' | 'error'; text: string } | null>(
-    null,
-  );
+  const [status, setStatus] = useState<{
+    tone: 'ok' | 'error';
+    text: string;
+  } | null>(null);
 
   const xp = useProgress((d) => d.rewards.xp);
   const streak = useProgress((d) => d.streak);
@@ -42,16 +43,16 @@ export default function ProgresoDashboard() {
   // The prerendered HTML has no access to localStorage, so the first client
   // render must match it exactly. Render a placeholder until hydration lands.
   if (!hydrated) {
-    return (
-      <div className={styles.skeleton} aria-hidden="true" />
-    );
+    return <div className={styles.skeleton} aria-hidden="true" />;
   }
 
   const info = levelInfo(xp);
   const today = dayKey(new Date(), timeZone);
   const streakLive = isStreakActive(streak, today);
   const accuracy =
-    stats.totalNotes > 0 ? Math.round((stats.totalCorrect / stats.totalNotes) * 100) : 0;
+    stats.totalNotes > 0
+      ? Math.round((stats.totalCorrect / stats.totalNotes) * 100)
+      : 0;
   const totalStars = Object.values(songs).reduce((sum, s) => sum + s.stars, 0);
 
   const handleExport = () => {
@@ -63,13 +64,19 @@ export default function ProgresoDashboard() {
     const text = await file.text();
     const result = parseBackup(text);
     if (!result.ok) {
-      setStatus({ tone: 'error', text: `No pudimos leer el archivo: ${result.detail}` });
+      setStatus({
+        tone: 'error',
+        text: `No pudimos leer el archivo: ${result.detail}`,
+      });
       return;
     }
     applyImport(result.doc, getSnapshot(), mode);
     setStatus({
       tone: 'ok',
-      text: mode === 'merge' ? 'Combinamos tu progreso.' : 'Restauramos tu progreso.',
+      text:
+        mode === 'merge'
+          ? 'Combinamos tu progreso.'
+          : 'Restauramos tu progreso.',
     });
   };
 
@@ -144,7 +151,8 @@ export default function ProgresoDashboard() {
       <section className={styles.panel}>
         <h2 className={styles.panelTitle}>Logros</h2>
         <p className={styles.panelText}>
-          Conseguiste {Object.keys(achievements).length} de {ACHIEVEMENTS.length}.
+          Conseguiste {Object.keys(achievements).length} de{' '}
+          {ACHIEVEMENTS.length}.
         </p>
         <div className={styles.badgeGrid}>
           {ACHIEVEMENTS.map((a) => {
@@ -231,7 +239,8 @@ export default function ProgresoDashboard() {
           onChange={(e) => {
             const file = e.target.files?.[0];
             const mode =
-              (e.target.getAttribute('data-mode') as 'replace' | 'merge') ?? 'merge';
+              (e.target.getAttribute('data-mode') as 'replace' | 'merge') ??
+              'merge';
             if (file) void handleImportFile(file, mode);
             e.target.value = '';
           }}
