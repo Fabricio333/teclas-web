@@ -3,13 +3,39 @@
 
 .resourcesSection {
   @extend .sectionPadding;
+  position: relative;
+  overflow: hidden;
   min-height: calc(100dvh - var(--header-height));
+  // Same wash as the landing page's white sections, so arriving here from
+  // "Aprender" does not feel like landing on a different site.
+  background-image:
+    radial-gradient(
+      52rem 28rem at 12% -4%,
+      rgb(var(--green-rgb) / 0.18),
+      transparent 62%
+    ),
+    radial-gradient(
+      44rem 26rem at 88% 6%,
+      rgb(var(--blue-rgb) / 0.12),
+      transparent 60%
+    );
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3.5rem;
 }
 
 .title {
   font-size: $font-size-xl;
-  margin-bottom: 0.5rem;
-  text-align: center;
+  margin-bottom: 0.75rem;
+  color: var(--blue-900);
+  line-height: var(--leading-tight);
 
   @media (min-width: $tablet-breakpoint) {
     font-size: $font-size-xxl;
@@ -17,10 +43,10 @@
 }
 
 .subtitle {
-  text-align: center;
-  color: $light-text-color;
+  color: var(--neutral-600);
   max-width: 600px;
-  margin: 0 auto 3rem;
+  margin: 1.5rem auto 0;
+  line-height: var(--leading-normal);
 }
 
 .grid {
@@ -38,48 +64,165 @@
 }
 
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
+  // The grid item is the <Reveal> wrapper, so the card has to fill it for four
+  // cards of unequal text length to line up.
+  height: 100%;
+  overflow: hidden;
   text-align: center;
   padding: 2.5rem 2rem;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, $blue-color, $sky-color);
+  border-radius: var(--radius-xl);
   color: #fff;
   text-decoration: none;
+  isolation: isolate;
+  box-shadow: var(--shadow-md);
   transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform var(--dur-base) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-out);
+
+  // Specular sweep, same gesture as the buttons on the landing page.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px 0;
+    z-index: 1;
+    width: 45%;
+    background: linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0) 0%,
+      rgb(255 255 255 / 0.28) 50%,
+      rgb(255 255 255 / 0) 100%
+    );
+    transform: translateX(-140%) skewX(-18deg);
+    pointer-events: none;
+  }
+
+  > * {
+    position: relative;
+    z-index: 2;
+  }
 
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+  }
 
-    .arrow {
-      transform: translateX(4px);
-    }
+  &:hover::after {
+    animation: sheen var(--dur-celebrate) var(--ease-out);
+  }
+
+  &:hover .cardIconWrapper {
+    transform: scale(1.08) rotate(-5deg);
+    background-color: rgb(255 255 255 / 0.22);
+  }
+
+  &:hover .arrow {
+    transform: translateX(6px);
   }
 }
 
+// Every fill is taken from the dark end of its ramp. The previous single
+// gradient — $blue-color to $sky-color — put white text on #60c9de at the
+// bottom-right corner of all four cards, which is 1.9:1.
+.cardBlue {
+  background-image: linear-gradient(
+    135deg,
+    var(--blue-500),
+    var(--blue-700)
+  ); // 6.3:1 -> 11:1
+}
+
+.cardPurple {
+  background-image: linear-gradient(
+    135deg,
+    var(--purple-500),
+    var(--purple-700)
+  ); // 5.2:1 -> 9:1
+}
+
+.cardSky {
+  background-image: linear-gradient(
+    135deg,
+    var(--sky-800),
+    var(--blue-700)
+  ); // 6.0:1 -> 11:1
+}
+
+.cardGreen {
+  background-image: linear-gradient(
+    135deg,
+    var(--green-800),
+    var(--green-900)
+  ); // 7.0:1 -> 10.6:1
+}
+
+.cardIconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgb(255 255 255 / 0.28);
+  background-color: rgb(255 255 255 / 0.12);
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    background-color var(--dur-base) var(--ease-out);
+}
+
 .cardIcon {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.85rem;
 }
 
 .cardTitle {
   font-size: $font-size-lg;
   margin-bottom: 0.75rem;
+  text-wrap: balance;
 }
 
 .cardDescription {
   font-size: $font-size-md;
-  opacity: 0.9;
+  // Was 0.9 on top of a gradient that already failed contrast. On these darker
+  // fills 0.92 still clears AA comfortably.
+  opacity: 0.92;
   margin-bottom: 1.5rem;
-  line-height: 1.6;
+  line-height: var(--leading-normal);
 }
 
 .arrow {
+  // Pushes the arrow to the bottom of the card regardless of description
+  // length, so all four line up.
+  margin-top: auto;
   font-size: 1.25rem;
-  transition: transform 0.3s ease;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+
+  .card:hover::after {
+    animation: none;
+  }
+
+  .card:hover .cardIconWrapper,
+  .card:hover .arrow {
+    transform: none;
+  }
+}
+
+// Local copy — a module's `animation-name` is always rewritten to a hashed
+// ident by css-loader, so it cannot reach the keyframe in globals.scss.
+@keyframes sheen {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(220%) skewX(-18deg);
+  }
 }

@@ -9,7 +9,7 @@ import styles from './Inscription.module.scss';
 export default function Inscription() {
   return (
     <section id="inscription" className={styles.inscriptionSection}>
-      <AmbientNotes density="dense" tone="light" />
+      <AmbientNotes density="dense" tone="plum" />
       <div className={`container ${styles.inner}`}>
         <Reveal>
           <h2 className={styles.sectionTitle}>
@@ -21,7 +21,7 @@ export default function Inscription() {
           </p>
           <Link
             href="https://docs.google.com/forms/d/e/1FAIpQLSenT_EzJoCuNDeRN6dQN38OdeJ8RBybZvxOkESqKQBYAObf8w/viewform?usp=dialog"
-            className={`btnLight ${styles.cta}`}
+            className={`btnPlum ${styles.cta}`}
           >
             Inscribirme ahora
           </Link>

@@ -113,7 +113,7 @@ function NavLinks({ onNavigate }: NavLinksProps) {
       </Link>
       <Link
         href={inscriptionFormUrl}
-        className={styles.navLink}
+        className={`${styles.navLink} ${styles.navCta}`}
         onClick={onNavigate}
       >
         Inscripción

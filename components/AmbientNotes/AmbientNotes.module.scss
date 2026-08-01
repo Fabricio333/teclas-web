@@ -49,13 +49,19 @@
   color: var(--blue-500);
 }
 
+// For the light lilac band, where white glyphs would fade out entirely at the
+// pale end of the gradient and read as a rendering fault.
+.tonePlum {
+  color: var(--purple-500);
+}
+
 // Outer wrapper owns the horizontal wander only, so it can compose with the
 // inner element's vertical bob — two `transform` animations cannot share an
 // element.
 .drifter {
   position: absolute;
   display: block;
-  animation-name: teclas-drift-x;
+  animation-name: drift-x;
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
   animation-iteration-count: infinite;
   will-change: transform;
@@ -63,7 +69,7 @@
 
 .floater {
   display: block;
-  animation-name: teclas-float-y, teclas-twinkle;
+  animation-name: float-y, twinkle;
   animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
   animation-iteration-count: infinite;
   will-change: transform, opacity;
@@ -75,6 +81,49 @@
     // Softens the edges just enough that the glyphs read as atmosphere rather
     // than as clip art sitting on top of the section.
     filter: blur(0.15px);
+  }
+}
+
+// Declared here, not in globals.scss — see the note at the top of that file.
+// A module's `animation-name` is always rewritten to a hashed ident, so a
+// keyframe it references has to be local to the module.
+
+// Vertical bob. The scale step is what stops it reading as a rigid object
+// sliding up and down — the glyph swells slightly at the top of its arc, as
+// though drifting nearer.
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--spin-from, 0deg)) scale(1);
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 0), var(--drift-y, -26px), 0)
+      rotate(var(--spin-to, 6deg)) scale(var(--pulse, 1.08));
+  }
+}
+
+// Horizontal wander, on its own element so it can compose with the bob, and on
+// a period deliberately out of step with it so the two never resync into a
+// single obvious loop.
+@keyframes drift-x {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(var(--wander, 34px), 0, 0);
+  }
+}
+
+// Opacity flicker — what makes the shapes read as volatile rather than as a
+// static decal that happens to move.
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--twinkle-min, 0.16);
+  }
+  50% {
+    opacity: var(--twinkle-max, 0.5);
   }
 }
 

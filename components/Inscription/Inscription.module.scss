@@ -1,37 +1,34 @@
 @use '../../styles/variables' as *;
 @use '../../styles/components' as *;
 
-// The final call to action was a white section with a pale lilac button — the
-// lowest-contrast element on a page whose whole job is to get someone to click
-// it. It is now a deep band in the brand green, which is also what makes the
-// white floating glyphs legible here.
+// The final call to action started as a white section with a pale lilac button
+// — the lowest-contrast element on a page whose whole job is to get that click.
+// It briefly became a deep green band, which read as heavy and olive next to
+// the light green footer. It is now a light lilac-to-pink wash: still clearly
+// a band, but bright, and it uses hues the brand already carries in the hero
+// artwork rather than a fourth shade of green.
 .inscriptionSection {
   @extend .sectionPadding;
   position: relative;
   overflow: hidden;
   text-align: center;
-  // A vertical fall rather than the token's diagonal: on a band this wide the
-  // diagonal left one corner noticeably olive.
-  background-image: linear-gradient(
-    178deg,
-    var(--green-700),
-    var(--green-900) 62%,
-    var(--green-800)
-  );
-  color: #ffffff;
+  background-image: var(--grad-lilac);
+  // Deep plum rather than white: on a light surface white text would be
+  // unreadable. --purple-900 is 6.2:1 at the darkest end of the wash.
+  color: var(--purple-900);
   box-shadow:
-    0 -4px 12px rgba(0, 0, 0, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.3);
+    0 -4px 12px rgba(0, 0, 0, 0.18),
+    0 4px 12px rgba(0, 0, 0, 0.18);
 
-  // A soft green spotlight behind the button, so the eye lands on the CTA
-  // before it lands anywhere else in the band.
+  // A soft pink bloom behind the button, so the eye lands on the CTA before it
+  // lands anywhere else in the band.
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     background-image: radial-gradient(
-      42rem 22rem at 50% 78%,
-      rgb(var(--green-rgb) / 0.28),
+      42rem 22rem at 50% 76%,
+      rgb(var(--pink-rgb) / 0.22),
       transparent 68%
     );
     pointer-events: none;
@@ -42,6 +39,7 @@
     margin-bottom: 1.5rem;
     line-height: var(--leading-snug);
     text-wrap: balance;
+    color: var(--purple-900);
 
     @media (min-width: $mobile-breakpoint) {
       font-size: 2.5rem;
@@ -50,9 +48,9 @@
 
   .sectionSubtitle {
     font-size: 1.25rem;
-    // rgb(255 255 255 / .88) on --green-900 is 8.4:1. The previous #4b5563 was
-    // chosen for a white background and would be unreadable here.
-    color: rgb(255 255 255 / 0.88);
+    // --purple-800, not --purple-700: at 20px regular this needs 4.5:1, and
+    // --purple-700 on the darkest end of the wash is only 4.1:1.
+    color: var(--purple-800);
     margin-bottom: 2.5rem;
     max-width: 40rem;
     margin-inline: auto;

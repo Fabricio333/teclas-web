@@ -97,51 +97,19 @@ button {
 }
 
 // ---------------------------------------------------------------------------
-// Shared keyframes.
+// Keyframes used by this stylesheet only.
 //
-// These live in globals.scss rather than in a partial because every `.module
-// .scss` that `@use`s a partial re-emits the partial's contents into its own
-// stylesheet — the duplication already documented in _tokens.scss. Declared
-// here they are emitted exactly once, and modules can still reference them by
-// name: css-loader only rewrites an `animation-name` when a matching local
-// `@keyframes` exists in the *same* file, so these pass through untouched.
+// IMPORTANT: a `.module.scss` cannot reference a keyframe declared here.
+// css-loader rewrites *every* `animation-name` inside a CSS module to a hashed
+// ident whether or not a matching local `@keyframes` exists, so a module saying
+// `animation: teclas-sheen` compiles to `animation: Foo_teclas-sheen__a1b2c3`
+// and silently matches nothing. That is not a hypothetical: it is exactly how
+// the ambient background layer shipped without any motion at all.
+//
+// Sass also rejects `:global(name)` in a value position, so the workaround
+// there is unavailable. Any keyframe a module needs must be declared in that
+// module. They are a few lines each; correctness is worth the repetition.
 // ---------------------------------------------------------------------------
-
-// Vertical bob for the floating background SVGs.
-@keyframes teclas-float-y {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) rotate(var(--spin-from, 0deg));
-  }
-  50% {
-    transform: translate3d(var(--drift-x, 0), var(--drift-y, -26px), 0)
-      rotate(var(--spin-to, 6deg));
-  }
-}
-
-// Slow horizontal wander, offset from the bob so the two never resync into a
-// single obvious loop.
-@keyframes teclas-drift-x {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(var(--wander, 34px), 0, 0);
-  }
-}
-
-// Opacity flicker — what makes the shapes read as volatile rather than as a
-// static decal that happens to move.
-@keyframes teclas-twinkle {
-  0%,
-  100% {
-    opacity: var(--twinkle-min, 0.16);
-  }
-  50% {
-    opacity: var(--twinkle-max, 0.5);
-  }
-}
 
 // One-shot specular sweep across a button on hover.
 @keyframes teclas-sheen {
@@ -153,22 +121,6 @@ button {
   }
 }
 
-// Expanding halo behind feature icons.
-@keyframes teclas-pulse-ring {
-  0% {
-    transform: scale(0.82);
-    opacity: 0.55;
-  }
-  70% {
-    transform: scale(1.35);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1.35);
-    opacity: 0;
-  }
-}
-
 // Pans a wide gradient across its own box (background-position, so it is
 // compositor-cheap and never triggers layout).
 @keyframes teclas-gradient-pan {
@@ -177,31 +129,6 @@ button {
   }
   to {
     background-position: 200% 50%;
-  }
-}
-
-// Entrance used by the hero, which animates on load rather than on scroll.
-@keyframes teclas-rise-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 22px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-// The hero's scroll cue.
-@keyframes teclas-nudge-down {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.55;
-  }
-  50% {
-    transform: translateY(8px);
-    opacity: 1;
   }
 }
 
@@ -319,6 +246,24 @@ button {
     box-shadow:
       0 10px 22px rgb(var(--green-deep-rgb) / 0.42),
       0 26px 56px rgb(var(--green-deep-rgb) / 0.34);
+  }
+}
+
+// For light lilac/pink surfaces, where a white button would disappear and the
+// green one would fight the background. White on --purple-500 is 5.3:1.
+.btnPlum {
+  @extend .btn;
+  background-image: var(--grad-plum);
+  color: var(--neutral-0);
+  border-color: rgb(255 255 255 / 0.28);
+  box-shadow:
+    0 6px 16px rgb(var(--purple-rgb) / 0.38),
+    0 18px 40px rgb(var(--purple-rgb) / 0.26);
+
+  &:hover {
+    box-shadow:
+      0 10px 22px rgb(var(--purple-rgb) / 0.46),
+      0 26px 56px rgb(var(--purple-rgb) / 0.32);
   }
 }
 

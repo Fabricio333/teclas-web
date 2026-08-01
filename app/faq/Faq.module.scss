@@ -3,17 +3,36 @@
 
 .faqSection {
   @extend .sectionPadding;
+  position: relative;
+  overflow: hidden;
   // dvh, not vh: iOS Safari's collapsing URL bar makes 100vh taller than the
   // visible viewport. Subtracting the header stops the page scrolling when its
   // content already fits, now that `main` carries the offset.
   min-height: calc(100dvh - var(--header-height));
-  background:
-    linear-gradient(
-      180deg,
-      rgba($sky-color, 0.16),
-      rgba($background-color, 0) 24rem
+  // Was a single flat sky wash down the top 24rem. Now the same layered brand
+  // washes the landing page uses, so the FAQ reads as part of the same site.
+  background-color: var(--neutral-0);
+  background-image:
+    radial-gradient(
+      54rem 30rem at 50% -8%,
+      rgb(var(--green-rgb) / 0.2),
+      transparent 62%
     ),
-    $background-color;
+    radial-gradient(
+      40rem 26rem at 4% 32%,
+      rgb(var(--sky-rgb) / 0.14),
+      transparent 58%
+    ),
+    radial-gradient(
+      40rem 26rem at 96% 72%,
+      rgb(var(--blue-rgb) / 0.12),
+      transparent 58%
+    );
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
 .faqContent {
@@ -21,8 +40,13 @@
   margin: 0 auto;
 }
 
+.faqHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
 .faqTitle {
-  color: $dark-text-color;
+  color: var(--blue-900);
   font-size: 1.75rem;
   line-height: 1.1;
   margin: 0 auto 0.75rem;
@@ -39,11 +63,11 @@
 }
 
 .faqIntro {
-  color: $light-text-color;
+  color: var(--neutral-600);
   font-size: 1.0625rem;
   line-height: 1.7;
   max-width: 36rem;
-  margin: 0 auto 2.5rem;
+  margin: 1.5rem auto 0;
   text-align: center;
 }
 
@@ -53,6 +77,12 @@
   list-style: none;
   margin: 0;
   padding: 0;
+
+  // The <li> is now the <Reveal> wrapper, so the marker has to be cleared here
+  // rather than on a class inside FAQItem.
+  > li {
+    list-style: none;
+  }
 }
 
 @media (max-width: 500px) {

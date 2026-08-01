@@ -7,6 +7,8 @@ import {
   faSliders,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
+import AmbientNotes from '@/components/AmbientNotes';
+import Reveal from '@/components/Reveal';
 import { resourcesMetadata } from '@/lib/metadata';
 import styles from './Resources.module.scss';
 
@@ -15,61 +17,104 @@ export const metadata = resourcesMetadata;
 export default function ResourcesPage() {
   return (
     <section className={styles.resourcesSection}>
-      <div className="container">
-        <h1 className={styles.title}>Recursos</h1>
-        <p className={styles.subtitle}>
-          Explorá nuestras herramientas interactivas para mejorar tu práctica de
-          piano.
-        </p>
+      <AmbientNotes density="sparse" tone="brand" />
+      <div className={`container ${styles.inner}`}>
+        <Reveal className={styles.header}>
+          <h1 className={styles.title}>Recursos</h1>
+          <div className="decorativeLine"></div>
+          <p className={styles.subtitle}>
+            Explorá nuestras herramientas interactivas para mejorar tu práctica
+            de piano.
+          </p>
+        </Reveal>
 
         <div className={styles.grid}>
-          <Link href="/piano-player" className={styles.card}>
-            <FontAwesomeIcon icon={faMusic} className={styles.cardIcon} />
-            <h2 className={styles.cardTitle}>Aprende Piano</h2>
-            <p className={styles.cardDescription}>
-              Seguí las notas en la partitura y tocá canciones clásicas usando
-              tu teclado o haciendo clic en las teclas del piano.
-            </p>
-            <span className={styles.arrow}>
-              <FontAwesomeIcon icon={faArrowRight} />
-            </span>
-          </Link>
+          {/*
+            <Reveal> wraps each card rather than being it: both define their own
+            `transition`, and whichever stylesheet loaded last would win the
+            whole shorthand.
+          */}
+          <Reveal delay={0}>
+            <Link
+              href="/piano-player"
+              className={`${styles.card} ${styles.cardBlue}`}
+            >
+              <span className={styles.cardIconWrapper}>
+                <FontAwesomeIcon icon={faMusic} className={styles.cardIcon} />
+              </span>
+              <h2 className={styles.cardTitle}>Aprende Piano</h2>
+              <p className={styles.cardDescription}>
+                Seguí las notas en la partitura y tocá canciones clásicas usando
+                tu teclado o haciendo clic en las teclas del piano.
+              </p>
+              <span className={styles.arrow}>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
+            </Link>
+          </Reveal>
 
-          <Link href="/ear-training" className={styles.card}>
-            <FontAwesomeIcon icon={faHeadphones} className={styles.cardIcon} />
-            <h2 className={styles.cardTitle}>Entrenamiento Auditivo</h2>
-            <p className={styles.cardDescription}>
-              Escuchá las notas y encontralas en el piano. Mejorá tu oído
-              musical con ejercicios interactivos.
-            </p>
-            <span className={styles.arrow}>
-              <FontAwesomeIcon icon={faArrowRight} />
-            </span>
-          </Link>
+          <Reveal delay={90}>
+            <Link
+              href="/ear-training"
+              className={`${styles.card} ${styles.cardPurple}`}
+            >
+              <span className={styles.cardIconWrapper}>
+                <FontAwesomeIcon
+                  icon={faHeadphones}
+                  className={styles.cardIcon}
+                />
+              </span>
+              <h2 className={styles.cardTitle}>Entrenamiento Auditivo</h2>
+              <p className={styles.cardDescription}>
+                Escuchá las notas y encontralas en el piano. Mejorá tu oído
+                musical con ejercicios interactivos.
+              </p>
+              <span className={styles.arrow}>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
+            </Link>
+          </Reveal>
 
-          <Link href="/calibracion" className={styles.card}>
-            <FontAwesomeIcon icon={faSliders} className={styles.cardIcon} />
-            <h2 className={styles.cardTitle}>Calibrar el micrófono</h2>
-            <p className={styles.cardDescription}>
-              Escuchamos tu piano un ratito para reconocer mejor las notas que
-              tocás, aunque esté un poco desafinado.
-            </p>
-            <span className={styles.arrow}>
-              <FontAwesomeIcon icon={faArrowRight} />
-            </span>
-          </Link>
+          <Reveal delay={180}>
+            <Link
+              href="/calibracion"
+              className={`${styles.card} ${styles.cardSky}`}
+            >
+              <span className={styles.cardIconWrapper}>
+                <FontAwesomeIcon icon={faSliders} className={styles.cardIcon} />
+              </span>
+              <h2 className={styles.cardTitle}>Calibrar el micrófono</h2>
+              <p className={styles.cardDescription}>
+                Escuchamos tu piano un ratito para reconocer mejor las notas que
+                tocás, aunque esté un poco desafinado.
+              </p>
+              <span className={styles.arrow}>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
+            </Link>
+          </Reveal>
 
-          <Link href="/progreso" className={styles.card}>
-            <FontAwesomeIcon icon={faChartLine} className={styles.cardIcon} />
-            <h2 className={styles.cardTitle}>Mi progreso</h2>
-            <p className={styles.cardDescription}>
-              Mirá tu nivel, tu racha de práctica y los logros que fuiste
-              consiguiendo. Se guarda en este navegador.
-            </p>
-            <span className={styles.arrow}>
-              <FontAwesomeIcon icon={faArrowRight} />
-            </span>
-          </Link>
+          <Reveal delay={270}>
+            <Link
+              href="/progreso"
+              className={`${styles.card} ${styles.cardGreen}`}
+            >
+              <span className={styles.cardIconWrapper}>
+                <FontAwesomeIcon
+                  icon={faChartLine}
+                  className={styles.cardIcon}
+                />
+              </span>
+              <h2 className={styles.cardTitle}>Mi progreso</h2>
+              <p className={styles.cardDescription}>
+                Mirá tu nivel, tu racha de práctica y los logros que fuiste
+                consiguiendo. Se guarda en este navegador.
+              </p>
+              <span className={styles.arrow}>
+                <FontAwesomeIcon icon={faArrowRight} />
+              </span>
+            </Link>
+          </Reveal>
         </div>
       </div>
     </section>

@@ -137,7 +137,7 @@
   .heroSubtitle,
   .heroCta,
   .scrollCue {
-    animation: teclas-rise-in 700ms var(--ease-out) both;
+    animation: rise-in 700ms var(--ease-out) both;
   }
 
   .heroTitle {
@@ -161,7 +161,7 @@
   }
 
   .scrollCue svg {
-    animation: teclas-nudge-down 2.2s var(--ease-in-out) infinite;
+    animation: nudge-down 2.2s var(--ease-in-out) infinite;
     animation-delay: 1.4s;
   }
 
@@ -184,5 +184,29 @@
       18% 12%,
       82% 88%,
       38% 62%;
+  }
+}
+
+// Local copies — see the note at the top of globals.scss.
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
   }
 }

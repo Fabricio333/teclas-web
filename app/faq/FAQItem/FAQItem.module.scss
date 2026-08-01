@@ -1,37 +1,86 @@
 @use '../../../styles/variables' as *;
 
-.faqItem {
-  list-style: none;
-}
-
 .faqDisclosure {
-  background: #fff;
-  border: 1px solid rgba($blue-color, 0.18);
-  border-radius: 0.5rem;
-  box-shadow: 0 0.75rem 2rem rgba($dark-text-color, 0.08);
+  position: relative;
   overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-spring);
+
+  // Brand-green rail down the leading edge, wiped in from the top when the
+  // question opens. This is what marks the open row at a glance — previously
+  // only a 0.48-alpha border colour did, which is nearly invisible.
+  &::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 4px;
+    background-image: linear-gradient(
+      180deg,
+      var(--green-300),
+      var(--green-600)
+    );
+    transform: scaleY(0);
+    transform-origin: top center;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgb(var(--green-rgb) / 0.42);
+    box-shadow: var(--shadow-md);
+  }
 
   &[open] {
-    border-color: rgba($green-color, 0.48);
-    box-shadow: 0 1rem 2.5rem rgba($dark-text-color, 0.12);
+    border-color: rgb(var(--green-rgb) / 0.5);
+    box-shadow: var(--shadow-md);
+
+    &::before {
+      transform: scaleY(1);
+    }
+
+    .iconWrapper {
+      background-color: rgb(var(--green-rgb) / 0.18);
+      border-color: rgb(var(--green-rgb) / 0.42);
+    }
 
     .icon {
-      color: $green-color;
+      color: var(--green-700);
       transform: rotate(90deg);
     }
 
     .title {
-      color: $dark-text-color;
+      color: var(--blue-900);
     }
+
+    // Answers fade up as they expand. <details> height itself is not
+    // animatable without JS, so the content does the work instead.
+    .description {
+      animation: answer-in var(--dur-slow) var(--ease-out) both;
+    }
+  }
+}
+
+@keyframes answer-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
 .faqHeader {
   display: grid;
-  grid-template-columns: 1.25rem 1fr;
+  grid-template-columns: 2rem 1fr;
   gap: 0.875rem;
   align-items: center;
   width: 100%;
@@ -49,12 +98,26 @@
   }
 }
 
+.iconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgb(var(--blue-rgb) / 0.2);
+  background-color: rgb(var(--blue-rgb) / 0.08);
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out);
+}
+
 .icon {
   color: $blue-color;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-spring);
 }
 
 .title {
@@ -65,14 +128,15 @@
   margin: 0;
   min-width: 0;
   overflow-wrap: anywhere;
+  transition: color var(--dur-base) var(--ease-out);
 }
 
 .description {
-  border-top: 1px solid rgba($blue-color, 0.12);
-  color: $light-text-color;
+  border-top: 1px solid var(--color-border);
+  color: var(--neutral-600);
   font-size: 1rem;
   line-height: 1.7;
-  padding: 0 1.25rem 1.25rem 3.375rem;
+  padding: 1rem 1.25rem 1.25rem 4.125rem;
 
   p {
     max-width: 42rem;
@@ -90,20 +154,25 @@
   }
 
   .description {
-    padding: 0 1.5rem 1.35rem 3.625rem;
+    padding: 1rem 1.5rem 1.35rem 4.375rem;
   }
 }
 
 @media (max-width: $mobile-breakpoint) {
   .faqHeader {
-    grid-template-columns: 1rem 1fr;
+    grid-template-columns: 1.75rem 1fr;
     gap: 0.75rem;
     padding: 1rem;
   }
 
+  .iconWrapper {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
   .description {
     font-size: 0.9375rem;
-    padding: 0 1rem 1rem 2.75rem;
+    padding: 0.875rem 1rem 1rem 3.5rem;
   }
 }
 
@@ -117,5 +186,15 @@
     p {
       max-width: 18rem;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faqDisclosure:hover {
+    transform: none;
+  }
+
+  .faqDisclosure[open] .description {
+    animation: none;
   }
 }

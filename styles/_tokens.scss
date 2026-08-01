@@ -90,12 +90,22 @@
   --yellow-300: #ffe37a;
   --yellow-500: #ffd122;
   --yellow-600: #e0b400;
+  --purple-100: #e7d8f2;
   --purple-300: #c3a5d6;
   --purple-500: #8658a7;
   --purple-700: #5f3d78;
+  // Dark ends of the ramp, so a *light* lilac surface can carry text: --purple-700
+  // on --purple-300 is only 4.1:1, --purple-800 is 5.2:1 and --purple-900 6.2:1.
+  --purple-800: #4a2e60;
+  --purple-900: #3d2450;
+  --pink-100: #fbd9ea;
+  --pink-300: #f6a8cd;
   --sky-300: #a3e2ef;
   --sky-500: #60c9de;
   --sky-700: #2f9cb4;
+  // Same reason as --green-800/900: the sky ramp tops out at 3.3:1 against
+  // white, so a card that fills with it cannot carry a white label.
+  --sky-800: #226e81;
   --pink-500: #ed3b95;
   --orange-500: #f3862c;
   --neutral-0: #fff;
@@ -205,6 +215,14 @@
     var(--green-900)
   );
   --grad-blue: linear-gradient(160deg, var(--blue-500), var(--blue-700));
+  // Light lilac -> pink. Used by the closing CTA band and the header pills.
+  --grad-lilac: linear-gradient(
+    160deg,
+    var(--purple-100),
+    var(--pink-100) 46%,
+    var(--purple-300)
+  );
+  --grad-plum: linear-gradient(135deg, var(--purple-500), var(--purple-700));
   --grad-line: linear-gradient(
     90deg,
     var(--green-500),

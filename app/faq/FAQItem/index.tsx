@@ -8,18 +8,20 @@ interface Props {
   defaultOpen?: boolean;
 }
 
+// Renders the <details> only. The <li> this used to wrap itself in now comes
+// from the <Reveal as="li"> in the page — a <li> inside a <li> is invalid.
 export default function FAQItem({ content, defaultOpen = false }: Props) {
   return (
-    <li className={styles.faqItem}>
-      <details className={styles.faqDisclosure} open={defaultOpen}>
-        <summary className={styles.faqHeader}>
+    <details className={styles.faqDisclosure} open={defaultOpen}>
+      <summary className={styles.faqHeader}>
+        <span className={styles.iconWrapper}>
           <FontAwesomeIcon icon={faChevronRight} className={styles.icon} />
-          <h2 className={styles.title}>{content.title}</h2>
-        </summary>
-        <div className={styles.description}>
-          <p>{content.description}</p>
-        </div>
-      </details>
-    </li>
+        </span>
+        <h2 className={styles.title}>{content.title}</h2>
+      </summary>
+      <div className={styles.description}>
+        <p>{content.description}</p>
+      </div>
+    </details>
   );
 }

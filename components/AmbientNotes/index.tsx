@@ -1,6 +1,6 @@
 import styles from './AmbientNotes.module.scss';
 
-type AmbientTone = 'light' | 'brand' | 'ink';
+type AmbientTone = 'light' | 'brand' | 'ink' | 'plum';
 
 type AmbientDensity = 'sparse' | 'normal' | 'dense';
 
@@ -257,6 +257,11 @@ const SHAPES: Shape[] = [
   },
 ];
 
+// Tuning knobs for the whole field, applied to every shape's authored values.
+// < 1 shortens the periods (faster), > 1 lengthens the travel (bigger arcs).
+const MOTION_SPEEDUP = 0.55;
+const MOTION_TRAVEL = 1.9;
+
 const DENSITY_COUNT: Record<AmbientDensity, number> = {
   sparse: 8,
   normal: 13,
@@ -267,6 +272,7 @@ const TONE_CLASS: Record<AmbientTone, string> = {
   light: styles.toneLight,
   brand: styles.toneBrand,
   ink: styles.toneInk,
+  plum: styles.tonePlum,
 };
 
 function ShapeGlyph({ kind }: { kind: ShapeKind }) {
@@ -413,7 +419,7 @@ export default function AmbientNotes({
         .filter(Boolean)
         .join(' ')}
     >
-      {shapes.map((shape) => (
+      {shapes.map((shape, index) => (
         <span
           className={styles.drifter}
           key={`${shape.kind}-${shape.x}-${shape.y}`}
@@ -421,21 +427,32 @@ export default function AmbientNotes({
             left: `${shape.x}%`,
             top: `${shape.y}%`,
             width: `${shape.size}rem`,
-            animationDuration: `${shape.wander}s`,
+            // The authored periods (13-30s) and amplitudes (16-34px) were slow
+            // enough that the field read as a static decal. Everything below is
+            // scaled off the same authored values so the relative variation
+            // between glyphs is preserved — only the overall liveliness moved.
+            animationDuration: `${(shape.wander * MOTION_SPEEDUP).toFixed(1)}s`,
             animationDelay: `${shape.delay}s`,
-            ['--wander' as string]: `${shape.amplitude}px`,
+            ['--wander' as string]: `${Math.round(shape.amplitude * MOTION_TRAVEL)}px`,
           }}
         >
           <span
             className={styles.floater}
             style={{
-              animationDuration: `${shape.float}s, ${shape.float * 0.7}s`,
+              animationDuration: `${(shape.float * MOTION_SPEEDUP).toFixed(1)}s, ${(
+                shape.float *
+                MOTION_SPEEDUP *
+                0.7
+              ).toFixed(1)}s`,
               animationDelay: `${shape.delay}s, ${shape.delay * 0.6}s`,
               ['--spin-from' as string]: `${shape.rotate}deg`,
-              ['--spin-to' as string]: `${shape.rotate + 10}deg`,
-              ['--drift-y' as string]: `-${18 + shape.size * 4}px`,
+              // Alternating direction: every glyph tilting the same way looked
+              // like the whole layer was on one hinge.
+              ['--spin-to' as string]: `${shape.rotate + (index % 2 === 0 ? 24 : -21)}deg`,
+              ['--drift-y' as string]: `-${Math.round(30 + shape.size * 9)}px`,
+              ['--pulse' as string]: index % 3 === 0 ? '1.14' : '1.08',
               ['--twinkle-max' as string]: `${shape.opacity}`,
-              ['--twinkle-min' as string]: `${(shape.opacity * 0.35).toFixed(3)}`,
+              ['--twinkle-min' as string]: `${(shape.opacity * 0.3).toFixed(3)}`,
             }}
           >
             <ShapeGlyph kind={shape.kind} />
