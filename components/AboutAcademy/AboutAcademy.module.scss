@@ -126,18 +126,21 @@
   }
 }
 
-.accentOrange {
+// Blue / purple / pink, in the same order as the three cards on /resources, so
+// the landing page and the practice menu read as one product. Was orange, which
+// matched nothing else.
+.accentPink {
   .iconWrapper {
-    background-color: rgba($orange-color, 0.1);
-    border-color: rgba($orange-color, 0.24);
+    background-color: rgb(var(--pink-rgb) / 0.12);
+    border-color: rgb(var(--pink-rgb) / 0.28);
   }
 
   .iconWrapper::after {
-    border-color: rgba($orange-color, 0.5);
+    border-color: rgb(var(--pink-rgb) / 0.5);
   }
 
   .icon {
-    color: $orange-color;
+    color: var(--pink-700);
   }
 }
 

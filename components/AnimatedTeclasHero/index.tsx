@@ -6,6 +6,7 @@ import type {
 } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
+import { midiToSolfege } from '@/lib/piano-player/noteNames';
 import styles from './AnimatedTeclasHero.module.scss';
 
 type AnimatedTeclasHeroProps = {
@@ -942,11 +943,7 @@ export default function AnimatedTeclasHero({
           {allKeys.map((key) => (
             <path
               key={`${key.id}-hit`}
-              aria-label={`Tocar ${midiNumberToNote(
-                key.midi,
-                undefined,
-                true,
-              )}`}
+              aria-label={`Tocar ${midiToSolfege(key.midi, { octave: true })}`}
               className={styles.keyHitTarget}
               d={key.path}
               onKeyDown={(event) => handleKeyDown(event, key)}

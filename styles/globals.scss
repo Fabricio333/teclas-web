@@ -202,12 +202,14 @@ button {
   }
 }
 
-// Primary CTA. Brand green fill with near-black green text — 5.7:1, versus the
-// 1.9:1 that white-on-green would have given.
+// Primary CTA. Brand green fill with near-black ink — 8.7:1, versus the 1.9:1
+// that white-on-green would have given.
 .btnPrimary {
   @extend .btn;
   background-image: var(--grad-green);
-  color: var(--green-900);
+  // --neutral-900 rather than --green-900: 8.7:1 instead of 5.7:1, and a
+  // neutral ink reads as text where the tinted one read as a smudge.
+  color: var(--neutral-900);
   border-color: rgb(var(--green-deep-rgb) / 0.22);
   box-shadow: var(--shadow-green);
 

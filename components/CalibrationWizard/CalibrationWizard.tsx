@@ -13,8 +13,11 @@ import {
   faVolumeHigh,
 } from '@fortawesome/free-solid-svg-icons';
 import styles from './CalibrationWizard.module.scss';
+// `midiNumberToNote` stays for the sample filename; everything the student
+// reads goes through `midiToSolfege`.
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
-import { MIDI_TO_SOLFEGE } from '@/lib/ear-training/levels';
+import { midiToSolfege } from '@/lib/piano-player/noteNames';
+import CalibrationKeyboard from './CalibrationKeyboard';
 import {
   captureNote,
   fitTuning,
@@ -52,10 +55,13 @@ const VOCAL_PLANS: Record<'quick' | 'full', number[]> = {
   full: [53, 57, 60, 64, 67, 72],
 };
 
+/**
+ * Was `Do4 (C4)` — and only for the 48-71 range, since it came from the ear
+ * training map; anything outside it fell back to the bare English name. Now
+ * fixed-do across the whole keyboard, with no English in parentheses.
+ */
 function noteLabel(midi: number): string {
-  const solfege = MIDI_TO_SOLFEGE[midi];
-  const letter = midiNumberToNote(midi, undefined, true);
-  return solfege ? `${solfege} (${letter})` : letter;
+  return midiToSolfege(midi, { octave: true });
 }
 
 export default function CalibrationWizard() {
@@ -462,6 +468,21 @@ export default function CalibrationWizard() {
           </p>
 
           <div className={styles.bigNote}>{noteLabel(targets[noteIndex])}</div>
+
+          {/* Naming the note assumes the student can already find it on the
+              instrument, which is exactly the assumption a beginners' school
+              should not make — and getting the octave wrong here silently
+              poisons the tuning fit. */}
+          <CalibrationKeyboard
+            // `noteIndex`, not `captured.length`: a skipped note advances the
+            // index without adding a capture, and the two would drift apart.
+            completedCount={noteIndex}
+            // `mismatch.midi` is what was actually heard — `captureNote`
+            // labels the take with the detected note, not the requested one.
+            detectedMidi={mismatch?.midi ?? null}
+            targetMidi={targets[noteIndex]}
+            targets={targets}
+          />
 
           <div
             className={`${styles.meter} ${captureState === 'recording' ? styles.meterRecording : ''}`}

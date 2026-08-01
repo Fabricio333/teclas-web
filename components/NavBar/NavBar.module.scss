@@ -27,7 +27,10 @@
   );
   border-bottom: 1px solid rgb(var(--green-deep-rgb) / 0.22);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  color: var(--green-900);
+  // --neutral-900, not --green-900: dark-green-on-green was 5.7:1 and read
+  // as muddy rather than as ink. The neutral is 8.7:1 on --green-500 and
+  // 11:1 on the lighter --green-300 at the top of the gradient.
+  color: var(--neutral-900);
 }
 
 .visible {
@@ -154,7 +157,7 @@
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   text-decoration: none;
-  color: var(--green-900);
+  color: var(--neutral-900);
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif;

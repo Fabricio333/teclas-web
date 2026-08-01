@@ -51,7 +51,7 @@ export default function AboutAcademy() {
           </Reveal>
 
           <Reveal delay={220}>
-            <div className={`${styles.featureCard} ${styles.accentOrange}`}>
+            <div className={`${styles.featureCard} ${styles.accentPink}`}>
               <div className={styles.iconWrapper}>
                 <FontAwesomeIcon icon={faUsers} className={styles.icon} />
               </div>

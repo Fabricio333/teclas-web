@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './PianoPlayer.module.scss';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
+// Students read fixed-do. `midiNumberToNote` stays for the Tone.js sampler,
+// whose note strings double as sample filenames.
+import {
+  letterNameToSolfege,
+  midiToSolfege,
+} from '@/lib/piano-player/noteNames';
 import {
   LEVELS,
   DEBUG_LEVEL,
@@ -242,7 +248,7 @@ export default function PianoPlayer() {
   }, [showPiano]);
   const micNoteLabel =
     currentMicMidi !== null
-      ? midiNumberToNote(currentMicMidi, undefined, true)
+      ? midiToSolfege(currentMicMidi, { octave: true })
       : null;
 
   const toggleMic = useCallback(async () => {
@@ -453,8 +459,8 @@ export default function PianoPlayer() {
 
         const windowEl = document.getElementById('qwerty-window');
         if (windowEl) {
-          const low = midiNumberToNote(60 + midiOffset, undefined, true);
-          const high = midiNumberToNote(71 + midiOffset, undefined, true);
+          const low = midiToSolfege(60 + midiOffset, { octave: true });
+          const high = midiToSolfege(71 + midiOffset, { octave: true });
           windowEl.textContent = `${low}-${high}`;
         }
       };
@@ -1742,7 +1748,9 @@ export default function PianoPlayer() {
         {WHITE_KEYS.map((k) => (
           <span key={k.midi} className={styles.kbdGroup}>
             <kbd className={styles.kbd}>{k.label}</kbd>
-            <span className={styles.kbdNote}>{k.note}</span>
+            <span className={styles.kbdNote}>
+              {letterNameToSolfege(k.note)}
+            </span>
             <span className={styles.kbdFinger}>{k.finger}</span>
           </span>
         ))}
