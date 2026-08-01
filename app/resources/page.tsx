@@ -85,7 +85,7 @@ export default function ResourcesPage() {
           <Reveal delay={180}>
             <Link
               href="/progreso"
-              className={`${styles.card} ${styles.cardGreen}`}
+              className={`${styles.card} ${styles.cardPink}`}
             >
               <span className={styles.cardIconWrapper}>
                 <FontAwesomeIcon

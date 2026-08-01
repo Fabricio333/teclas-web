@@ -100,6 +100,10 @@
   --purple-900: #3d2450;
   --pink-100: #fbd9ea;
   --pink-300: #f6a8cd;
+  // Dark ends of the pink ramp. --pink-500 is only 3.7:1 against white, so a
+  // card filled with it cannot carry a white label; --pink-700 is 6.1:1.
+  --pink-700: #b8206e;
+  --pink-900: #7d1149;
   --sky-300: #a3e2ef;
   --sky-500: #60c9de;
   --sky-700: #2f9cb4;

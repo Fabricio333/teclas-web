@@ -143,12 +143,16 @@
   ); // 5.2:1 -> 9:1
 }
 
-.cardGreen {
+// Was the deep green ramp, which read as olive next to the green header and
+// duplicated the colour the closing CTA band used to have. Pink instead: it is
+// the furthest hue from the other two cards, and it matches the lilac/pink the
+// header pills and the CTA band now use.
+.cardPink {
   background-image: linear-gradient(
     135deg,
-    var(--green-800),
-    var(--green-900)
-  ); // 7.0:1 -> 10.6:1
+    var(--pink-700),
+    var(--pink-900)
+  ); // 6.1:1 -> 10.2:1
 }
 
 .cardIconWrapper {
