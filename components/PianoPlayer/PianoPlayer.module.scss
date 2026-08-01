@@ -408,6 +408,7 @@
   right: 0.5rem;
   z-index: var(--z-raised);
   display: flex;
+  align-items: center;
   gap: 0.35rem;
 }
 
@@ -431,28 +432,84 @@
   }
 }
 
-// Fullscreen: the wrapper becomes the whole display, so let the score use it.
-.sheetWrapper:fullscreen {
+// Toggled-on state for the toolbar buttons (fullscreen, show piano).
+.sheetToolBtnOn {
+  background: $primary-color;
+  border-color: $primary-color;
+  color: #fff;
+}
+
+// Fullscreen now applies to the whole play area, so the keyboard comes with the
+// score. The previous rule put `.sheetWrapper` fullscreen on its own, which is
+// why going fullscreen used to take the piano away.
+//
+// Note the JS counterpart: `fullscreenLines()` measures the piano and sizes the
+// sheet viewport to what is left, so the two panes share the display rather
+// than the score claiming all of it.
+.playArea:fullscreen {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2.5rem;
-  border-radius: 0;
+  gap: 0.75rem;
+  height: 100dvh;
+  padding: 1.5rem clamp(1rem, 4vw, 3rem);
   background: #fffef9;
+  overflow: hidden;
 
-  .sheetViewport {
-    height: auto !important;
-    max-height: 100dvh;
-    overflow-y: auto;
+  .sheetWrapper {
+    flex: 0 1 auto;
+    margin-bottom: 0;
+    border-radius: var(--radius-md);
+    // The score should use the width it is given; 700px is a page constraint,
+    // not a fullscreen one.
+    .sheet {
+      max-width: min(1400px, 100%);
+    }
   }
 
-  .sheetScroller {
-    // Following a single line is pointless when the whole piece is visible.
-    transform: none !important;
+  .pianoWrapper {
+    flex: 0 0 auto;
+    margin-top: 0;
   }
+}
 
-  .sheet {
-    max-width: min(1400px, 100%);
+// The visible on-state. An `aria-pressed` icon button is correct for a screen
+// reader but tells a sighted student nothing about why the layout changed.
+.fullscreenBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2rem;
+  padding: 0 0.7rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgb(var(--green-rgb) / 0.5);
+  background: rgb(var(--green-rgb) / 0.14);
+  color: var(--green-900);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.fullscreenDot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--green-600);
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: live-dot 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes live-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.82);
   }
 }
 
@@ -1113,24 +1170,59 @@
   display: inline-flex;
 }
 
+// Was a bare 36px gear. It sat next to two labelled controls and read as
+// decoration, so nobody found the piano toggle or the line count behind it.
 .settingsBtn {
-  width: 2.25rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   height: 2.25rem;
-  display: grid;
-  place-items: center;
+  padding: 0 0.9rem;
   border-radius: 999px;
   border: 1px solid #cbd5e1;
   background: #fff;
   color: $primary-color;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
     color var(--dur-fast) var(--ease-out);
 
   &:hover {
     background: $primary-color;
+    border-color: $primary-color;
     color: #fff;
   }
+}
+
+.settingsBtnOpen {
+  background: $primary-color;
+  border-color: $primary-color;
+  color: #fff;
+}
+
+.settingsBtnLabel {
+  // The icon alone is enough once the panel is a familiar place.
+  @media (max-width: $mobile-breakpoint) {
+    display: none;
+  }
+}
+
+// Unread-style marker for "you said you play an acoustic piano but never
+// calibrated". This is the only pointer to the wizard now that the toolbar
+// link is gone.
+.settingsDot {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.15rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--color-warning);
+  box-shadow: 0 0 0 2px #fff;
 }
 
 .settingsPanel {
@@ -1138,13 +1230,43 @@
   top: calc(100% + 0.5rem);
   right: 0;
   z-index: var(--z-popover);
-  width: 15rem;
+  width: 17.5rem;
   padding: 0.85rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   border: 1px solid #e2e8f0;
   background: #fff;
   box-shadow: var(--shadow-lg);
   text-align: left;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: settings-in var(--dur-fast) var(--ease-out) both;
+  }
+}
+
+@keyframes settings-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.settingsGroupTitle {
+  margin: 0.35rem 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $light-text-color;
+
+  &:not(:first-child) {
+    margin-top: 0.9rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid #f1f5f9;
+  }
 }
 
 .settingsRow {
@@ -1155,6 +1277,9 @@
   padding: 0.4rem 0;
   font-size: 0.9rem;
   color: $text-color;
+}
+
+label.settingsRow {
   cursor: pointer;
 }
 
@@ -1162,34 +1287,92 @@
   flex: 1;
 }
 
-.settingsSelect {
-  padding: 0.2rem 0.4rem;
-  border-radius: var(--radius-xs);
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  font-size: 0.85rem;
-}
-
-.settingsHint {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #f1f5f9;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  color: $light-text-color;
-}
-
-.calibrateBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
+// Native checkbox restyled as a switch — keeps the semantics, the keyboard
+// behaviour and the focus ring for free.
+.settingsToggle {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 2.35rem;
+  height: 1.35rem;
   border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #e2e8f0;
+  cursor: pointer;
+  position: relative;
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0.15rem;
+    width: 1rem;
+    height: 1rem;
+    margin-top: -0.5rem;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(15 23 42 / 0.3);
+    transition: transform var(--dur-fast) var(--ease-spring);
+  }
+
+  &:checked {
+    background: $success-color;
+    border-color: $success-color;
+  }
+
+  &:checked::after {
+    transform: translateX(0.95rem);
+  }
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+.segment {
+  min-width: 1.7rem;
+  padding: 0.25rem 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: $light-text-color;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+.segmentOn {
+  background: $primary-color;
+  color: #fff;
+
+  &:hover {
+    color: #fff;
+  }
+}
+
+.settingsAction {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: var(--radius-md);
   border: 1px solid $primary-color;
-  color: $primary-color;
   background: #fff;
+  color: $primary-color;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition:
     background-color var(--dur-fast) var(--ease-out),
@@ -1201,19 +1384,7 @@
   }
 }
 
-.calibrateLabel {
-  @media (max-width: $mobile-breakpoint) {
-    display: none;
-  }
-}
-
-// Hiding the keyboard is what makes the sheet usable on a laptop. Kept in the
-// DOM (the engine binds handlers to it) but removed from layout and a11y.
-.pianoHidden {
-  display: none;
-}
-
-.calibrateBtnDone {
+.settingsActionDone {
   border-color: $success-color;
   color: $success-color;
 
@@ -1221,4 +1392,17 @@
     background: $success-color;
     color: #fff;
   }
+}
+
+.settingsHint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: $light-text-color;
+}
+
+// Hiding the keyboard is what makes the sheet usable on a laptop. Kept in the
+// DOM (the engine binds handlers to it) but removed from layout and a11y.
+.pianoHidden {
+  display: none;
 }

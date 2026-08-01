@@ -13,6 +13,9 @@ import {
   getSectionForPosition,
   getSongPatterns,
   getSongSections,
+  isGrandStaff,
+  notesForHand,
+  voiceClassForHand,
 } from '@/lib/piano-player/songs';
 import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
@@ -35,6 +38,7 @@ import {
   faCompress,
   faGear,
   faSliders,
+  faKeyboard,
 } from '@fortawesome/free-solid-svg-icons';
 
 const ALL_LEVELS =
@@ -146,7 +150,12 @@ export default function PianoPlayer() {
   const [midiStatus, setMidiStatus] = useState<MidiStatus>('checking');
 
   // ---------- Sheet view ----------
-  const sheetWrapperRef = useRef<HTMLDivElement>(null);
+  // The fullscreen target is the whole play area, not just the sheet. When it
+  // was the sheet wrapper the keyboard was left behind on the normal page, so
+  // going fullscreen silently took the piano away from anyone playing with the
+  // mouse or the QWERTY keys.
+  const stageRef = useRef<HTMLDivElement>(null);
+  const pianoWrapperRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -154,11 +163,17 @@ export default function PianoPlayer() {
   const settings = useSettings();
   const showPiano = settings.showPiano;
   const sheetLines = settings.sheetLines;
+  const practiceHand = settings.practiceHand;
+
+  // The student said they play an acoustic piano but never finished calibrating
+  // — worth a nudge on the settings button, since that is now the only route to
+  // the calibration wizard.
+  const needsCalibration = settings.inputMode === 'acoustic' && !isCalibrated;
 
   useOnClickOutside(settingsRef, () => setSettingsOpen(false));
 
   const toggleFullscreen = useCallback(async () => {
-    const el = sheetWrapperRef.current;
+    const el = stageRef.current;
     if (!el) return;
     try {
       if (document.fullscreenElement) {
@@ -177,7 +192,7 @@ export default function PianoPlayer() {
   // it: Escape and the browser's own UI can exit without going through us.
   useEffect(() => {
     const onChange = () => {
-      const active = document.fullscreenElement === sheetWrapperRef.current;
+      const active = document.fullscreenElement === stageRef.current;
       setIsFullscreen(active);
       // Re-measure: the SVG is responsive, so its systems move when the box
       // resizes, and the follow offset would otherwise point at stale
@@ -194,6 +209,32 @@ export default function PianoPlayer() {
     sheetLinesRef.current = sheetLines;
     window.dispatchEvent(new Event('teclas:relayout-sheet'));
   }, [sheetLines]);
+
+  // Which level is loaded, mirrored out of the engine. The engine owns this
+  // (the "next song" button changes levels without the <select> ever firing a
+  // change event), so it announces switches and React follows.
+  const [levelIndex, setLevelIndex] = useState(0);
+  const levelIsGrandStaff = isGrandStaff(
+    ALL_LEVELS[levelIndex] ?? ALL_LEVELS[0],
+  );
+
+  useEffect(() => {
+    const onLevelChanged = (event: Event) => {
+      const index = (event as CustomEvent<{ index: number }>).detail?.index;
+      if (typeof index === 'number') setLevelIndex(index);
+    };
+    window.addEventListener('teclas:level-changed', onLevelChanged);
+    return () =>
+      window.removeEventListener('teclas:level-changed', onLevelChanged);
+  }, []);
+
+  const practiceHandRef = useRef(practiceHand);
+  useEffect(() => {
+    practiceHandRef.current = practiceHand;
+    // Switching hands changes which voice drives the game, so the level has to
+    // be reloaded from the top rather than continuing mid-sequence.
+    window.dispatchEvent(new Event('teclas:hand-changed'));
+  }, [practiceHand]);
 
   useEffect(() => {
     // Hiding the piano changes the sheet's available height.
@@ -365,7 +406,7 @@ export default function PianoPlayer() {
       // ---------- Level state ----------
       let currentLevelIndex = 0;
       let level = ALL_LEVELS[currentLevelIndex];
-      let SONG = level.notes;
+      let SONG = notesForHand(level, practiceHandRef.current);
       let sections = getSongSections(level);
       let patterns = getSongPatterns(level);
       let activePracticeSection: SongSection | null = null;
@@ -631,6 +672,42 @@ export default function PianoPlayer() {
        * any render, resize or fullscreen change, because abcjs is responsive
        * and every system moves when the box width changes.
        */
+      /**
+       * How many systems fit in fullscreen.
+       *
+       * Previously this was `max(configuredLines, systems.length)` — i.e. "show
+       * the whole score" — which assumed the sheet owned the entire display.
+       * Now that the piano is inside the fullscreen element too, the sheet only
+       * gets the height the keyboard leaves, otherwise it pushes the piano off
+       * the bottom of the screen.
+       */
+      const fullscreenLines = (layout: SheetLayout): number => {
+        const stage = document.getElementById('play-stage');
+        if (!stage || layout.pitch <= 0) return layout.systems.length;
+
+        const pianoBox = document
+          .getElementById('piano-wrapper')
+          ?.getBoundingClientRect();
+        const toolbarBox = document
+          .getElementById('sheet-toolbar')
+          ?.getBoundingClientRect();
+
+        // 64px covers the stage's own padding plus the progress bar.
+        const reserved =
+          (pianoBox?.height ?? 0) + (toolbarBox?.height ?? 0) + 64;
+        const available = stage.getBoundingClientRect().height - reserved;
+
+        const fits = Math.floor(
+          (available - layout.tallestSystem) / layout.pitch + 1,
+        );
+        return Math.max(1, Math.min(layout.systems.length, fits));
+      };
+
+      const visibleLines = (layout: SheetLayout): number =>
+        document.fullscreenElement !== null
+          ? fullscreenLines(layout)
+          : sheetLinesRef.current;
+
       const relayoutSheet = () => {
         const scroller = sheetScroller();
         const viewport = sheetViewport();
@@ -644,12 +721,7 @@ export default function PianoPlayer() {
         );
         if (sheetLayout.systems.length === 0) return;
 
-        // In fullscreen the box is as tall as the display, so show everything
-        // that fits instead of the configured line count.
-        const inFullscreen = document.fullscreenElement !== null;
-        const lines = inFullscreen
-          ? Math.max(sheetLinesRef.current, sheetLayout.systems.length)
-          : sheetLinesRef.current;
+        const lines = visibleLines(sheetLayout);
 
         viewport.style.height = `${Math.ceil(viewportHeightFor(sheetLayout, lines))}px`;
         followCurrentSystem(true);
@@ -661,10 +733,7 @@ export default function PianoPlayer() {
         if (!scroller || !sheetLayout || sheetLayout.systems.length === 0)
           return;
 
-        const inFullscreen = document.fullscreenElement !== null;
-        const lines = inFullscreen
-          ? Math.max(sheetLinesRef.current, sheetLayout.systems.length)
-          : sheetLinesRef.current;
+        const lines = visibleLines(sheetLayout);
 
         const system = systemIndexForNote(
           sheetLayout,
@@ -691,11 +760,28 @@ export default function PianoPlayer() {
         window.removeEventListener('resize', onRelayout);
       });
 
-      // Find note elements in the SVG rendered by abcjs
+      /**
+       * Note elements of the voice currently being practised.
+       *
+       * `add_classes: true` makes abcjs tag every note with `abcjs-vN` for its
+       * voice index, so on a grand staff the two hands are separable. Without
+       * that filter a two-voice score would interleave both hands into one
+       * array and `noteElems()[pos]` would highlight the wrong notehead —
+       * `SONG` only ever holds one hand's sequence.
+       *
+       * Single-voice scores are all tagged `abcjs-v0`, so the right-hand path
+       * is exactly what every existing song already gets.
+       */
       const noteElems = (): SVGElement[] => {
         const sheet = document.getElementById('sheet');
         if (!sheet) return [];
-        let els = sheet.querySelectorAll<SVGElement>('.abcjs-note');
+        const voice = voiceClassForHand(practiceHandRef.current);
+        let els = sheet.querySelectorAll<SVGElement>(`.abcjs-note.${voice}`);
+        if (els.length === 0) {
+          // Either the score is single-voice and we asked for the left hand, or
+          // this abcjs build tags notes differently. Fall back to every note.
+          els = sheet.querySelectorAll<SVGElement>('.abcjs-note');
+        }
         if (els.length === 0) {
           els = sheet.querySelectorAll<SVGElement>('[class*="abcjs-n"]');
         }
@@ -1146,7 +1232,10 @@ export default function PianoPlayer() {
       const switchLevel = (idx: number) => {
         currentLevelIndex = idx;
         level = ALL_LEVELS[idx];
-        SONG = level.notes;
+        SONG = notesForHand(level, practiceHandRef.current);
+        window.dispatchEvent(
+          new CustomEvent('teclas:level-changed', { detail: { index: idx } }),
+        );
         sections = getSongSections(level);
         patterns = getSongPatterns(level);
         activePracticeSection = null;
@@ -1172,6 +1261,15 @@ export default function PianoPlayer() {
           switchLevel(idx);
         });
       }
+
+      // Changing hands swaps which voice `SONG` and `noteElems()` refer to, so
+      // the run has to restart from the top — continuing mid-sequence would
+      // point the cursor at a position that means nothing in the other hand.
+      const onHandChanged = () => switchLevel(currentLevelIndex);
+      window.addEventListener('teclas:hand-changed', onHandChanged);
+      cleanupFns.push(() =>
+        window.removeEventListener('teclas:hand-changed', onHandChanged),
+      );
 
       const octaveDownBtn = document.getElementById('qwerty-octave-down');
       const octaveUpBtn = document.getElementById('qwerty-octave-up');
@@ -1307,70 +1405,123 @@ export default function PianoPlayer() {
             />
           </button>
 
-          <Link
-            href="/calibracion"
-            className={`${styles.calibrateBtn} ${isCalibrated ? styles.calibrateBtnDone : ''}`}
-            title={
-              isCalibrated
-                ? 'Tu micrófono está calibrado. Tocá para recalibrar.'
-                : 'Calibrar el micrófono con tu piano'
-            }
-          >
-            <FontAwesomeIcon icon={faSliders} />
-            <span className={styles.calibrateLabel}>
-              {isCalibrated ? 'Calibrado' : 'Calibrar'}
-            </span>
-          </Link>
-
+          {/* The standalone "Calibrar" link that used to sit here is gone.
+              Calibration is a once-in-a-while task, so it now lives inside
+              this panel and in the first-run prompt, instead of taking
+              permanent space in the toolbar. */}
           <div className={styles.settingsMenu} ref={settingsRef}>
             <button
               type="button"
-              className={styles.settingsBtn}
+              className={`${styles.settingsBtn} ${settingsOpen ? styles.settingsBtnOpen : ''}`}
               onClick={() => setSettingsOpen((v) => !v)}
               aria-expanded={settingsOpen}
               aria-haspopup="true"
-              aria-label="Ajustes de la vista"
-              title="Ajustes de la vista"
+              title="Ajustes de la práctica"
             >
               <FontAwesomeIcon icon={faGear} />
+              <span className={styles.settingsBtnLabel}>Ajustes</span>
+              {needsCalibration && (
+                <span
+                  className={styles.settingsDot}
+                  // Not decorative: this dot is the only signal that
+                  // calibration is still pending.
+                  role="status"
+                  aria-label="Falta calibrar el micrófono"
+                />
+              )}
             </button>
 
             {settingsOpen && (
-              <div className={styles.settingsPanel} role="menu">
+              <div className={styles.settingsPanel} role="dialog">
+                <p className={styles.settingsGroupTitle}>Vista</p>
+
                 <label className={styles.settingsRow}>
+                  <span className={styles.settingsRowLabel}>
+                    Mostrar el piano
+                  </span>
                   <input
+                    className={styles.settingsToggle}
                     type="checkbox"
+                    role="switch"
                     checked={showPiano}
                     onChange={(e) =>
                       updateSettings({ showPiano: e.target.checked })
                     }
                   />
-                  <span>Mostrar el piano</span>
                 </label>
 
-                <label className={styles.settingsRow}>
-                  <span className={styles.settingsRowLabel}>
-                    Renglones visibles
-                  </span>
-                  <select
-                    className={styles.settingsSelect}
-                    value={sheetLines}
-                    onChange={(e) =>
-                      updateSettings({
-                        sheetLines: Number(e.target.value) as 1 | 2 | 3 | 4,
-                      })
-                    }
+                <div className={styles.settingsRow}>
+                  <span className={styles.settingsRowLabel}>Renglones</span>
+                  {/* Segmented rather than a <select>: four options, one tap
+                      each, and the current value is readable without opening
+                      anything. */}
+                  <div
+                    className={styles.segmented}
+                    role="group"
+                    aria-label="Renglones visibles"
                   >
-                    <option value={1}>1</option>
-                    <option value={2}>2</option>
-                    <option value={3}>3</option>
-                    <option value={4}>4</option>
-                  </select>
-                </label>
+                    {([1, 2, 3, 4] as const).map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        className={`${styles.segment} ${sheetLines === n ? styles.segmentOn : ''}`}
+                        aria-pressed={sheetLines === n}
+                        onClick={() => updateSettings({ sheetLines: n })}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {levelIsGrandStaff && (
+                  <div className={styles.settingsRow}>
+                    <span className={styles.settingsRowLabel}>Mano</span>
+                    <div
+                      className={styles.segmented}
+                      role="group"
+                      aria-label="Mano a practicar"
+                    >
+                      <button
+                        type="button"
+                        className={`${styles.segment} ${practiceHand === 'right' ? styles.segmentOn : ''}`}
+                        aria-pressed={practiceHand === 'right'}
+                        onClick={() =>
+                          updateSettings({ practiceHand: 'right' })
+                        }
+                      >
+                        Derecha
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.segment} ${practiceHand === 'left' ? styles.segmentOn : ''}`}
+                        aria-pressed={practiceHand === 'left'}
+                        onClick={() => updateSettings({ practiceHand: 'left' })}
+                      >
+                        Izquierda
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <p className={styles.settingsGroupTitle}>Micrófono</p>
+
+                <Link
+                  href="/calibracion"
+                  className={`${styles.settingsAction} ${isCalibrated ? styles.settingsActionDone : ''}`}
+                >
+                  <FontAwesomeIcon icon={faSliders} />
+                  <span>
+                    {isCalibrated
+                      ? 'Calibrado — volver a calibrar'
+                      : 'Calibrar el micrófono'}
+                  </span>
+                </Link>
 
                 <p className={styles.settingsHint}>
-                  Si tocás en un piano de verdad, ocultá el teclado para ver más
-                  partitura.
+                  {isCalibrated
+                    ? 'Si cambiaste de piano o de lugar, conviene calibrar otra vez.'
+                    : 'Calibrá una vez para que reconozcamos mejor tu piano, aunque esté un poco desafinado.'}
                 </p>
               </div>
             )}
@@ -1468,26 +1619,53 @@ export default function PianoPlayer() {
         <div id="stage-track" className={styles.stageTrack} />
       </div>
 
-      {/* Play area: sheet (left) + piano (right) on desktop */}
-      <div className={styles.playArea}>
-        {/* Sheet music. The wrapper is the fullscreen target; the viewport
-            clips to N systems and the inner scroller is translated to follow
-            the current line. */}
-        <div
-          id="sheet-wrapper"
-          ref={sheetWrapperRef}
-          className={styles.sheetWrapper}
-        >
-          <div className={styles.sheetToolbar}>
+      {/* Play area: sheet, progress and piano. This whole block is the
+          fullscreen target, so the keyboard comes along instead of being left
+          behind on the page underneath. */}
+      <div
+        id="play-stage"
+        ref={stageRef}
+        className={`${styles.playArea} ${isFullscreen ? styles.playAreaFullscreen : ''}`}
+      >
+        {/* Sheet music. The viewport clips to N systems and the inner scroller
+            is translated to follow the current line. */}
+        <div id="sheet-wrapper" className={styles.sheetWrapper}>
+          <div id="sheet-toolbar" className={styles.sheetToolbar}>
+            {isFullscreen && (
+              <>
+                {/* The on-state indicator. A pressed icon button alone gave no
+                    hint that fullscreen was what changed the layout. */}
+                <span className={styles.fullscreenBadge}>
+                  <span className={styles.fullscreenDot} aria-hidden="true" />
+                  Pantalla completa
+                </span>
+                <button
+                  type="button"
+                  className={`${styles.sheetToolBtn} ${showPiano ? styles.sheetToolBtnOn : ''}`}
+                  onClick={() => updateSettings({ showPiano: !showPiano })}
+                  aria-pressed={showPiano}
+                  title={
+                    showPiano
+                      ? 'Ocultar el piano y usar todo el alto para la partitura'
+                      : 'Mostrar el piano'
+                  }
+                  aria-label={
+                    showPiano ? 'Ocultar el piano' : 'Mostrar el piano'
+                  }
+                >
+                  <FontAwesomeIcon icon={faKeyboard} />
+                </button>
+              </>
+            )}
             <button
               type="button"
-              className={styles.sheetToolBtn}
+              className={`${styles.sheetToolBtn} ${isFullscreen ? styles.sheetToolBtnOn : ''}`}
               onClick={toggleFullscreen}
               aria-pressed={isFullscreen}
               title={
                 isFullscreen
                   ? 'Salir de pantalla completa'
-                  : 'Ver la partitura en pantalla completa'
+                  : 'Ver la partitura y el piano en pantalla completa'
               }
               aria-label={
                 isFullscreen
@@ -1522,6 +1700,8 @@ export default function PianoPlayer() {
             handlers to this node and drives it imperatively, so unmounting it
             would tear down that wiring. Hidden with CSS instead. */}
         <div
+          id="piano-wrapper"
+          ref={pianoWrapperRef}
           className={`${styles.pianoWrapper} ${showPiano ? '' : styles.pianoHidden}`}
           aria-hidden={!showPiano}
         >

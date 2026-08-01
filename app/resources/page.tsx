@@ -4,7 +4,6 @@ import {
   faMusic,
   faHeadphones,
   faChartLine,
-  faSliders,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import AmbientNotes from '@/components/AmbientNotes';
@@ -75,26 +74,15 @@ export default function ResourcesPage() {
             </Link>
           </Reveal>
 
-          <Reveal delay={180}>
-            <Link
-              href="/calibracion"
-              className={`${styles.card} ${styles.cardSky}`}
-            >
-              <span className={styles.cardIconWrapper}>
-                <FontAwesomeIcon icon={faSliders} className={styles.cardIcon} />
-              </span>
-              <h2 className={styles.cardTitle}>Calibrar el micrófono</h2>
-              <p className={styles.cardDescription}>
-                Escuchamos tu piano un ratito para reconocer mejor las notas que
-                tocás, aunque esté un poco desafinado.
-              </p>
-              <span className={styles.arrow}>
-                <FontAwesomeIcon icon={faArrowRight} />
-              </span>
-            </Link>
-          </Reveal>
+          {/*
+            The "Calibrar el micrófono" card used to sit here. Calibration is
+            setup, not a thing you come here to practise — it now surfaces in
+            the first-run prompt and in the practice apps' Ajustes panel, where
+            it is actually needed. /calibracion still exists and both of those
+            link to it.
+          */}
 
-          <Reveal delay={270}>
+          <Reveal delay={180}>
             <Link
               href="/progreso"
               className={`${styles.card} ${styles.cardGreen}`}

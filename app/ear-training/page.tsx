@@ -1,3 +1,4 @@
+import LearnOnboarding from '@/components/LearnOnboarding';
 import EarTraining from '@/components/EarTraining';
 import { earTrainingMetadata } from '@/lib/metadata';
 import { earTrainingJsonLd } from '@/lib/seo/earTraining';
@@ -11,6 +12,7 @@ export default function EarTrainingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(earTrainingJsonLd) }}
       />
+      <LearnOnboarding />
       <EarTraining />
     </>
   );

@@ -202,6 +202,19 @@ export function normalizeProgress(raw: unknown): ProgressDoc {
       showPiano: bool(settings.showPiano, true),
       sheetLines: Math.min(4, Math.max(1, int(settings.sheetLines, 2, 1))) as
         1 | 2 | 3 | 4,
+      // A document saved before these fields existed normalizes to the
+      // defaults, so an existing student just sees the first-run prompt once.
+      // That is why no schemaVersion bump or migration is needed.
+      inputMode: oneOf(
+        settings.inputMode,
+        ['unset', 'acoustic', 'midi', 'keyboard'] as const,
+        'unset',
+      ),
+      practiceHand: oneOf(
+        settings.practiceHand,
+        ['right', 'left'] as const,
+        'right',
+      ),
       gamificationLevel: oneOf(
         settings.gamificationLevel,
         ['full', 'minimal', 'off'] as const,

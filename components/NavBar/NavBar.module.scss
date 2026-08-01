@@ -83,11 +83,33 @@
   }
 }
 
+// Was a bare icon on a transparent background — a ~20px tap target, well under
+// the 44px minimum, and easy to miss against the green bar. Now a filled pill
+// in the same lilac/pink as the Inscripción CTA.
 .mobileMenuButton {
-  display: block;
-  background: none;
-  border: none;
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgb(255 255 255 / 0.85);
+  background-image: linear-gradient(
+    135deg,
+    var(--purple-100),
+    var(--pink-300) 130%
+  );
+  color: var(--purple-900);
+  font-size: 1.15rem;
   cursor: pointer;
+  box-shadow: 0 3px 10px rgb(var(--purple-rgb) / 0.3);
+  transition:
+    transform var(--dur-base) var(--ease-spring),
+    box-shadow var(--dur-base) var(--ease-out);
+
+  &:active {
+    transform: scale(0.94);
+    transition-duration: var(--dur-instant);
+  }
 
   // 767.98px, not 768px. The previous `max-width: 768px` here paired with
   // `min-width: 768px` on .mobileNavContainer meant that at exactly 768px the
@@ -95,6 +117,18 @@
   // display:none — leaving no navigation at all.
   @media (min-width: 768px) {
     display: none;
+  }
+}
+
+// The open state reads as pressed-in, so the button and the dropdown below it
+// look like one object.
+.mobileMenuButtonOpen {
+  box-shadow: inset 0 2px 6px rgb(var(--purple-rgb) / 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobileMenuButton:active {
+    transform: none;
   }
 }
 

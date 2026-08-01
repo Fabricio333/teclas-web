@@ -34,9 +34,51 @@ export interface Level {
   name: string;
   difficulty: 1 | 2 | 3;
   abc: string;
-  notes: number[]; // MIDI numbers in order
+  /**
+   * MIDI numbers in order for the right hand — the voice the game follows by
+   * default. Index i of this array must correspond to note element i of voice
+   * `V:1` in `abc`; that positional pairing is how the sheet highlight is
+   * driven.
+   */
+  notes: number[];
+  /**
+   * Left-hand sequence, for grand-staff scores. Present only when `abc`
+   * declares a second voice (`V:2`, bass clef); `leftNotes[i]` pairs with note
+   * element i of that voice the same way `notes` does for `V:1`.
+   *
+   * A level with this set can be practised one hand at a time — see
+   * `settings.practiceHand`. Playing both hands together is deliberately NOT
+   * supported yet: it needs simultaneous-note matching rather than the
+   * one-note-at-a-time cursor the engine has.
+   */
+  leftNotes?: number[];
   sections?: SongSection[];
   patterns?: SongPattern[];
+}
+
+/** True when the level carries a second (bass) voice. */
+export function isGrandStaff(level: Level): boolean {
+  return Array.isArray(level.leftNotes) && level.leftNotes.length > 0;
+}
+
+/**
+ * The note sequence the game should follow, given the student's hand choice.
+ * Falls back to the right hand whenever the level has no second voice, so
+ * every existing single-staff song is unaffected.
+ */
+export function notesForHand(level: Level, hand: 'right' | 'left'): number[] {
+  if (hand === 'left' && isGrandStaff(level)) return level.leftNotes!;
+  return level.notes;
+}
+
+/**
+ * abcjs tags each note element with the voice it belongs to (`abcjs-v0` for
+ * the first voice, `abcjs-v1` for the second). Selecting on that is what lets
+ * the engine follow one hand of a grand staff while the other stays rendered
+ * but inert.
+ */
+export function voiceClassForHand(hand: 'right' | 'left'): string {
+  return hand === 'left' ? 'abcjs-v1' : 'abcjs-v0';
 }
 
 function buildSections(specs: SongSectionSpec[]): SongSection[] {
@@ -667,6 +709,34 @@ export const LEVELS: Level[] = applySongStructure([
       'C C G G | A A G2 | F F E E | D D C2 |',
     ].join('\n'),
     notes: [60, 60, 67, 67, 69, 69, 67, 65, 65, 64, 64, 62, 62, 60],
+  },
+  {
+    // The first grand-staff level. Two voices, so it exercises the whole
+    // two-hand path: `V:1`/`V:2` render as a linked treble/bass system, abcjs
+    // tags each note `abcjs-v0`/`abcjs-v1`, and the engine follows whichever
+    // one `settings.practiceHand` selects (Ajustes → Mano).
+    //
+    // One hand at a time by design — see the note on `Level.leftNotes`.
+    id: 'estrellita-dos-manos',
+    name: 'Estrellita a dos manos',
+    difficulty: 2,
+    abc: [
+      'X:1',
+      'T:Estrellita a dos manos',
+      'M:4/4',
+      'L:1/4',
+      'K:C',
+      '%%score { V1 | V2 }',
+      'V:V1 clef=treble',
+      'V:V2 clef=bass',
+      '[V:V1] C C G G | A A G2 | F F E E | D D C2 |',
+      '[V:V2] C,2 E,2 | F,2 C,2 | F,2 C,2 | G,2 C,2 |',
+    ].join('\n'),
+    // Right hand: the Estrellita melody, unchanged.
+    notes: [60, 60, 67, 67, 69, 69, 67, 65, 65, 64, 64, 62, 62, 60],
+    // Left hand: two half notes per bar, C / F-C / F-C / G-C.
+    // C,=48 E,=52 F,=53 G,=55 in ABC's octave notation.
+    leftNotes: [48, 52, 53, 48, 53, 48, 55, 48],
   },
   {
     id: 'maria-corderito',

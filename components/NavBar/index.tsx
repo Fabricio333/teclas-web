@@ -55,9 +55,10 @@ export default function Navbar() {
         </Link>
 
         <button
-          className={styles.mobileMenuButton}
+          className={`${styles.mobileMenuButton} ${isMenuOpen ? styles.mobileMenuButtonOpen : ''}`}
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+          aria-expanded={isMenuOpen}
         >
           {isMenuOpen ? (
             <FontAwesomeIcon icon={faXmark} size="lg" />

@@ -91,6 +91,17 @@ export interface SettingsState {
   /** How many staff systems the sheet viewport shows at once. */
   sheetLines: 1 | 2 | 3 | 4;
   /**
+   * How the student plays. Captured once by the first-run prompt so the app
+   * stops asking, and so the mic is only offered to people who actually have an
+   * acoustic piano in front of them. `unset` is what triggers that prompt.
+   */
+  inputMode: 'unset' | 'acoustic' | 'midi' | 'keyboard';
+  /**
+   * Which voice of a grand-staff score the game follows. Ignored by
+   * single-staff songs, which are all of them today.
+   */
+  practiceHand: 'right' | 'left';
+  /**
    * Adult beginners frequently find XP and badges patronising, and this is a
    * music school's site — the whole layer must be switchable off.
    */
@@ -194,6 +205,8 @@ export const EMPTY_PROGRESS: ProgressDoc = deepFreeze<ProgressDoc>({
     volume: 0.8,
     showPiano: true,
     sheetLines: 2,
+    inputMode: 'unset',
+    practiceHand: 'right',
     gamificationLevel: 'full',
   },
   sessions: [],
