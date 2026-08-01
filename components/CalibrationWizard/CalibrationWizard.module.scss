@@ -79,7 +79,12 @@
 
 .meterFill {
   height: 100%;
-  background: linear-gradient(90deg, $green-color, $yellow-color, $orange-color);
+  background: linear-gradient(
+    90deg,
+    $green-color,
+    $yellow-color,
+    $orange-color
+  );
   transition: width 60ms linear;
 }
 
@@ -232,4 +237,18 @@
   color: var(--color-success);
   font-size: var(--text-sm);
   margin-bottom: var(--space-4);
+}
+
+.captureState {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+  min-height: 1.4rem;
+}
+
+// Visible confirmation that a take is in progress, so a student who plays and
+// sees nothing happen knows whether they were heard.
+.meterRecording {
+  outline: 2px solid $orange-color;
+  outline-offset: 2px;
 }

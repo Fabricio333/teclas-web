@@ -69,8 +69,20 @@ export default function CalibrationWizard() {
   const [silenceProgress, setSilenceProgress] = useState(0);
 
   const [noteIndex, setNoteIndex] = useState(0);
+  /**
+   * Bumped to re-arm the listener for the same note. `setNoteIndex(i => i)`
+   * would set an identical value, React would bail out of the re-render, and
+   * the capture effect would never run again — which left the wizard frozen
+   * after any failed take.
+   */
+  const [attempt, setAttempt] = useState(0);
   const [captured, setCaptured] = useState<NoteCalibration[]>([]);
   const [noteMessage, setNoteMessage] = useState<string | null>(null);
+  const [captureState, setCaptureState] = useState<'waiting' | 'recording'>(
+    'waiting',
+  );
+  /** A take we heard clearly but which wasn't the note we asked for. */
+  const [mismatch, setMismatch] = useState<NoteCalibration | null>(null);
 
   const [existing, setExisting] = useState<CalibrationProfile | null>(null);
   const [saved, setSaved] = useState<CalibrationProfile | null>(null);
@@ -144,50 +156,93 @@ export default function CalibrationWizard() {
     if (noteIndex >= targets.length) return;
 
     let cancelled = false;
+    let rearmTimer: ReturnType<typeof setTimeout> | null = null;
     const localAbort = { aborted: false };
     abortRef.current = localAbort;
-    setNoteMessage(null);
+    setCaptureState('waiting');
+    setMismatch(null);
 
+    // Floor the gate at the room's measured p95 so a noisy room doesn't
+    // self-trigger; `captureNote` additionally requires a rise above its own
+    // rolling baseline before it starts recording.
     const gate = Math.max(0.008, noise.rmsP95 * 2.2);
 
     void captureNote(handleRef.current, {
       targetMidi: targets[noteIndex],
       gate,
-      onLevel: (rms) => setLevel(rms),
+      onLevel: (rms, state) => {
+        setLevel(rms);
+        setCaptureState(state);
+      },
       signal: localAbort,
     }).then((result) => {
       if (cancelled) return;
+
       if (result.ok && result.note) {
         setCaptured((prev) => [...prev, result.note!]);
-        setNoteMessage('Listo');
-        setTimeout(() => {
+        setNoteMessage('¡Listo!');
+        rearmTimer = setTimeout(() => {
           if (!cancelled) setNoteIndex((i) => i + 1);
         }, 450);
-      } else {
-        setNoteMessage(
-          result.detectedMidi !== undefined
-            ? `${result.message} (escuchamos ${noteLabel(result.detectedMidi)})`
-            : result.message,
-        );
+        return;
       }
+
+      if (result.detectedMidi !== undefined && result.note) {
+        // Heard something clear, just not the requested note. Let them decide
+        // rather than silently discarding a good take.
+        setMismatch(result.note);
+        setNoteMessage(
+          `Escuchamos ${noteLabel(result.detectedMidi)} en vez de ${noteLabel(targets[noteIndex])}.`,
+        );
+        return;
+      }
+
+      // Anything else: say what happened and listen again automatically. The
+      // student has both hands on the instrument; making them click to retry
+      // is exactly the wrong ask.
+      setNoteMessage(result.message);
+      rearmTimer = setTimeout(() => {
+        if (!cancelled) setAttempt((a) => a + 1);
+      }, 900);
     });
 
     return () => {
       cancelled = true;
       localAbort.aborted = true;
+      if (rearmTimer) clearTimeout(rearmTimer);
     };
-  }, [step, noteIndex, noise, targets]);
+  }, [step, noteIndex, attempt, noise, targets]);
 
   // All anchors captured.
   useEffect(() => {
-    if (step === 'notes' && noteIndex >= targets.length && captured.length > 0) {
+    if (
+      step === 'notes' &&
+      noteIndex >= targets.length &&
+      captured.length > 0
+    ) {
       setStep('review');
       stopCapture();
     }
   }, [step, noteIndex, targets.length, captured.length, stopCapture]);
 
-  const retryNote = () => setNoteIndex((i) => i);
-  const skipNote = () => setNoteIndex((i) => i + 1);
+  const retryNote = () => {
+    setNoteMessage(null);
+    setAttempt((a) => a + 1);
+  };
+
+  const skipNote = () => {
+    setNoteMessage(null);
+    setNoteIndex((i) => i + 1);
+  };
+
+  /** Keep a take that was clear but landed on a different note than asked. */
+  const acceptMismatch = () => {
+    if (!mismatch) return;
+    setCaptured((prev) => [...prev, mismatch]);
+    setMismatch(null);
+    setNoteMessage(null);
+    setNoteIndex((i) => i + 1);
+  };
 
   const playReference = (midi: number) => {
     const name = midiNumberToNote(midi, undefined, true);
@@ -337,7 +392,10 @@ export default function CalibrationWizard() {
           <p className={styles.panelText}>Tocá algo, cualquier cosa.</p>
 
           <div className={styles.meter} aria-hidden="true">
-            <div className={styles.meterFill} style={{ width: `${levelPct}%` }} />
+            <div
+              className={styles.meterFill}
+              style={{ width: `${levelPct}%` }}
+            />
           </div>
 
           <p className={styles.verdict} role="status">
@@ -405,9 +463,21 @@ export default function CalibrationWizard() {
 
           <div className={styles.bigNote}>{noteLabel(targets[noteIndex])}</div>
 
-          <div className={styles.meter} aria-hidden="true">
-            <div className={styles.meterFill} style={{ width: `${levelPct}%` }} />
+          <div
+            className={`${styles.meter} ${captureState === 'recording' ? styles.meterRecording : ''}`}
+            aria-hidden="true"
+          >
+            <div
+              className={styles.meterFill}
+              style={{ width: `${levelPct}%` }}
+            />
           </div>
+
+          <p className={styles.captureState} role="status">
+            {captureState === 'recording'
+              ? 'Grabando…'
+              : 'Escuchando… tocá la nota cuando quieras'}
+          </p>
 
           <div className={styles.coverage} aria-hidden="true">
             {targets.map((m, i) => (
@@ -431,6 +501,15 @@ export default function CalibrationWizard() {
           )}
 
           <div className={styles.actions}>
+            {mismatch && (
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={acceptMismatch}
+              >
+                <FontAwesomeIcon icon={faCheck} /> Usar igual
+              </button>
+            )}
             <button
               type="button"
               className={styles.secondaryBtn}

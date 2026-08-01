@@ -189,14 +189,96 @@ export interface NoteCaptureResult {
   detectedMidi?: number;
 }
 
+export type CaptureState = 'waiting' | 'recording';
+
+/**
+ * Decides when the student has actually started playing.
+ *
+ * A fixed absolute threshold is not enough: a room with a fan or a laptop
+ * sitting above it self-triggers immediately, and the wizard then records a
+ * second of nothing. So this tracks a rolling baseline of the quiet level and
+ * fires only on a sustained rise above it.
+ *
+ * Extracted as a class purely so it can be tested without a microphone.
+ */
+export class OnsetDetector {
+  /** How far above the ambient baseline counts as playing. */
+  static readonly RATIO = 2.5;
+  /** Consecutive frames required, so a click or bump can't arm it. */
+  static readonly FRAMES = 3;
+  private static readonly ATTACK = 0.05;
+  /**
+   * Frames spent measuring the room before arming (~250 ms at 60 fps).
+   *
+   * Without this the baseline starts at `gate`, so a room whose ambient level
+   * is already above the gate fires instantly and records a second of nothing
+   * — the baseline never gets a chance to adapt upward, because it only
+   * adapts on frames that fall *below* the threshold.
+   */
+  private static readonly WARMUP_FRAMES = 15;
+
+  private baseline: number;
+  private framesAbove = 0;
+  private fired = false;
+  /**
+   * Warm-up samples, reduced to a median rather than averaged: if the student
+   * plays during the warm-up, a mean (or an EWMA) would latch onto that and
+   * leave the threshold so high that nothing fires afterwards. A median
+   * shrugs off a few loud frames.
+   */
+  private warmup: number[] = [];
+
+  constructor(private readonly gate: number) {
+    this.baseline = gate;
+  }
+
+  /** Feed one frame's RMS. Returns true on the frame the onset fires. */
+  push(rms: number): boolean {
+    if (this.fired) return false;
+
+    if (this.warmup.length < OnsetDetector.WARMUP_FRAMES) {
+      this.warmup.push(rms);
+      if (this.warmup.length === OnsetDetector.WARMUP_FRAMES) {
+        const sorted = [...this.warmup].sort((a, b) => a - b);
+        this.baseline = sorted[Math.floor(sorted.length / 2)];
+      }
+      return false;
+    }
+
+    const threshold = Math.max(this.gate, this.baseline * OnsetDetector.RATIO);
+
+    if (rms > threshold) {
+      this.framesAbove += 1;
+      if (this.framesAbove >= OnsetDetector.FRAMES) {
+        this.fired = true;
+        return true;
+      }
+    } else {
+      this.framesAbove = 0;
+      // Only adapt while nothing is happening — a held note must not drag the
+      // baseline up and cut its own recording short.
+      this.baseline += (rms - this.baseline) * OnsetDetector.ATTACK;
+    }
+    return false;
+  }
+
+  get currentBaseline(): number {
+    return this.baseline;
+  }
+}
+
 export interface NoteCaptureOptions {
   targetMidi: number;
   gate: number;
-  /** Give up if the student doesn't play, ms. */
+  /**
+   * Give up if the student doesn't play, ms. Generous on purpose: they may be
+   * finding the note on the keyboard, adjusting the bench, or reading the
+   * prompt for the first time.
+   */
   timeoutMs?: number;
   /** How long to record once an onset is detected, ms. */
   captureMs?: number;
-  onLevel?: (rms: number, armed: boolean) => void;
+  onLevel?: (rms: number, state: CaptureState) => void;
   signal?: { aborted: boolean };
 }
 
@@ -214,7 +296,7 @@ export async function captureNote(
   const {
     targetMidi,
     gate,
-    timeoutMs = 15000,
+    timeoutMs = 60000,
     captureMs = 1200,
     onLevel,
     signal,
@@ -226,6 +308,8 @@ export async function captureNote(
   const clarities: number[] = [];
   let peakRms = 0;
 
+  const onset = new OnsetDetector(gate);
+
   return new Promise((resolve) => {
     const tick = () => {
       if (signal?.aborted) {
@@ -235,15 +319,15 @@ export async function captureNote(
 
       const { rms, frequency, clarity } = readFrame(handle);
       const now = performance.now();
-      onLevel?.(rms, onsetAt !== null);
+      onLevel?.(rms, onsetAt === null ? 'waiting' : 'recording');
 
       if (onsetAt === null) {
-        if (rms > gate) {
-          onsetAt = now;
-        } else if (now - started > timeoutMs) {
+        if (onset.push(rms)) onsetAt = now;
+
+        if (onsetAt === null && now - started > timeoutMs) {
           resolve({
             ok: false,
-            message: 'No escuchamos nada. ¿Está prendido el micrófono?',
+            message: 'No escuchamos nada. Probá tocar un poco más fuerte.',
           });
           return;
         }
@@ -287,10 +371,21 @@ export async function captureNote(
       const cents = centsBetween(f0, expected);
 
       if (detectedMidi !== targetMidi) {
+        // Return the take anyway, labelled with what we actually heard. The
+        // student may have played a perfectly good note one octave off, and
+        // throwing away a clean recording would make them play it twice.
         resolve({
           ok: false,
           detectedMidi,
           message: 'Escuchamos otra nota. ¿Tocaste la que pedimos?',
+          note: {
+            midi: detectedMidi,
+            f0Hz: f0,
+            centsFromEqual: centsBetween(f0, midiToFrequency(detectedMidi)),
+            peakRms,
+            clarity: meanClarity,
+            capturedAt: Date.now(),
+          },
         });
         return;
       }
