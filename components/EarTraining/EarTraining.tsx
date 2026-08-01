@@ -13,6 +13,7 @@ import {
   generateRound,
 } from '@/lib/ear-training/levels';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
+import { recordRun } from '@/lib/progress';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMicrophone,
@@ -247,6 +248,13 @@ export default function EarTraining() {
       let hits = 0;
       let attempts = 0;
       let streak = 0;
+      // Progress reporting. `bestStreak` is tracked separately from `streak`
+      // because `streak` resets on a wrong answer but the achievement wants
+      // the high-water mark for the round.
+      let bestStreak = 0;
+      let runStartedAt = Date.now();
+      let lastInputSource: InputSource = 'pointer';
+      let runReported = false;
       let idleTimer: ReturnType<typeof setTimeout> | null = null;
       let canAnswer = false;
       let advanceTimer: ReturnType<typeof setTimeout> | null = null;
@@ -442,6 +450,8 @@ export default function EarTraining() {
         source = 'system',
         velocity = DEFAULT_VELOCITY_BY_SOURCE[source],
       ) => {
+        if (source !== 'system') lastInputSource = source;
+
         const pendingRelease = pendingReleases.get(midiNumber);
         if (pendingRelease) {
           clearTimeout(pendingRelease);
@@ -470,6 +480,7 @@ export default function EarTraining() {
         if (correct) {
           score += 10;
           streak += 1;
+          bestStreak = Math.max(bestStreak, streak);
           canAnswer = false;
           flashKey(midiNumber, true);
           showNoteName(midiNumber);
@@ -489,6 +500,20 @@ export default function EarTraining() {
               doneScoreEl.textContent = `${score} puntos \u00B7 ${acc}% precision`;
             }
             updateScoreUI();
+            if (!runReported) {
+              runReported = true;
+              recordRun({
+                kind: 'exercise',
+                refId: `ear-${level.id}`,
+                notesAttempted: attempts,
+                notesCorrect: hits,
+                completed: true,
+                durationMs: Date.now() - runStartedAt,
+                inputSource: lastInputSource,
+                score,
+                bestStreak,
+              });
+            }
             return;
           }
 
@@ -508,7 +533,10 @@ export default function EarTraining() {
         }
       };
 
-      const handleNoteRelease: NoteHandler = (midiNumber, source = 'system') => {
+      const handleNoteRelease: NoteHandler = (
+        midiNumber,
+        source = 'system',
+      ) => {
         const startedAt = pressedAt.get(midiNumber) ?? performance.now();
         const heldFor = performance.now() - startedAt;
         const minPressMs = MIN_PRESS_MS_BY_SOURCE[source];
@@ -528,10 +556,7 @@ export default function EarTraining() {
         };
 
         if (heldFor < minPressMs) {
-          const releaseTimer = setTimeout(
-            finishRelease,
-            minPressMs - heldFor,
-          );
+          const releaseTimer = setTimeout(finishRelease, minPressMs - heldFor);
           pendingReleases.set(midiNumber, releaseTimer);
           return;
         }
@@ -665,6 +690,9 @@ export default function EarTraining() {
         hits = 0;
         attempts = 0;
         streak = 0;
+        bestStreak = 0;
+        runStartedAt = Date.now();
+        runReported = false;
         canAnswer = false;
         clearIdle();
         clearHintKey();

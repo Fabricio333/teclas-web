@@ -16,6 +16,7 @@ import {
 } from '@/lib/piano-player/songs';
 import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
+import { recordRun } from '@/lib/progress';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMicrophone,
@@ -23,9 +24,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 const ALL_LEVELS =
-  process.env.NODE_ENV === 'development'
-    ? [...LEVELS, DEBUG_LEVEL]
-    : LEVELS;
+  process.env.NODE_ENV === 'development' ? [...LEVELS, DEBUG_LEVEL] : LEVELS;
 
 function getDifficultyLabel(d: 1 | 2 | 3): string {
   return '\u2B50'.repeat(d);
@@ -301,6 +300,11 @@ export default function PianoPlayer() {
       let hits = 0;
       let attempts = 0;
       let streak = 0;
+      // Progress reporting: when the run started, and which input the student
+      // actually used (the last non-'system' source wins).
+      let runStartedAt = Date.now();
+      let lastInputSource: InputSource = 'pointer';
+      let runReported = false;
       let idleTimer: ReturnType<typeof setTimeout> | null = null;
       let errorHighlighted = false;
       let highlighted = -1;
@@ -310,8 +314,7 @@ export default function PianoPlayer() {
       const sustainedMidi = new Set<number>();
       let sustainPedalDown = false;
 
-      getExpectedMidiRef.current = () =>
-        pos < SONG.length ? SONG[pos] : null;
+      getExpectedMidiRef.current = () => (pos < SONG.length ? SONG[pos] : null);
 
       // ---------- Octave shift ----------
       let midiOffset = 0; // added to base MIDI (KEY_TO_MIDI) to get actual MIDI
@@ -340,9 +343,7 @@ export default function PianoPlayer() {
         if (!el) return;
         const noteCount = SONG.length;
         const inputHint =
-          level.difficulty === 3
-            ? 'Ideal con teclado MIDI'
-            : 'QWERTY o MIDI';
+          level.difficulty === 3 ? 'Ideal con teclado MIDI' : 'QWERTY o MIDI';
         el.textContent = `${noteCount} notas · ${sections.length} partes · ${patterns.length} patrones · ${inputHint}`;
       };
 
@@ -686,6 +687,8 @@ export default function PianoPlayer() {
         source = 'system',
         velocity = DEFAULT_VELOCITY_BY_SOURCE[source],
       ) => {
+        if (source !== 'system') lastInputSource = source;
+
         const pendingRelease = pendingReleases.get(midiNumber);
         if (pendingRelease) {
           clearTimeout(pendingRelease);
@@ -742,7 +745,8 @@ export default function PianoPlayer() {
                 ? 'Continuar cancion'
                 : 'Siguiente cancion';
               (doneNextBtn as HTMLButtonElement).style.display =
-                !activePracticeSection && currentLevelIndex >= ALL_LEVELS.length - 1
+                !activePracticeSection &&
+                currentLevelIndex >= ALL_LEVELS.length - 1
                   ? 'none'
                   : '';
             }
@@ -750,6 +754,24 @@ export default function PianoPlayer() {
             clearIdle();
             updateScoreUI();
             updateSectionProgress();
+            // Persist the run. Guarded so re-entering this branch (e.g. a
+            // trailing note event) can't double-count. Practising a single
+            // section still counts as practice, but only a full run of the
+            // piece is reported as `completed`.
+            if (!runReported) {
+              runReported = true;
+              recordRun({
+                kind: 'song',
+                refId: level.id,
+                hand: 'right',
+                notesAttempted: attempts,
+                notesCorrect: hits,
+                completed: activePracticeSection === null,
+                durationMs: Date.now() - runStartedAt,
+                inputSource: lastInputSource,
+                score,
+              });
+            }
             return;
           }
 
@@ -767,7 +789,10 @@ export default function PianoPlayer() {
         updateScoreUI();
       };
 
-      const handleNoteRelease: NoteHandler = (midiNumber, source = 'system') => {
+      const handleNoteRelease: NoteHandler = (
+        midiNumber,
+        source = 'system',
+      ) => {
         const startedAt = pressedAt.get(midiNumber) ?? performance.now();
         const heldFor = performance.now() - startedAt;
         const minPressMs = MIN_PRESS_MS_BY_SOURCE[source];
@@ -787,10 +812,7 @@ export default function PianoPlayer() {
         };
 
         if (heldFor < minPressMs) {
-          const releaseTimer = setTimeout(
-            finishRelease,
-            minPressMs - heldFor,
-          );
+          const releaseTimer = setTimeout(finishRelease, minPressMs - heldFor);
           pendingReleases.set(midiNumber, releaseTimer);
           return;
         }
@@ -940,6 +962,8 @@ export default function PianoPlayer() {
         hits = 0;
         attempts = 0;
         streak = 0;
+        runStartedAt = Date.now();
+        runReported = false;
         highlighted = -1;
         errorHighlighted = false;
         activePracticeSection = practiceSection;

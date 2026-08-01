@@ -154,6 +154,23 @@ export const earTrainingMetadata: Metadata = {
   },
 };
 
+/**
+ * Personal dashboard — noindex on purpose. It shows one student's own saved
+ * progress and has no value in search results.
+ */
+export const progresoMetadata: Metadata = {
+  title: 'Mi progreso | TECLAS Ciudad Jardín',
+  description:
+    'Seguí tu progreso en el piano: nivel, racha de práctica, estrellas y logros.',
+  alternates: {
+    canonical: 'https://teclasciudadjardin.com.ar/progreso',
+  },
+  robots: {
+    index: false,
+    follow: true,
+  },
+};
+
 export default {
   homeMetadata,
   eventsMetadata,
@@ -161,4 +178,5 @@ export default {
   resourcesMetadata,
   pianoPlayerMetadata,
   earTrainingMetadata,
+  progresoMetadata,
 };

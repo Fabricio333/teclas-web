@@ -34,8 +34,7 @@
     "pitchy": "^4.1.0",
     "react": "^19",
     "react-dom": "^19",
-    "tone": "^15.1.22",
-    "zod": "^3.24.1"
+    "tone": "^15.1.22"
   },
   "devDependencies": {
     "@types/node": "^22",

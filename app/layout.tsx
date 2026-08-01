@@ -5,6 +5,7 @@ import '../styles/globals.scss';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
+import ProgressProvider from '@/components/ProgressProvider';
 import Script from 'next/script';
 
 const delius = Delius({
@@ -96,6 +97,7 @@ export default function RootLayout({
       <body
         className={`${delius.variable} ${comicNeue.variable} ${lobster.variable}`}
       >
+        <ProgressProvider />
         <NavBar />
         <main>{children}</main>
         <WhatsAppButton />

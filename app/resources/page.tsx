@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faMusic,
   faHeadphones,
+  faChartLine,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { resourcesMetadata } from '@/lib/metadata';
@@ -39,6 +40,18 @@ export default function ResourcesPage() {
             <p className={styles.cardDescription}>
               Escuchá las notas y encontralas en el piano. Mejorá tu oído
               musical con ejercicios interactivos.
+            </p>
+            <span className={styles.arrow}>
+              <FontAwesomeIcon icon={faArrowRight} />
+            </span>
+          </Link>
+
+          <Link href="/progreso" className={styles.card}>
+            <FontAwesomeIcon icon={faChartLine} className={styles.cardIcon} />
+            <h2 className={styles.cardTitle}>Mi progreso</h2>
+            <p className={styles.cardDescription}>
+              Mirá tu nivel, tu racha de práctica y los logros que fuiste
+              consiguiendo. Se guarda en este navegador.
             </p>
             <span className={styles.arrow}>
               <FontAwesomeIcon icon={faArrowRight} />

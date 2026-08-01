@@ -1,0 +1,237 @@
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
+
+.progresoSection {
+  @extend .sectionPadding;
+  min-height: calc(100dvh - var(--header-height));
+}
+
+.title {
+  font-size: $font-size-xl;
+  color: $dark-text-color;
+  text-align: center;
+  margin-bottom: var(--space-2);
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: $font-size-xxl;
+  }
+}
+
+.subtitle {
+  text-align: center;
+  color: $light-text-color;
+  margin-bottom: var(--space-10);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-10);
+}
+
+.tile {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+}
+
+.tileLabel {
+  display: block;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.tileValue {
+  display: block;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-primary);
+  line-height: var(--leading-tight);
+}
+
+.tileXp .tileValue {
+  color: var(--color-xp);
+}
+
+.tileStreak .tileValue {
+  color: var(--color-streak);
+}
+
+.tileMastery .tileValue {
+  color: var(--color-mastery);
+}
+
+.tileMeta {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-subtle);
+  margin-top: var(--space-1);
+}
+
+.xpBarOuter {
+  margin-top: var(--space-3);
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-bg-sunken);
+  overflow: hidden;
+}
+
+.xpBarInner {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-xp);
+  transition: width var(--dur-celebrate) var(--ease-spring);
+}
+
+.panel {
+  max-width: 820px;
+  margin: 0 auto var(--space-8);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.panelTitle {
+  font-size: var(--text-lg);
+  color: $dark-text-color;
+  margin-bottom: var(--space-2);
+}
+
+.panelText {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-4);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.button {
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background-color: var(--color-primary-soft);
+  }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+
+.buttonPrimary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-fg);
+
+  &:hover {
+    background-color: var(--color-primary-hover);
+  }
+}
+
+.buttonDanger {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+
+  &:hover {
+    background-color: rgba(229, 72, 77, 0.08);
+  }
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.status {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.statusError {
+  color: var(--color-danger);
+}
+
+.statusOk {
+  color: var(--color-success);
+}
+
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+
+.badge {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  background-color: var(--color-surface-alt);
+}
+
+.badgeLocked {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.badgeName {
+  display: block;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-1);
+}
+
+.badgeDesc {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.badgeTierBronce {
+  border-color: rgba(205, 127, 50, 0.5);
+}
+.badgeTierPlata {
+  border-color: rgba(160, 168, 180, 0.6);
+}
+.badgeTierOro {
+  border-color: rgb(var(--yellow-rgb) / 0.7);
+}
+
+.skeleton {
+  min-height: 12rem;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg-sunken);
+}
+
+.warning {
+  max-width: 820px;
+  margin: 0 auto var(--space-6);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-warning);
+  background-color: rgb(var(--orange-rgb) / 0.08);
+  color: $dark-text-color;
+  font-size: var(--text-sm);
+}

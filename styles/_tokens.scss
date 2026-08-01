@@ -64,9 +64,147 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  // ---- L1 primitives: brand ramps -----------------------------------------
+  // Hexes are unchanged from _variables.scss; these are ramps around them.
+  // The `--*-rgb` channel triplets let modules write
+  // `rgb(var(--blue-rgb) / .18)` instead of SCSS `rgba()`, which is what
+  // allows the eventual retirement of _variables.scss (SCSS colour functions
+  // cannot operate on `var()`).
+  --blue-50: #eef2fa;
+  --blue-100: #d6dff1;
+  --blue-300: #8ea3d3;
+  --blue-500: #415ca9;
+  --blue-600: #354c8c;
+  --blue-700: #2a3c6f;
+  --blue-900: #141d36;
+  --green-50: #f4f9e6;
+  --green-300: #c9e07f;
+  --green-500: #a5ce39;
+  --green-600: #87ab2a;
+  --green-700: #6a861f;
+  --yellow-300: #ffe37a;
+  --yellow-500: #ffd122;
+  --yellow-600: #e0b400;
+  --purple-300: #c3a5d6;
+  --purple-500: #8658a7;
+  --purple-700: #5f3d78;
+  --sky-300: #a3e2ef;
+  --sky-500: #60c9de;
+  --sky-700: #2f9cb4;
+  --pink-500: #ed3b95;
+  --orange-500: #f3862c;
+  --neutral-0: #fff;
+  --neutral-50: #f7f8fa;
+  --neutral-100: #eef0f4;
+  --neutral-200: #dfe2ea;
+  --neutral-400: #a5abbb;
+  --neutral-600: #5a6172;
+  --neutral-800: #2b3243;
+  --neutral-900: #1c2230;
+  --neutral-950: #0e121c;
+
+  --blue-rgb: 65 92 169;
+  --green-rgb: 165 206 57;
+  --yellow-rgb: 255 209 34;
+  --purple-rgb: 134 88 167;
+  --sky-rgb: 96 201 222;
+  --pink-rgb: 237 59 149;
+  --orange-rgb: 243 134 44;
+  --ink-rgb: 20 24 40;
+
+  // ---- L2 semantic (theme-swapped) ----------------------------------------
+  --color-bg: var(--neutral-0);
+  --color-bg-subtle: var(--neutral-50);
+  --color-bg-sunken: var(--neutral-100);
+  --color-surface: var(--neutral-0);
+  --color-surface-alt: var(--neutral-50);
+  --color-border: rgb(var(--blue-rgb) / 0.16);
+  --color-border-strong: rgb(var(--blue-rgb) / 0.34);
+  --color-text: var(--neutral-900);
+  --color-text-muted: var(--neutral-600);
+  --color-text-subtle: var(--neutral-400);
+  --color-text-inverse: var(--neutral-0);
+  --color-primary: var(--blue-500);
+  --color-primary-hover: var(--blue-600);
+  --color-primary-soft: var(--blue-50);
+  --color-primary-fg: var(--neutral-0);
+  --color-accent: var(--yellow-500);
+  --color-success: var(--green-600);
+  --color-warning: var(--orange-500);
+  --color-danger: #e5484d;
+  --color-info: var(--sky-500);
+  --color-scrim: rgb(var(--ink-rgb) / 0.55);
+
+  // ---- L2b learning semantics ---------------------------------------------
+  --color-xp: var(--yellow-500);
+  --color-streak: var(--orange-500);
+  --color-mastery: var(--green-500);
+  --color-locked: var(--neutral-400);
+  --color-correct: var(--green-600);
+  // Pink rather than red: kinder for a children's app and already on-brand.
+  // Colour is never the sole signal — always pair with an icon and text.
+  --color-incorrect: var(--pink-500);
+
+  // ---- type ---------------------------------------------------------------
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.25rem, 1.05rem + 0.8vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.2rem + 1.4vw, 2rem);
+  --text-3xl: clamp(1.75rem, 1.25rem + 2.2vw, 2.5rem);
+  --text-4xl: clamp(2rem, 1.2rem + 3.4vw, 3.25rem);
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.6;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  // ---- radii --------------------------------------------------------------
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+
+  // ---- elevation ----------------------------------------------------------
+  --shadow-xs: 0 1px 2px rgb(var(--ink-rgb) / 0.06);
+  --shadow-sm:
+    0 1px 2px rgb(var(--ink-rgb) / 0.06), 0 2px 6px rgb(var(--ink-rgb) / 0.06);
+  --shadow-md:
+    0 2px 4px rgb(var(--ink-rgb) / 0.06), 0 8px 20px rgb(var(--ink-rgb) / 0.1);
+  --shadow-lg:
+    0 4px 8px rgb(var(--ink-rgb) / 0.07), 0 16px 40px rgb(var(--ink-rgb) / 0.14);
+
   // ---- focus --------------------------------------------------------------
-  --color-focus-ring: #ffd122;
-  --focus-ring: 0 0 0 3px rgb(255 209 34 / 0.55);
+  --color-focus-ring: var(--yellow-500);
+  --focus-ring: 0 0 0 3px rgb(var(--yellow-rgb) / 0.55);
+}
+
+// Dark theme overrides the SEMANTIC layer only, never the primitives.
+// `data-theme` is what next-themes stamps on <html>.
+[data-theme='dark'] {
+  --color-bg: var(--neutral-950);
+  --color-bg-subtle: #141926;
+  --color-bg-sunken: #10141f;
+  --color-surface: #1a2030;
+  --color-surface-alt: #141926;
+  --color-border: rgb(255 255 255 / 0.1);
+  --color-border-strong: rgb(255 255 255 / 0.22);
+  --color-text: #e8eaf0;
+  --color-text-muted: #a5abbb;
+  --color-text-subtle: #767d90;
+  // blue-500 fails contrast on a dark surface; lift it.
+  --color-primary: #7b93d8;
+  --color-primary-hover: #93a8e2;
+  --color-primary-soft: #1e2740;
+  --color-success: var(--green-500);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 2px 4px rgb(0 0 0 / 0.4), 0 8px 20px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 4px 8px rgb(0 0 0 / 0.45), 0 16px 40px rgb(0 0 0 / 0.55);
 }
 
 // Expressive motion only. Functional feedback keeps its short durations, so a
