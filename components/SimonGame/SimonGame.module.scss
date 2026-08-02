@@ -93,93 +93,10 @@
   background: var(--green-500);
 }
 
-// ---------- Piano ----------
-
-.piano {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  gap: 0;
+// The keyboard itself lives in components/PianoKeyboard so that every game
+// shows the same instrument.
+.keyboard {
   margin-bottom: 1.25rem;
-  padding: 0.4rem 0.4rem 0;
-  border-radius: var(--radius-md);
-  background: linear-gradient(180deg, #1e2433, #141926);
-}
-
-.whiteKey {
-  position: relative;
-  z-index: 1;
-  flex: 1 1 0;
-  // Comfortably past the 44px minimum: this is the only control that matters
-  // and it is aimed at children.
-  min-width: 2.6rem;
-  height: 9rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.15rem;
-  padding-bottom: 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
-  background: linear-gradient(180deg, #fff, #eef1f5);
-  cursor: pointer;
-  transition:
-    background-color var(--dur-instant) var(--ease-out),
-    transform var(--dur-instant) var(--ease-out);
-
-  & + .whiteKey {
-    margin-left: -1px;
-  }
-
-  &:active:not(:disabled) {
-    background: linear-gradient(180deg, var(--green-300), var(--green-500));
-    transform: translateY(2px);
-  }
-
-  &:disabled {
-    cursor: default;
-  }
-
-  @media (min-width: $mobile-breakpoint) {
-    height: 10.5rem;
-  }
-}
-
-// The key the app is currently playing.
-.keyLit {
-  background: linear-gradient(180deg, var(--sky-300), var(--sky-500));
-  border-color: var(--sky-700);
-}
-
-.keyName {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--neutral-800);
-}
-
-.keyHint {
-  display: none;
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: $light-text-color;
-
-  // The QWERTY letter only helps where there is a keyboard.
-  @media (min-width: $mobile-breakpoint) {
-    display: block;
-  }
-}
-
-.blackKey {
-  position: absolute;
-  z-index: 2;
-  top: 0.4rem;
-  left: calc(0.4rem + var(--slot) * (100% - 0.8rem) / 7);
-  width: calc((100% - 0.8rem) / 7 * 0.6);
-  height: 60%;
-  border-radius: 0 0 var(--radius-xs) var(--radius-xs);
-  background: linear-gradient(180deg, #333949, #10141f);
-  pointer-events: none;
 }
 
 // ---------- Actions ----------

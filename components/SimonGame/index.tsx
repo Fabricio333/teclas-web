@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faRotateRight } from '@fortawesome/free-solid-svg-icons';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
-import { midiToSolfege } from '@/lib/piano-player/noteNames';
 import { WHITE_KEYS, BLACK_KEYS } from '@/lib/piano-player/songs';
+import PianoKeyboard from '@/components/PianoKeyboard';
 import styles from './SimonGame.module.scss';
 
 /**
@@ -328,34 +328,21 @@ export default function SimonGame() {
         ))}
       </div>
 
-      <div className={styles.piano}>
-        {WHITE_KEYS.map((key) => (
-          <button
-            className={`${styles.whiteKey} ${
-              playingIndex !== null && steps[playingIndex]?.midi === key.midi
-                ? styles.keyLit
-                : ''
-            }`}
-            disabled={busy}
-            key={key.midi}
-            onPointerDown={() => press(key.midi)}
-            type="button"
-          >
-            <span className={styles.keyName}>{midiToSolfege(key.midi)}</span>
-            <span className={styles.keyHint}>{key.label}</span>
-          </button>
-        ))}
-        {/* Decorative: the black keys are never part of a sequence, but a
-            keyboard without them does not read as a piano. */}
-        {BLACK_KEYS.map((key, i) => (
-          <span
-            aria-hidden="true"
-            className={styles.blackKey}
-            key={key.midi}
-            style={{ ['--slot' as string]: [0.7, 1.7, 3.7, 4.7, 5.7][i] }}
-          />
-        ))}
-      </div>
+      {/*
+        The house keyboard, the same one the piano player shows. Simon
+        originally drew its own simplified keys, which made this screen look
+        like it belonged to a different product.
+      */}
+      <PianoKeyboard
+        className={styles.keyboard}
+        disabled={busy}
+        labels="both"
+        litMidi={
+          playingIndex !== null ? (steps[playingIndex]?.midi ?? null) : null
+        }
+        naturalsOnly
+        onPress={press}
+      />
 
       <div className={styles.actions}>
         {phase === 'right' ? (

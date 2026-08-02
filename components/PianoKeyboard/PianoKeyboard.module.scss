@@ -1,0 +1,191 @@
+@use '../../styles/variables' as *;
+
+// ---------------------------------------------------------------------------
+// The keyboard, extracted verbatim from PianoPlayer.module.scss so that every
+// game shows the *same* instrument. It had been duplicated between the piano
+// player and the ear training game, and a third, plainer one had grown inside
+// the Simon game — which is what made that screen look like a different app.
+//
+// PianoPlayer and EarTraining still build their own DOM imperatively (their
+// engines bind handlers to those nodes), so they keep their copies of these
+// rules for now; this module is what any *new* surface should use.
+// ---------------------------------------------------------------------------
+
+.piano {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  height: $white-key-height;
+  margin: 0 auto;
+  max-width: 500px;
+  touch-action: none; // eliminates ~100ms browser touch delay
+}
+
+.key {
+  background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
+  border: 1px solid #c4b99a;
+  width: $white-key-width;
+  height: 100%;
+  position: relative;
+  text-align: center;
+  font-weight: bold;
+  z-index: 1;
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 8px;
+  margin: 0 1px;
+  border-radius: 0 0 6px 6px;
+  transition:
+    background 0.06s ease-out,
+    transform 0.04s ease-out,
+    box-shadow 0.06s ease-out;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.15),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.04);
+
+  &:hover {
+    background: linear-gradient(180deg, #fdfcf5 0%, #ede8de 60%, #e4ddd0 100%);
+  }
+
+  &:active {
+    transform: translateY(3px);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.1),
+      inset 0 2px 4px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(180deg, #f0ebe0 0%, #e8e2d5 100%);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.black {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
+  color: white;
+  width: $black-key-width;
+  height: 60%;
+  position: absolute;
+  top: 0;
+  z-index: 3;
+  border-radius: 0 0 4px 4px;
+  border: 1px solid #000;
+  align-items: flex-end;
+  padding-bottom: 6px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.06);
+
+  &:hover {
+    background: linear-gradient(180deg, #333 0%, #222 40%, #181818 100%);
+  }
+
+  &:active {
+    transform: translateY(2px);
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.4),
+      inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(180deg, #222 0%, #151515 100%);
+  }
+}
+
+// 175px is half the seven-key span (7 x 50px, key + margins).
+.black[data-key-position='0'] {
+  left: calc(50% - 175px + 32px);
+}
+
+.black[data-key-position='1'] {
+  left: calc(50% - 175px + 82px);
+}
+
+.black[data-key-position='3'] {
+  left: calc(50% - 175px + 182px);
+}
+
+.black[data-key-position='4'] {
+  left: calc(50% - 175px + 232px);
+}
+
+.black[data-key-position='5'] {
+  left: calc(50% - 175px + 282px);
+}
+
+.keyLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.12rem;
+  font-size: $font-size-sm;
+  color: #999;
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+
+.keyNote {
+  line-height: 1;
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.keyLetter {
+  line-height: 1;
+}
+
+.black .keyLabel {
+  color: #999;
+}
+
+.pressed {
+  transform: translateY(3px);
+  background: linear-gradient(180deg, #e8e2d5 0%, #ddd6c6 100%);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.08),
+    inset 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  .keyLabel {
+    color: #888;
+  }
+}
+
+.black.pressed {
+  transform: translateY(2px);
+  background: linear-gradient(180deg, #181818 0%, #0e0e0e 100%);
+}
+
+// The key the app is currently sounding, as opposed to one the student is
+// holding down.
+.lit {
+  background: linear-gradient(180deg, var(--sky-300) 0%, var(--sky-500) 100%);
+  border-color: var(--sky-700);
+
+  .keyLabel,
+  .keyNote {
+    color: var(--blue-900);
+  }
+}
+
+.black.lit {
+  background: linear-gradient(180deg, var(--sky-700) 0%, var(--sky-800) 100%);
+
+  .keyLabel,
+  .keyNote {
+    color: #fff;
+  }
+}
+
+// Matches the piano player's "play this next" outline.
+.hint {
+  outline: 3px solid rgba(245, 158, 11, 0.6);
+  outline-offset: -3px;
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .piano {
+    height: 150px;
+    transform-origin: top center;
+  }
+}
