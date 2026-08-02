@@ -40,6 +40,40 @@
   margin-bottom: var(--space-1);
 }
 
+.pastTitle {
+  font-size: $font-size-lg;
+  color: $dark-text-color;
+  margin: var(--space-10) 0 var(--space-6);
+  text-align: center;
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: $font-size-xl;
+  }
+}
+
+.pastEventCard {
+  border-color: rgba($light-text-color, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.pastBadge {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background-color: rgba($light-text-color, 0.12);
+  color: $light-text-color;
+  font-size: $font-size-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.eventSubtitle {
+  color: $purple-color;
+  font-style: italic;
+  margin-bottom: var(--space-2);
+}
+
 .eventLink {
   display: inline-block;
   margin-top: var(--space-4);

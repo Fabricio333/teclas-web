@@ -1,8 +1,65 @@
-import eventJsonLd from '@/lib/seo/event';
+import Image from 'next/image';
+import Link from 'next/link';
+import {
+  pastEvents,
+  upcomingEvents,
+  whatsappUrl,
+  type TeclasEvent,
+} from '@/lib/events';
 import { eventsMetadata } from '@/lib/metadata';
 import styles from './Events.module.scss';
 
 export { eventsMetadata as metadata };
+
+function EventCard({ event }: { event: TeclasEvent }) {
+  const isPast = event.status === 'past';
+
+  return (
+    <article
+      className={`${styles.eventCard} ${isPast ? styles.pastEventCard : ''}`}
+    >
+      <Link
+        href={`/events/${event.slug}`}
+        className={styles.eventThumb}
+        aria-hidden="true"
+        tabIndex={-1}
+      >
+        <Image
+          src={event.image}
+          alt={event.imageAlt}
+          width={480}
+          height={360}
+          className={styles.eventThumbImage}
+        />
+      </Link>
+      <div className={styles.eventBody}>
+        {isPast && <span className={styles.pastBadge}>Finalizado</span>}
+        <h2 className={styles.eventTitle}>{event.title}</h2>
+        {event.subtitle && (
+          <p className={styles.eventSubtitle}>{event.subtitle}</p>
+        )}
+        <p className={styles.eventMeta}>{event.date}</p>
+        <p className={styles.eventMeta}>{event.summary}</p>
+        <div className={styles.eventActions}>
+          <a
+            href={whatsappUrl(event.whatsappMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${styles.pill} ${styles.pillPrimary}`}
+          >
+            {event.ctaLabel}
+          </a>
+          <Link
+            href={`/events/${event.slug}`}
+            className={`${styles.pill} ${styles.pillSecondary}`}
+          >
+            Leer más
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
 
 export default function EventsPage() {
   return (
@@ -13,24 +70,31 @@ export default function EventsPage() {
         page. Rendering it inline matches how /faq, /piano-player and
         /ear-training already emit theirs. The schema content is unchanged.
       */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd) }}
-      />
+      {[...upcomingEvents, ...pastEvents].map((event) => (
+        <script
+          key={event.slug}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(event.jsonLd) }}
+        />
+      ))}
       <div className="container">
         <h1 className={styles.title}>Próximos Eventos</h1>
-        <div className={styles.eventCard}>
-          <h2 className={styles.eventTitle}>Piano Workshop in Ciudad Jardín</h2>
-          <p className={styles.eventMeta}>
-            01 de Septiembre de 2024, 10:00 hs.
-          </p>
-          <p className={styles.eventMeta}>
-            Taller intensivo de piano para todos los niveles.
-          </p>
-          <a href="tel:+541134162288" className={styles.eventLink}>
-            Contactar para inscripción
-          </a>
+        <div className={styles.eventList}>
+          {upcomingEvents.map((event) => (
+            <EventCard key={event.slug} event={event} />
+          ))}
         </div>
+
+        {pastEvents.length > 0 && (
+          <>
+            <h2 className={styles.pastTitle}>Eventos Anteriores</h2>
+            <div className={styles.eventList}>
+              {pastEvents.map((event) => (
+                <EventCard key={event.slug} event={event} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );

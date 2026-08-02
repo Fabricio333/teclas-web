@@ -402,6 +402,15 @@
   will-change: transform;
 }
 
+.sheetHint {
+  margin-bottom: 0.35rem;
+  // Clears the toolbar, which is absolutely positioned in the same corner.
+  padding-right: 6rem;
+  font-size: 0.72rem;
+  color: $light-text-color;
+  text-align: left;
+}
+
 .sheetToolbar {
   position: absolute;
   top: 0.5rem;
@@ -579,6 +588,12 @@
 
 .sheet {
   max-width: 700px;
+  // Signals that the noteheads do something. Applied to the container rather
+  // than to each note, since abcjs rebuilds the SVG on every render.
+  :global(.abcjs-note) {
+    cursor: pointer;
+  }
+
   margin: 0 auto;
   overflow-x: auto;
 
@@ -896,6 +911,13 @@
   animation: notePulse 1s ease-in-out infinite;
   transform-origin: center;
   transform-box: fill-box;
+}
+
+// The note being sounded by the listen tool, as opposed to the one the student
+// has to play next. Deliberately a different colour from .sheetHighlight so
+// the two can never be confused mid-piece.
+.sheetPreview {
+  fill: var(--sky-700) !important;
 }
 
 .sheetCorrect {

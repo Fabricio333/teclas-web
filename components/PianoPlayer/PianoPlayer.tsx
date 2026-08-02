@@ -45,6 +45,7 @@ import {
   faGear,
   faSliders,
   faKeyboard,
+  faVolumeHigh,
 } from '@fortawesome/free-solid-svg-icons';
 
 const ALL_LEVELS =
@@ -652,10 +653,14 @@ export default function PianoPlayer() {
       });
 
       // ---------- Sheet music ----------
+      /** Durations of the rendered notes, in whole-notes, parallel to
+       *  `noteElems()`. Empty when it could not be aligned — see below. */
+      let noteDurations: number[] = [];
+
       const renderSheet = (lev: typeof level) => {
         const sheetEl = document.getElementById('sheet');
         if (sheetEl) sheetEl.innerHTML = '';
-        abcjs.renderAbc('sheet', lev.abc, {
+        const tunes = abcjs.renderAbc('sheet', lev.abc, {
           add_classes: true,
           paddingbottom: 14,
           paddingleft: 12,
@@ -665,6 +670,41 @@ export default function PianoPlayer() {
           scale: 1.08,
           staffwidth: 700,
         });
+
+        // Real rhythm for the playback below, read out of abcjs's own parse
+        // rather than assumed. Rests are skipped so the array lines up with
+        // `noteElems()`, which only returns noteheads — and if the two lengths
+        // disagree for any reason (a grand staff filters to one voice, for
+        // instance) the array is dropped and playback falls back to an even
+        // pulse. A wrong-length array would desynchronise the highlight from
+        // the sound, which is worse than a flat rhythm.
+        noteDurations = collectNoteDurations(tunes?.[0]);
+      };
+
+      const collectNoteDurations = (tune: unknown): number[] => {
+        const durations: number[] = [];
+        try {
+          const lines = (tune as { lines?: unknown[] })?.lines ?? [];
+          for (const line of lines as { staff?: unknown[] }[]) {
+            for (const staff of (line.staff ?? []) as {
+              voices?: unknown[];
+            }[]) {
+              for (const voice of (staff.voices ?? []) as unknown[][]) {
+                for (const item of voice as {
+                  el_type?: string;
+                  rest?: unknown;
+                  duration?: number;
+                }[]) {
+                  if (item.el_type !== 'note' || item.rest) continue;
+                  durations.push(item.duration ?? 0.25);
+                }
+              }
+            }
+          }
+        } catch {
+          return [];
+        }
+        return durations;
       };
 
       // ---------- Sheet viewport: show N systems and follow the current one ----------
@@ -832,6 +872,155 @@ export default function PianoPlayer() {
           p.classList.remove(cls),
         );
       };
+
+      // ---------- Listen to the score ----------
+      //
+      // Two ways in, because "let me hear it" means two things: tap a notehead
+      // to hear that one note, or press play to hear the phrase. Neither
+      // touches the game — pos, score and streak are untouched — and the
+      // microphone is muted throughout so the speakers are never mistaken for
+      // the student playing.
+
+      /** Quarter note, ms. Slow enough to follow, brisk enough not to drag. */
+      const PREVIEW_QUARTER_MS = 560;
+      let previewTimers: ReturnType<typeof setTimeout>[] = [];
+      let previewIndex = -1;
+      // An explicit flag, not `previewTimers.length`: finished timers stay in
+      // the array, so length is true forever once anything has played and the
+      // listen button toggled the wrong way on its first press.
+      let playingAll = false;
+
+      const noteMs = (index: number) => {
+        const whole = noteDurations[index];
+        // abcjs measures duration in whole notes; four quarters to the whole.
+        return whole ? whole * 4 * PREVIEW_QUARTER_MS : PREVIEW_QUARTER_MS;
+      };
+
+      const markPreview = (index: number, on: boolean) => {
+        const el = noteElems()[index];
+        if (!el) return;
+        if (on) applyClass(el, styles.sheetPreview);
+        else removeClass(el, styles.sheetPreview);
+      };
+
+      const setListenButton = (active: boolean) => {
+        const btn = document.getElementById('listen-btn');
+        if (!btn) return;
+        btn.setAttribute('aria-pressed', String(active));
+        btn.setAttribute('title', active ? 'Detener' : 'Escuchar la partitura');
+        btn.classList.toggle(styles.sheetToolBtnOn, active);
+      };
+
+      const stopPreview = () => {
+        previewTimers.forEach(clearTimeout);
+        previewTimers = [];
+        if (previewIndex >= 0) markPreview(previewIndex, false);
+        previewIndex = -1;
+        playingAll = false;
+        setListenButton(false);
+        try {
+          synth?.releaseAll();
+        } catch {
+          // Nothing was sounding — releasing anyway is harmless.
+        }
+        window.setTimeout(() => micUnmuteRef.current?.(), 250);
+      };
+
+      const soundNote = (midiNumber: number, seconds: number) => {
+        const name = midiToName[midiNumber];
+        if (!name) return;
+        try {
+          synth.triggerAttackRelease(name, seconds, Tone.now());
+        } catch (err) {
+          console.error('Preview error:', err);
+        }
+      };
+
+      /** Sound one note, without involving the game at all. */
+      const previewSingle = (index: number) => {
+        if (!synth.loaded || SONG[index] === undefined) return;
+        stopPreview();
+        micMuteRef.current?.();
+        markPreview(index, true);
+        previewIndex = index;
+        soundNote(SONG[index], noteMs(index) / 1000);
+        previewTimers.push(
+          window.setTimeout(() => {
+            markPreview(index, false);
+            previewIndex = -1;
+            window.setTimeout(() => micUnmuteRef.current?.(), 250);
+          }, noteMs(index)),
+        );
+      };
+
+      /** Play from `startIndex` to the end, following the line as it goes. */
+      const previewFrom = (startIndex: number) => {
+        if (!synth.loaded) return;
+        stopPreview();
+        playingAll = true;
+        setListenButton(true);
+        micMuteRef.current?.();
+
+        let at = 0;
+        for (let index = startIndex; index < SONG.length; index++) {
+          const duration = noteMs(index);
+          const midiNumber = SONG[index];
+          previewTimers.push(
+            window.setTimeout(() => {
+              if (previewIndex >= 0) markPreview(previewIndex, false);
+              markPreview(index, true);
+              previewIndex = index;
+
+              // Keep the line being listened to on screen, the same way the
+              // game does while the student is playing.
+              if (sheetLayout) {
+                const scroller = sheetScroller();
+                if (scroller) {
+                  const offset = scrollOffsetFor(
+                    sheetLayout,
+                    systemIndexForNote(sheetLayout, index),
+                    visibleLines(sheetLayout),
+                  );
+                  scroller.style.transition =
+                    'transform var(--dur-base) var(--ease-out)';
+                  scroller.style.transform = `translateY(${-offset}px)`;
+                }
+              }
+
+              soundNote(midiNumber, (duration * 0.95) / 1000);
+            }, at),
+          );
+          at += duration;
+        }
+
+        previewTimers.push(window.setTimeout(stopPreview, at + 200));
+      };
+
+      cleanupFns.push(stopPreview);
+
+      // Tap a notehead to hear it. Delegated, because abcjs replaces the whole
+      // SVG on every re-render and per-note listeners would be lost each time.
+      const sheetEl = document.getElementById('sheet');
+      const onSheetClick = (event: MouseEvent) => {
+        const target = event.target as Element | null;
+        const noteEl = target?.closest('.abcjs-note');
+        if (!noteEl) return;
+        const index = noteElems().indexOf(noteEl as SVGElement);
+        if (index < 0) return;
+        previewSingle(index);
+      };
+      sheetEl?.addEventListener('click', onSheetClick);
+      cleanupFns.push(() =>
+        sheetEl?.removeEventListener('click', onSheetClick),
+      );
+
+      const listenBtn = document.getElementById('listen-btn');
+      const onListen = () => {
+        if (playingAll) stopPreview();
+        else previewFrom(0);
+      };
+      listenBtn?.addEventListener('click', onListen);
+      cleanupFns.push(() => listenBtn?.removeEventListener('click', onListen));
 
       // ---------- UI helpers ----------
       const scoreEl = document.getElementById('score-val');
@@ -1666,6 +1855,17 @@ export default function PianoPlayer() {
             is translated to follow the current line. */}
         <div id="sheet-wrapper" className={styles.sheetWrapper}>
           <div id="sheet-toolbar" className={styles.sheetToolbar}>
+            {/* Wired by the engine, which owns the sampler and the sheet
+                layout. Rendered here so it sits with the other sheet tools. */}
+            <button
+              aria-pressed="false"
+              className={styles.sheetToolBtn}
+              id="listen-btn"
+              title="Escuchar la partitura"
+              type="button"
+            >
+              <FontAwesomeIcon icon={faVolumeHigh} />
+            </button>
             {isFullscreen && (
               <>
                 {/* The on-state indicator. A pressed icon button alone gave no
@@ -1711,6 +1911,9 @@ export default function PianoPlayer() {
               <FontAwesomeIcon icon={isFullscreen ? faCompress : faExpand} />
             </button>
           </div>
+          <p className={styles.sheetHint}>
+            Tocá una nota de la partitura para escucharla.
+          </p>
           <div id="sheet-viewport" className={styles.sheetViewport}>
             <div id="sheet-scroller" className={styles.sheetScroller}>
               <div id="sheet" className={styles.sheet} />
