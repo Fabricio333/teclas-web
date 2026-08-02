@@ -605,6 +605,45 @@ const SONG_SECTION_SPECS: Record<string, SongSectionSpec[]> = {
       patternName: 'Cierre',
     },
   ],
+  // A-A-B-A, four bars each. The three A sections share a patternId so the
+  // player is told the theme comes back three times rather than being shown
+  // three unrelated blocks.
+  'allegro-suzuki': [
+    {
+      id: 'main-a',
+      name: 'Tema',
+      kind: 'main',
+      length: 19,
+      patternId: 'allegro-theme',
+      patternName: 'Tema en staccato',
+      focus: 'Notas repetidas sueltas y salto C-G',
+    },
+    {
+      id: 'main-a-repeat',
+      name: 'Tema otra vez',
+      kind: 'main',
+      length: 19,
+      patternId: 'allegro-theme',
+      patternName: 'Tema en staccato',
+    },
+    {
+      id: 'bridge',
+      name: 'Puente',
+      kind: 'bridge',
+      length: 15,
+      patternId: 'allegro-bridge',
+      patternName: 'Respuesta ligada',
+      focus: 'Sin staccato, salto A-C repetido',
+    },
+    {
+      id: 'ending',
+      name: 'Retorno y final',
+      kind: 'ending',
+      length: 19,
+      patternId: 'allegro-theme',
+      patternName: 'Tema en staccato',
+    },
+  ],
   greensleeves: [
     {
       id: 'main',
@@ -969,6 +1008,37 @@ export const LEVELS: Level[] = applySongStructure([
     notes: [
       62, 67, 71, 67, 71, 69, 67, 64, 62, 67, 71, 67, 71, 69, 71, 69, 71, 74,
       71, 74, 71, 67, 64, 62, 67, 71, 67, 71, 69, 67,
+    ],
+  },
+  {
+    // Converted from a MuseScore file with `scripts/mscz-to-level.mjs`, which
+    // checks the abc against abcjs so the note elements and `notes` stay
+    // paired. Suzuki writes it in A major; this arrangement is in C, which
+    // keeps it on the white keys.
+    //
+    // The staccato dots are the character of the piece, and they are only on
+    // the A sections — the B section (bars 9-12) is unmarked in the source.
+    // Decorations attach to a notehead rather than creating one, so they do
+    // not affect the pairing above.
+    id: 'allegro-suzuki',
+    name: 'Allegro',
+    difficulty: 2,
+    abc: [
+      'X:1',
+      'T:Allegro',
+      'M:4/4',
+      'L:1/4',
+      'K:C',
+      '.c .c .G .G | A/2 B/2 c/2 A/2 .G .G | .F .F .E .E | D/2 C/2 D/2 E/2 C2 |',
+      '.c .c .G .G | A/2 B/2 c/2 A/2 .G .G | .F .F .E .E | D/2 C/2 D/2 E/2 C2 |',
+      'A A G C | A A G C | A B c A | G E D2 |',
+      '.c .c .G .G | A/2 B/2 c/2 A/2 .G .G | .F .F .E .E | D/2 C/2 D/2 E/2 C2 |',
+    ].join('\n'),
+    notes: [
+      72, 72, 67, 67, 69, 71, 72, 69, 67, 67, 65, 65, 64, 64, 62, 60, 62, 64,
+      60, 72, 72, 67, 67, 69, 71, 72, 69, 67, 67, 65, 65, 64, 64, 62, 60, 62,
+      64, 60, 69, 69, 67, 60, 69, 69, 67, 60, 69, 71, 72, 69, 67, 64, 62, 72,
+      72, 67, 67, 69, 71, 72, 69, 67, 67, 65, 65, 64, 64, 62, 60, 62, 64, 60,
     ],
   },
   {
