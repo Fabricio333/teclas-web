@@ -1,0 +1,232 @@
+@use '../../styles/variables' as *;
+
+.game {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.round {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--blue-900);
+
+  small {
+    font-weight: 600;
+    color: $light-text-color;
+  }
+}
+
+.sheetToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: $light-text-color;
+  cursor: pointer;
+}
+
+// One line, big enough to read from a piano stool, telling you the only thing
+// you need to know at that moment.
+.status {
+  min-height: 2.4rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--blue-900);
+}
+
+.status_listening {
+  color: var(--sky-800);
+}
+
+.status_answering {
+  color: var(--green-700);
+}
+
+.status_right {
+  color: var(--green-700);
+}
+
+.status_wrong {
+  color: var(--pink-700);
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: #d7dce6;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-spring);
+}
+
+// A long note is a wider dot, so the rhythm is visible as well as audible.
+.dotLong {
+  width: 1.5rem;
+}
+
+.dotPlaying {
+  background: var(--sky-500);
+  transform: scale(1.25);
+}
+
+.dotDone {
+  background: var(--green-500);
+}
+
+// ---------- Piano ----------
+
+.piano {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 1.25rem;
+  padding: 0.4rem 0.4rem 0;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, #1e2433, #141926);
+}
+
+.whiteKey {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  // Comfortably past the 44px minimum: this is the only control that matters
+  // and it is aimed at children.
+  min-width: 2.6rem;
+  height: 9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.15rem;
+  padding-bottom: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  background: linear-gradient(180deg, #fff, #eef1f5);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-instant) var(--ease-out),
+    transform var(--dur-instant) var(--ease-out);
+
+  & + .whiteKey {
+    margin-left: -1px;
+  }
+
+  &:active:not(:disabled) {
+    background: linear-gradient(180deg, var(--green-300), var(--green-500));
+    transform: translateY(2px);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+
+  @media (min-width: $mobile-breakpoint) {
+    height: 10.5rem;
+  }
+}
+
+// The key the app is currently playing.
+.keyLit {
+  background: linear-gradient(180deg, var(--sky-300), var(--sky-500));
+  border-color: var(--sky-700);
+}
+
+.keyName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--neutral-800);
+}
+
+.keyHint {
+  display: none;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: $light-text-color;
+
+  // The QWERTY letter only helps where there is a keyboard.
+  @media (min-width: $mobile-breakpoint) {
+    display: block;
+  }
+}
+
+.blackKey {
+  position: absolute;
+  z-index: 2;
+  top: 0.4rem;
+  left: calc(0.4rem + var(--slot) * (100% - 0.8rem) / 7);
+  width: calc((100% - 0.8rem) / 7 * 0.6);
+  height: 60%;
+  border-radius: 0 0 var(--radius-xs) var(--radius-xs);
+  background: linear-gradient(180deg, #333949, #10141f);
+  pointer-events: none;
+}
+
+// ---------- Actions ----------
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cta {
+  min-width: 11rem;
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: $light-text-color;
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #94a3b8;
+    color: $text-color;
+  }
+}
+
+.sheetCard {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: #fffef9;
+}
+
+.sheetLabel {
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $light-text-color;
+}

@@ -1,0 +1,41 @@
+@use '../../../styles/variables' as *;
+
+.switcher {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  max-width: 26rem;
+  margin: 0 auto 1.25rem;
+  padding: 0.25rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+}
+
+.tab {
+  flex: 1 1 0;
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: $light-text-color;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: $primary-color;
+  }
+}
+
+.tabOn {
+  background: $primary-color;
+  color: #fff;
+
+  &:hover {
+    color: #fff;
+  }
+}
