@@ -25,4 +25,14 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+  <!--
+    /ear-training was indexable but missing from the sitemap. /calibracion and
+    /progreso are deliberately absent: both are noindex, and listing a noindex
+    URL in a sitemap is a contradiction Search Console reports as an error.
+  -->
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/ear-training</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>

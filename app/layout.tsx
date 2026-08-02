@@ -30,6 +30,15 @@ const lobster = Lobster({
 });
 
 export const metadata: Metadata = {
+  /**
+   * Without this, Next resolves every relative image in `openGraph` and
+   * `twitter` against the *build* host — so every page in production shipped
+   * `og:image="http://localhost:3000/teclas.jpg"`, and no link to this site
+   * has ever rendered a preview image on WhatsApp, Facebook or X.
+   *
+   * Adding the base is what makes those absolute; no image or text changed.
+   */
+  metadataBase: new URL('https://teclasciudadjardin.com.ar'),
   title: 'TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires',
   description:
     'Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.',
@@ -68,7 +77,15 @@ export default function RootLayout({
     <html lang="es">
       <head>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="robots" content="index, follow" />
+        {/*
+          The hard-coded `<meta name="robots" content="index, follow">` that
+          used to sit here is gone. Every page already emits its own robots tag
+          through the Metadata API, so this produced a duplicate on all nine
+          pages — and on /calibracion and /progreso it produced a direct
+          contradiction: "index, follow" next to "noindex, follow". Crawlers
+          take the most restrictive of a conflicting pair, so the intent held,
+          but only by luck.
+        */}
         <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
         {/* Google Analytics */}
