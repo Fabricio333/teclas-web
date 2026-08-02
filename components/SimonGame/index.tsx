@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faRotateRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faEye,
+  faEyeSlash,
+  faPlay,
+  faRotateRight,
+} from '@fortawesome/free-solid-svg-icons';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { WHITE_KEYS, BLACK_KEYS } from '@/lib/piano-player/songs';
 import { letterNameToSolfege } from '@/lib/piano-player/noteNames';
@@ -17,7 +22,7 @@ import styles from './SimonGame.module.scss';
  * playing without being taught anything and without setting anything up.
  */
 
-type Phase = 'idle' | 'listening' | 'answering' | 'right' | 'wrong';
+type Phase = 'idle' | 'listening' | 'answering' | 'right' | 'lost';
 
 /** Beats. Two values only — a child can hear "short" and "long". */
 type Beat = 1 | 2;
@@ -36,36 +41,77 @@ const BEAT_MS = 620;
  *  pitch, so the rhythm rule is met only once the ear part is comfortable. */
 const RHYTHM_FROM_ROUND = 3;
 
+const BEATS_PER_BAR = 4;
+
 const PHASE_TEXT: Record<Phase, string> = {
-  idle: 'Tocá Escuchar y prestá atención',
+  idle: 'Tocá Empezar y prestá atención',
   listening: 'Escuchá…',
   answering: 'Tu turno',
   right: '¡Muy bien!',
-  wrong: 'Casi. Escuchá de nuevo',
+  lost: 'Se terminó',
 };
 
-function randomStep(round: number): Step {
+/** Pause on "¡Muy bien!" before the next round starts on its own. Long enough
+ *  to read the notation that just appeared, short enough not to drag. */
+const ROUND_GAP_MS = 1500;
+
+/** Points per note repeated correctly. */
+const POINTS_PER_NOTE = 10;
+
+function randomStep(round: number, beatsSoFar: number): Step {
   const midi = POOL[Math.floor(Math.random() * POOL.length)];
-  const beats: Beat = round >= RHYTHM_FROM_ROUND && Math.random() < 0.4 ? 2 : 1;
+  // A long note starting on the last beat of a bar would have to be split
+  // across the barline, which neither the notation nor the dots can express.
+  const roomInBar = BEATS_PER_BAR - (beatsSoFar % BEATS_PER_BAR);
+  const canBeLong = roomInBar >= 2;
+  const beats: Beat =
+    canBeLong && round >= RHYTHM_FROM_ROUND && Math.random() < 0.4 ? 2 : 1;
   return { midi, beats };
 }
 
-/** ABC for the notation shown after a correct round. */
-function sequenceToAbc(steps: Step[]): string {
-  const letters: Record<number, string> = {
-    60: 'C',
-    62: 'D',
-    64: 'E',
-    65: 'F',
-    67: 'G',
-    69: 'A',
-    71: 'B',
-  };
-  const body = steps
-    .map((s) => `${letters[s.midi] ?? 'C'}${s.beats === 2 ? '2' : ''}`)
-    .join(' ');
+const ABC_LETTER: Record<number, string> = {
+  60: 'C',
+  62: 'D',
+  64: 'E',
+  65: 'F',
+  67: 'G',
+  69: 'A',
+  71: 'B',
+};
 
-  return ['X:1', 'M:4/4', 'L:1/4', 'K:C', `${body} |`].join('\n');
+/**
+ * ABC for the notation.
+ *
+ * Every note used to go into a single bar — `C D E F G A B |` and on — so from
+ * about round five the score was one absurdly overfull measure stretched
+ * across the page. Barred properly now, with the last bar padded with a rest
+ * so it is a legal 4/4 measure rather than a truncated one.
+ *
+ * `nextRound` guarantees a long note never starts on the last beat of a bar,
+ * so no note ever needs splitting across a barline.
+ */
+function sequenceToAbc(steps: Step[]): string {
+  const bars: string[] = [];
+  let bar: string[] = [];
+  let beats = 0;
+
+  for (const step of steps) {
+    bar.push(`${ABC_LETTER[step.midi] ?? 'C'}${step.beats === 2 ? '2' : ''}`);
+    beats += step.beats;
+    if (beats >= BEATS_PER_BAR) {
+      bars.push(bar.join(' '));
+      bar = [];
+      beats = 0;
+    }
+  }
+
+  if (bar.length > 0) {
+    const rest = BEATS_PER_BAR - beats;
+    if (rest > 0) bar.push(`z${rest > 1 ? rest : ''}`);
+    bars.push(bar.join(' '));
+  }
+
+  return ['X:1', 'M:4/4', 'L:1/4', 'K:C', `${bars.join(' | ')} |`].join('\n');
 }
 
 /**
@@ -99,7 +145,13 @@ export default function SimonGame() {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const [answered, setAnswered] = useState(0);
   const [best, setBest] = useState(0);
+  const [score, setScore] = useState(0);
   const [showSheet, setShowSheet] = useState(true);
+  /** Which mistake ended the run, so the game-over card can say. */
+  const [lostOn, setLostOn] = useState<'note' | 'rhythm'>('note');
+  /** The sequence to draw. Held separately from `steps` so the notation stays
+   *  on screen through the gap between rounds instead of flashing. */
+  const [sheetSteps, setSheetSteps] = useState<Step[]>([]);
 
   const onsetsRef = useRef<number[]>([]);
   const answerRef = useRef(0);
@@ -192,11 +244,19 @@ export default function SimonGame() {
     [clearTimers, getSampler, sound],
   );
 
+  // `press` schedules the next round but is declared first, so it goes through
+  // a ref rather than forcing the two callbacks into a circular dependency.
+  const nextRoundRef = useRef<(() => void) | null>(null);
+
   const nextRound = useCallback(() => {
-    const list = [...stepsRef.current, randomStep(stepsRef.current.length + 1)];
+    const played = stepsRef.current;
+    const beatsSoFar = played.reduce((sum, s) => sum + s.beats, 0);
+    const list = [...played, randomStep(played.length + 1, beatsSoFar)];
     setSteps(list);
     void playSequence(list);
   }, [playSequence]);
+
+  nextRoundRef.current = nextRound;
 
   const restart = useCallback(() => {
     clearTimers();
@@ -204,6 +264,8 @@ export default function SimonGame() {
     setPhase('idle');
     setPlayingIndex(null);
     setAnswered(0);
+    setScore(0);
+    setSheetSteps([]);
   }, [clearTimers]);
 
   const press = useCallback(
@@ -217,34 +279,46 @@ export default function SimonGame() {
 
       if (list[index]?.midi !== midi) {
         clearTimers();
-        setPhase('wrong');
-        timersRef.current.push(setTimeout(() => playSequence(list), 1400));
+        setLostOn('note');
+        setSheetSteps(list);
+        setPhase('lost');
         return;
       }
 
       answerRef.current = index + 1;
       setAnswered(index + 1);
+      setScore((s) => s + POINTS_PER_NOTE);
       if (answerRef.current < list.length) return;
 
-      // Whole sequence played back. Notes were right; check the shape of the
-      // rhythm, and treat a rhythm slip as "try again", never as a loss.
+      // Whole sequence played back. The notes were right; the shape of the
+      // rhythm is the last thing to check.
       if (!rhythmMatches(list, onsetsRef.current)) {
         clearTimers();
-        setPhase('wrong');
-        timersRef.current.push(setTimeout(() => playSequence(list), 1600));
+        setLostOn('rhythm');
+        setSheetSteps(list);
+        setPhase('lost');
         return;
       }
 
       setPhase('right');
       setBest((b) => Math.max(b, list.length));
+      setSheetSteps(list);
+      // The run continues on its own from here — no button to press between
+      // rounds, which is what makes it feel like a game rather than a drill.
+      timersRef.current.push(
+        setTimeout(() => nextRoundRef.current?.(), ROUND_GAP_MS),
+      );
     },
-    [clearTimers, playSequence, sound],
+    // `playSequence` is no longer called here — a mistake now ends the run
+    // rather than replaying the sequence.
+    [clearTimers, sound],
   );
 
-  // Notation for the round just completed. Rendered only on success, so it
-  // rewards the ear rather than replacing it.
+  // Notation of what has been played so far. Driven by `sheetSteps` rather
+  // than by the phase, so it stays on screen through the gap between rounds
+  // instead of flashing for a moment and vanishing.
   useEffect(() => {
-    if (phase !== 'right' || !showSheet) return;
+    if (sheetSteps.length === 0 || !showSheet) return;
     const host = sheetRef.current;
     if (!host) return;
 
@@ -252,7 +326,7 @@ export default function SimonGame() {
     void import('abcjs').then((mod) => {
       if (cancelled || !sheetRef.current) return;
       const abcjs = (mod as { default?: typeof mod }).default ?? mod;
-      abcjs.renderAbc(sheetRef.current, sequenceToAbc(stepsRef.current), {
+      abcjs.renderAbc(sheetRef.current, sequenceToAbc(sheetSteps), {
         responsive: 'resize',
         scale: 1.1,
         staffwidth: 480,
@@ -265,7 +339,7 @@ export default function SimonGame() {
       cancelled = true;
       if (host) host.innerHTML = '';
     };
-  }, [phase, showSheet]);
+  }, [sheetSteps, showSheet]);
 
   // The QWERTY row, so a student on a laptop never has to reach for the mouse.
   useEffect(() => {
@@ -309,31 +383,29 @@ export default function SimonGame() {
             <FontAwesomeIcon icon={faRotateRight} /> Reiniciar
           </button>
 
-          <label className={styles.selectLabel}>
-            <input
-              checked={showSheet}
-              onChange={(e) => setShowSheet(e.target.checked)}
-              type="checkbox"
-            />{' '}
-            Ver la partitura
-          </label>
+          <button
+            aria-pressed={showSheet}
+            className={`${styles.restartBtn} ${showSheet ? styles.toggleOn : ''}`}
+            onClick={() => setShowSheet((v) => !v)}
+            type="button"
+          >
+            <FontAwesomeIcon icon={showSheet ? faEye : faEyeSlash} /> Partitura
+          </button>
         </div>
       </div>
 
       <div className={styles.scoreCards}>
         <div className={`${styles.scoreCard} ${styles.scoreCardBlue}`}>
+          <span className={styles.scoreCardLabel}>Puntos</span>
+          <span className={styles.scoreCardValue}>{score}</span>
+        </div>
+        <div className={`${styles.scoreCard} ${styles.scoreCardAmber}`}>
           <span className={styles.scoreCardLabel}>Ronda</span>
           <span className={styles.scoreCardValue}>{steps.length || 1}</span>
         </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardAmber}`}>
+        <div className={`${styles.scoreCard} ${styles.scoreCardGreen}`}>
           <span className={styles.scoreCardLabel}>Mejor</span>
           <span className={styles.scoreCardValue}>{best}</span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardGreen}`}>
-          <span className={styles.scoreCardLabel}>Notas</span>
-          <span className={styles.scoreCardValue}>
-            {phase === 'answering' ? `${answered}/${steps.length}` : '\u2014'}
-          </span>
         </div>
       </div>
 
@@ -346,23 +418,21 @@ export default function SimonGame() {
               }`}
         </p>
 
-        {phase === 'right' ? (
-          <button className={styles.playBtn} onClick={nextRound} type="button">
-            Seguir
-          </button>
-        ) : (
-          <button
-            className={styles.playBtn}
-            disabled={busy}
-            onClick={() =>
-              steps.length === 0 ? nextRound() : playSequence(steps)
-            }
-            type="button"
-          >
-            <FontAwesomeIcon icon={faPlay} />{' '}
-            {steps.length === 0 ? 'Empezar' : 'Escuchar de nuevo'}
-          </button>
-        )}
+        <button
+          className={styles.playBtn}
+          disabled={busy || phase === 'right'}
+          onClick={() =>
+            steps.length === 0 || phase === 'lost'
+              ? (restart(), nextRound())
+              : playSequence(steps)
+          }
+          type="button"
+        >
+          <FontAwesomeIcon icon={faPlay} />{' '}
+          {steps.length === 0 || phase === 'lost'
+            ? 'Empezar'
+            : 'Escuchar de nuevo'}
+        </button>
 
         <p className={styles.noteNameDisplay} role="status">
           {PHASE_TEXT[phase]}
@@ -400,12 +470,45 @@ export default function SimonGame() {
         />
       </div>
 
-      {showSheet && phase === 'right' && (
+      {showSheet && sheetSteps.length > 0 && (
         <div className={styles.sheetCard}>
-          <p className={styles.sheetLabel}>Esto fue lo que tocaste</p>
+          <p className={styles.sheetLabel}>
+            {phase === 'lost' ? 'La melodía era así' : 'Lo que llevás tocado'}
+          </p>
           <div ref={sheetRef} />
         </div>
       )}
+
+      {/* Game over. The run is continuous now, so this is the only place a
+          final score can be shown. */}
+      <div
+        className={`${styles.done} ${phase === 'lost' ? styles.doneVisible : ''}`}
+      >
+        <div className={styles.doneCard}>
+          <span className={styles.doneIcon}>{'\u266A'}</span>
+          <span className={styles.doneText}>
+            {lostOn === 'rhythm'
+              ? 'Las notas estaban bien, falló el ritmo'
+              : 'Esa no era la nota'}
+          </span>
+          <span className={styles.doneScore}>
+            {score} puntos {'\u00B7'} ronda {steps.length}
+            {best > steps.length ? ` \u00B7 mejor ${best}` : ''}
+          </span>
+          <div className={styles.doneActions}>
+            <button
+              className={`${styles.doneBtn} ${styles.doneBtnPrimary}`}
+              onClick={() => {
+                restart();
+                nextRound();
+              }}
+              type="button"
+            >
+              Jugar de nuevo
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className={styles.keyboardRef}>
         <span className={styles.keyboardRefTitle}>Teclas:</span>
