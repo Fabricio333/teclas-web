@@ -1745,31 +1745,37 @@ export default function PianoPlayer() {
           </span>
           <div ref={pianoRef} className={styles.piano} />
         </div>
+
+        {/*
+          Inside the stage, not after it. Only the fullscreen element's subtree
+          is painted, so out here the completion overlay was invisible in
+          fullscreen — you could finish a piece and never see "Siguiente
+          cancion", with no way to advance. It is `position: fixed`, so it does
+          not participate in the grid layout this container uses on desktop.
+        */}
+        <div ref={doneRef} className={styles.done}>
+          <div className={styles.doneCard}>
+            <span className={styles.doneIcon}>{'\u2713'}</span>
+            <span id="done-text" className={styles.doneText}>
+              {'\u00A1Bien hecho!'}
+            </span>
+            <div className={styles.doneActions}>
+              <button id="done-replay-btn" className={styles.doneBtn}>
+                Repetir
+              </button>
+              <button
+                id="done-next-btn"
+                className={`${styles.doneBtn} ${styles.doneBtnPrimary}`}
+              >
+                Siguiente cancion
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Hint text */}
       <p ref={hintRef} className={styles.hint} />
-
-      {/* Done overlay */}
-      <div ref={doneRef} className={styles.done}>
-        <div className={styles.doneCard}>
-          <span className={styles.doneIcon}>{'\u2713'}</span>
-          <span id="done-text" className={styles.doneText}>
-            {'\u00A1Bien hecho!'}
-          </span>
-          <div className={styles.doneActions}>
-            <button id="done-replay-btn" className={styles.doneBtn}>
-              Repetir
-            </button>
-            <button
-              id="done-next-btn"
-              className={`${styles.doneBtn} ${styles.doneBtnPrimary}`}
-            >
-              Siguiente cancion
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Keyboard reference */}
       <div className={styles.keyboardRef}>
