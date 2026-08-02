@@ -11,19 +11,45 @@
 // rules for now; this module is what any *new* surface should use.
 // ---------------------------------------------------------------------------
 
+// One white key plus its two 1px margins. Black keys are placed in multiples
+// of this, which is what lets the same rules draw one octave or seven.
+$key-pitch: $white-key-width + 2px;
+
+.frame {
+  position: relative;
+}
+
+// Only applied when the range is wider than one octave. A plain frame stays
+// overflow-visible, so the single-octave keyboard every game uses keeps its
+// drop shadow and its exact box — this wrapper changes nothing for them.
+.scroller {
+  overflow-x: auto;
+  // The keys cast a shadow ~10px below themselves, and a scroll container
+  // would clip it. Pad it back, then pull the same amount off the outside so
+  // the space this occupies in the page is unchanged.
+  padding-bottom: 10px;
+  margin-bottom: -10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+
 .piano {
   display: flex;
   justify-content: center;
   position: relative;
   height: $white-key-height;
   margin: 0 auto;
-  max-width: 500px;
+  // Sized to its keys rather than to the page, so a black key can be offset
+  // from the keyboard's own left edge instead of from a hand-measured centre.
+  width: calc(var(--white-count) * #{$key-pitch});
   touch-action: none; // eliminates ~100ms browser touch delay
 }
 
 .key {
   background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
   border: 1px solid #c4b99a;
+  flex: 0 0 auto;
   width: $white-key-width;
   height: 100%;
   position: relative;
@@ -63,6 +89,15 @@
   }
 }
 
+// A read-only keyboard is a diagram, not a control.
+div.key {
+  cursor: default;
+
+  &:hover {
+    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
+  }
+}
+
 .black {
   background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
   color: white;
@@ -70,6 +105,9 @@
   height: 60%;
   position: absolute;
   top: 0;
+  // `--slot` is how many white keys sit to this one's left, so it lands on
+  // the boundary between them whatever the range or the scroll position.
+  left: calc(var(--slot) * #{$key-pitch} - #{$black-key-width * 0.5});
   z-index: 3;
   border-radius: 0 0 4px 4px;
   border: 1px solid #000;
@@ -92,25 +130,8 @@
   }
 }
 
-// 175px is half the seven-key span (7 x 50px, key + margins).
-.black[data-key-position='0'] {
-  left: calc(50% - 175px + 32px);
-}
-
-.black[data-key-position='1'] {
-  left: calc(50% - 175px + 82px);
-}
-
-.black[data-key-position='3'] {
-  left: calc(50% - 175px + 182px);
-}
-
-.black[data-key-position='4'] {
-  left: calc(50% - 175px + 232px);
-}
-
-.black[data-key-position='5'] {
-  left: calc(50% - 175px + 282px);
+div.black:hover {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
 }
 
 .keyLabel {
@@ -181,6 +202,84 @@
 .hint {
   outline: 3px solid rgba(245, 158, 11, 0.6);
   outline-offset: -3px;
+}
+
+// "Play this one." Green because that is the app's go colour, and on a
+// five-octave keyboard it is the single thing the student has to find.
+.target {
+  background: linear-gradient(
+    180deg,
+    var(--green-300) 0%,
+    var(--green-500) 100%
+  );
+  border-color: var(--green-700);
+  z-index: 2;
+
+  .keyLabel,
+  .keyNote {
+    color: var(--green-900);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: key-pulse 1.6s var(--ease-in-out) infinite;
+  }
+}
+
+.black.target {
+  background: linear-gradient(
+    180deg,
+    var(--green-600) 0%,
+    var(--green-800) 100%
+  );
+  z-index: 4;
+
+  .keyLabel,
+  .keyNote {
+    color: #fff;
+  }
+}
+
+@keyframes key-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.12);
+  }
+}
+
+// Heard, but not what was asked for. The classic beginner miss is the right
+// note in the wrong octave, and side by side with the green key that becomes
+// obvious rather than arithmetic.
+.wrong {
+  background: linear-gradient(180deg, var(--pink-300) 0%, var(--pink-500) 100%);
+  border-color: var(--pink-700);
+
+  .keyLabel,
+  .keyNote {
+    color: var(--pink-900);
+  }
+}
+
+.black.wrong {
+  background: linear-gradient(180deg, var(--pink-700) 0%, var(--pink-900) 100%);
+
+  .keyLabel,
+  .keyNote {
+    color: #fff;
+  }
+}
+
+// Of interest on this screen — coming up, or already captured. A tint, not a
+// highlight: it must never compete with the key being asked for.
+.marked {
+  background: linear-gradient(180deg, #fff 0%, var(--green-50) 100%);
+  border-color: var(--green-300);
+}
+
+.black.marked {
+  background: linear-gradient(180deg, #2f3a1c 0%, #1a2010 100%);
 }
 
 @media (max-width: $mobile-breakpoint) {
