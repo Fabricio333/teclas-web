@@ -327,6 +327,9 @@ export default function SimonGame() {
       if (cancelled || !sheetRef.current) return;
       const abcjs = (mod as { default?: typeof mod }).default ?? mod;
       abcjs.renderAbc(sheetRef.current, sequenceToAbc(sheetSteps), {
+        // Matches the piano player's options, and makes the rendered notes
+        // addressable so the notation can actually be asserted on.
+        add_classes: true,
         responsive: 'resize',
         scale: 1.1,
         staffwidth: 480,
@@ -470,12 +473,29 @@ export default function SimonGame() {
         />
       </div>
 
-      {showSheet && sheetSteps.length > 0 && (
+      {/*
+        The card appears as soon as the toggle is on, even with nothing to
+        draw yet. Rendering nothing until the first round was completed made
+        the toggle look broken: you press "Partitura" and the page does not
+        change, because the notation only exists once you have played
+        something back.
+      */}
+      {showSheet && (
         <div className={styles.sheetCard}>
           <p className={styles.sheetLabel}>
-            {phase === 'lost' ? 'La melodía era así' : 'Lo que llevás tocado'}
+            {sheetSteps.length === 0
+              ? 'Partitura'
+              : phase === 'lost'
+                ? 'La melodía era así'
+                : 'Lo que llevás tocado'}
           </p>
-          <div ref={sheetRef} />
+          {sheetSteps.length === 0 ? (
+            <p className={styles.sheetEmpty}>
+              Acá vas a ver la melodía escrita cuando completes una ronda.
+            </p>
+          ) : (
+            <div ref={sheetRef} />
+          )}
         </div>
       )}
 
