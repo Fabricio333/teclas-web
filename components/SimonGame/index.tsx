@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faRotateRight } from '@fortawesome/free-solid-svg-icons';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { WHITE_KEYS, BLACK_KEYS } from '@/lib/piano-player/songs';
+import { letterNameToSolfege } from '@/lib/piano-player/noteNames';
 import PianoKeyboard from '@/components/PianoKeyboard';
 import styles from './SimonGame.module.scss';
 
@@ -287,75 +288,71 @@ export default function SimonGame() {
   const busy = phase === 'listening';
 
   return (
-    <div className={styles.game}>
-      <div className={styles.statusRow}>
-        <span className={styles.round}>
-          Ronda {steps.length || 1}
-          {best > 0 && <small> · mejor {best}</small>}
-        </span>
-        <label className={styles.sheetToggle}>
-          <input
-            checked={showSheet}
-            onChange={(e) => setShowSheet(e.target.checked)}
-            type="checkbox"
-          />
-          <span>Ver la partitura</span>
-        </label>
+    <section className={styles.gameSection}>
+      {/* Same shell as the other two practice apps: header, controls panel,
+          score cards, prompt area, piano, keyboard reference. */}
+      <div className={styles.header}>
+        <h2 className={styles.title}>Simon musical</h2>
+        <p className={styles.subtitle}>
+          Escuchá la melodía y repetila en el piano. Cada ronda suma una nota.
+        </p>
       </div>
 
-      <p
-        className={`${styles.status} ${styles[`status_${phase}`]}`}
-        role="status"
-      >
-        {PHASE_TEXT[phase]}
-      </p>
-
-      {/* One dot per note, filled as the student gets them right. This is the
-          only progress indicator — a bar or a score would be noise here. */}
-      <div className={styles.dots} aria-hidden="true">
-        {steps.map((step, i) => (
-          <span
-            className={[
-              styles.dot,
-              step.beats === 2 ? styles.dotLong : '',
-              playingIndex === i ? styles.dotPlaying : '',
-              phase === 'answering' && i < answered ? styles.dotDone : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-            key={i}
-          />
-        ))}
-      </div>
-
-      {/*
-        The house keyboard, the same one the piano player shows. Simon
-        originally drew its own simplified keys, which made this screen look
-        like it belonged to a different product.
-      */}
-      <PianoKeyboard
-        className={styles.keyboard}
-        disabled={busy}
-        labels="both"
-        litMidi={
-          playingIndex !== null ? (steps[playingIndex]?.midi ?? null) : null
-        }
-        naturalsOnly
-        onPress={press}
-      />
-
-      <div className={styles.actions}>
-        {phase === 'right' ? (
+      <div className={styles.controlsPanel}>
+        <div className={styles.controls}>
           <button
-            className={`btnPrimary ${styles.cta}`}
-            onClick={nextRound}
+            className={styles.restartBtn}
+            disabled={steps.length === 0}
+            onClick={restart}
             type="button"
           >
+            <FontAwesomeIcon icon={faRotateRight} /> Reiniciar
+          </button>
+
+          <label className={styles.selectLabel}>
+            <input
+              checked={showSheet}
+              onChange={(e) => setShowSheet(e.target.checked)}
+              type="checkbox"
+            />{' '}
+            Ver la partitura
+          </label>
+        </div>
+      </div>
+
+      <div className={styles.scoreCards}>
+        <div className={`${styles.scoreCard} ${styles.scoreCardBlue}`}>
+          <span className={styles.scoreCardLabel}>Ronda</span>
+          <span className={styles.scoreCardValue}>{steps.length || 1}</span>
+        </div>
+        <div className={`${styles.scoreCard} ${styles.scoreCardAmber}`}>
+          <span className={styles.scoreCardLabel}>Mejor</span>
+          <span className={styles.scoreCardValue}>{best}</span>
+        </div>
+        <div className={`${styles.scoreCard} ${styles.scoreCardGreen}`}>
+          <span className={styles.scoreCardLabel}>Notas</span>
+          <span className={styles.scoreCardValue}>
+            {phase === 'answering' ? `${answered}/${steps.length}` : '\u2014'}
+          </span>
+        </div>
+      </div>
+
+      <div className={styles.promptArea}>
+        <p className={styles.noteCounter}>
+          {steps.length === 0
+            ? 'Ronda 1'
+            : `Ronda ${steps.length} \u00B7 ${steps.length} ${
+                steps.length === 1 ? 'nota' : 'notas'
+              }`}
+        </p>
+
+        {phase === 'right' ? (
+          <button className={styles.playBtn} onClick={nextRound} type="button">
             Seguir
           </button>
         ) : (
           <button
-            className={`btnPrimary ${styles.cta}`}
+            className={styles.playBtn}
             disabled={busy}
             onClick={() =>
               steps.length === 0 ? nextRound() : playSequence(steps)
@@ -363,15 +360,44 @@ export default function SimonGame() {
             type="button"
           >
             <FontAwesomeIcon icon={faPlay} />{' '}
-            {steps.length === 0 ? 'Empezar' : 'Escuchar'}
+            {steps.length === 0 ? 'Empezar' : 'Escuchar de nuevo'}
           </button>
         )}
 
-        {steps.length > 0 && (
-          <button className={styles.secondary} onClick={restart} type="button">
-            <FontAwesomeIcon icon={faRotateRight} /> De nuevo
-          </button>
-        )}
+        <p className={styles.noteNameDisplay} role="status">
+          {PHASE_TEXT[phase]}
+        </p>
+
+        {/* One dot per note — wide for a long one, so the rhythm is visible as
+            well as audible. */}
+        <div className={styles.dots} aria-hidden="true">
+          {steps.map((step, i) => (
+            <span
+              className={[
+                styles.dot,
+                step.beats === 2 ? styles.dotLong : '',
+                playingIndex === i ? styles.dotPlaying : '',
+                phase === 'answering' && i < answered ? styles.dotDone : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              key={i}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* The house keyboard, the same one the piano player shows. */}
+      <div className={styles.pianoWrapper}>
+        <PianoKeyboard
+          disabled={busy}
+          labels="both"
+          litMidi={
+            playingIndex !== null ? (steps[playingIndex]?.midi ?? null) : null
+          }
+          naturalsOnly
+          onPress={press}
+        />
       </div>
 
       {showSheet && phase === 'right' && (
@@ -380,6 +406,18 @@ export default function SimonGame() {
           <div ref={sheetRef} />
         </div>
       )}
-    </div>
+
+      <div className={styles.keyboardRef}>
+        <span className={styles.keyboardRefTitle}>Teclas:</span>
+        {WHITE_KEYS.map((k) => (
+          <span key={k.midi} className={styles.kbdGroup}>
+            <kbd className={styles.kbd}>{k.label}</kbd>
+            <span className={styles.kbdNote}>
+              {letterNameToSolfege(k.note)}
+            </span>
+          </span>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -1,64 +1,249 @@
+@use 'sass:color';
 @use '../../styles/variables' as *;
 
-.game {
-  max-width: 640px;
+// ---------------------------------------------------------------------------
+// The page shell — section, header, controls panel, score cards, prompt area,
+// keyboard reference — is copied verbatim from EarTraining.module.scss so that
+// Simon looks like the rest of the practice apps rather than like something
+// bolted on. PianoPlayer and EarTraining already duplicate these between
+// themselves; this follows the existing pattern rather than inventing a third
+// look. Extracting all three into one shared shell is the real fix and is
+// worth doing separately.
+// ---------------------------------------------------------------------------
+
+.gameSection {
+  max-width: 800px;
   margin: 0 auto;
+  // This 2rem used to sit under an ~87px fixed header with no compensation
+  // anywhere, which put the "Entrenamiento Auditivo" heading entirely behind
+  // the navbar. `main { padding-top }` now clears it globally.
+  padding: var(--space-8) var(--space-6);
   text-align: center;
+  position: relative;
+  min-height: calc(80dvh - var(--header-height));
 }
 
-.statusRow {
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: $font-size-xl;
+  color: $primary-color;
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  font-size: $font-size-md;
+  color: $light-text-color;
+}
+
+.controlsPanel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.controls {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.round {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--blue-900);
+.selectLabel {
+  font-size: 0.9rem;
+  color: $text-color;
+}
 
-  small {
-    font-weight: 600;
-    color: $light-text-color;
+.restartBtn {
+  padding: 6px 18px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+
+  &:active {
+    background: #e2e8f0;
   }
 }
 
-.sheetToggle {
+.scoreCards {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.scoreCard {
+  flex: 1;
+  max-width: 160px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.scoreCardLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.8;
+}
+
+.scoreCardValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.scoreCardBlue {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+}
+
+.scoreCardAmber {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+}
+
+.scoreCardGreen {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.promptArea {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.playBtn {
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
+  border: 2px solid $primary-color;
+  background: $primary-color;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: color.adjust($primary-color, $lightness: -8%);
+    transform: scale(1.03);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.noteCounter {
+  font-size: 0.9rem;
+  color: $light-text-color;
+  font-weight: 600;
+}
+
+.noteNameDisplay {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: $success-color;
+  min-height: 2rem;
+  transition: opacity 0.3s;
+}
+
+.pianoWrapper {
+  background: linear-gradient(180deg, #0f172a, $black-key-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.keyboardRef {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  margin-top: 1rem;
+}
+
+.keyboardRefTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $light-text-color;
+  margin-right: 0.25rem;
+}
+
+.kbdGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.kbd {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.85rem;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.3rem;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: $text-color;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.kbdNote {
+  font-size: 0.65rem;
   color: $light-text-color;
-  cursor: pointer;
 }
 
-// One line, big enough to read from a piano stool, telling you the only thing
-// you need to know at that moment.
-.status {
-  min-height: 2.4rem;
-  margin-bottom: 0.75rem;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--blue-900);
+.hint {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  min-height: 1.5rem;
+  color: $text-color;
 }
 
-.status_listening {
-  color: var(--sky-800);
-}
-
-.status_answering {
-  color: var(--green-700);
-}
-
-.status_right {
-  color: var(--green-700);
-}
-
-.status_wrong {
-  color: var(--pink-700);
-}
+// ---------------------------------------------------------------------------
+// Simon-specific pieces.
+// ---------------------------------------------------------------------------
 
 .dots {
   display: flex;
@@ -79,7 +264,6 @@
     transform var(--dur-fast) var(--ease-spring);
 }
 
-// A long note is a wider dot, so the rhythm is visible as well as audible.
 .dotLong {
   width: 1.5rem;
 }
@@ -93,42 +277,8 @@
   background: var(--green-500);
 }
 
-// The keyboard itself lives in components/PianoKeyboard so that every game
-// shows the same instrument.
 .keyboard {
   margin-bottom: 1.25rem;
-}
-
-// ---------- Actions ----------
-
-.actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.cta {
-  min-width: 11rem;
-}
-
-.secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--radius-pill);
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: $light-text-color;
-  font-size: 0.9rem;
-  cursor: pointer;
-
-  &:hover {
-    border-color: #94a3b8;
-    color: $text-color;
-  }
 }
 
 .sheetCard {
@@ -146,4 +296,21 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: $light-text-color;
+}
+
+.sheetToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: $light-text-color;
+  cursor: pointer;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
