@@ -3,9 +3,8 @@ import { pastEventJsonLd } from '@/lib/seo/pastEvent';
 
 /**
  * Single source of truth for /events and its `/events/{slug}` detail pages, so
- * a card and its article can never drift apart. The copy of the pre-existing
- * "Piano Workshop in Ciudad Jardín" entry is reproduced verbatim from the old
- * hard-coded markup — moved, never rewritten (see the SEO rule in CLAUDE.md).
+ * a card and its article can never drift apart. Upcoming events are listed
+ * first, past ones after.
  */
 export type TeclasEvent = {
   slug: string;
@@ -39,30 +38,32 @@ export function whatsappUrl(message: string): string {
 
 export const events: TeclasEvent[] = [
   {
-    slug: 'piano-workshop-ciudad-jardin',
-    title: 'Piano Workshop in Ciudad Jardín',
+    slug: 'clase-abierta-piano-series-pelis-juegos',
+    title: 'Clase abierta de piano: series, pelis y juegos',
+    subtitle: 'Niños y jóvenes interpretarán música de series, pelis y juegos',
     status: 'upcoming',
-    date: '01 de Septiembre de 2024, 10:00 hs.',
-    summary: 'Taller intensivo de piano para todos los niveles.',
+    date: 'Sábado 29 de Agosto de 2026',
+    summary:
+      'Niños y jóvenes interpretarán música de series, películas y videojuegos.',
     location: 'TECLAS — Blvd. Aviador Finca 6142, Local 12, Ciudad Jardín.',
-    image: '/events/piano-workshop-ciudad-jardin.jpg',
-    imageAlt: 'Piano en el estudio de TECLAS, Ciudad Jardín',
+    image: '/events/clase-abierta-piano-series-pelis-juegos.jpg',
+    imageAlt: 'Alumnos de TECLAS tocando el teclado en el estudio',
     ctaLabel: 'Inscribirme por WhatsApp',
     whatsappMessage:
-      '¡Hola TECLAS! Quiero inscribirme al Piano Workshop in Ciudad Jardín.',
+      '¡Hola TECLAS! Quiero inscribirme a la clase abierta de piano del 29 de agosto.',
     metaDescription:
-      'Taller intensivo de piano para todos los niveles en TECLAS Ciudad Jardín.',
+      'Clase abierta de piano en TECLAS Ciudad Jardín: niños y jóvenes interpretarán música de series, películas y videojuegos.',
     body: [
-      'Taller intensivo de piano para todos los niveles.',
-      'Trabajamos en grupos reducidos para que cada persona tenga tiempo al teclado y una devolución concreta sobre lo que está tocando, sin importar desde qué punto arranque.',
-      'No hace falta traer instrumento: en el estudio hay teclados disponibles durante todo el encuentro.',
+      'Una clase abierta para venir a escuchar y a tocar: niños y jóvenes de TECLAS interpretarán música de series, películas y videojuegos.',
+      'Los temas que suenan en pantalla son la mejor puerta de entrada al piano — se reconocen de entrada, se disfrutan desde la primera nota y se aprenden tocando.',
+      'La entrada es libre y la clase está abierta a familias y a quienes estén pensando en empezar a estudiar piano.',
     ],
     facts: [
-      { label: 'Fecha', value: '01 de Septiembre de 2024, 10:00 hs.' },
-      { label: 'Duración', value: '2 horas' },
-      { label: 'Nivel', value: 'Todos los niveles' },
+      { label: 'Fecha', value: 'Sábado 29 de Agosto de 2026' },
+      { label: 'Horario', value: 'A confirmar' },
+      { label: 'Dirigido a', value: 'Niños y jóvenes, y sus familias' },
       { label: 'Lugar', value: 'Blvd. Aviador Finca 6142, Local 12' },
-      { label: 'Cupos', value: 'Limitados' },
+      { label: 'Entrada', value: 'Libre — cupos limitados' },
     ],
     jsonLd: eventJsonLd,
   },

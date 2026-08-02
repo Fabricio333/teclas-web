@@ -17,29 +17,6 @@
   }
 }
 
-.eventCard {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: var(--space-6);
-  border: 1px solid rgba($blue-color, 0.16);
-  border-radius: 0.75rem;
-  background-color: $background-color;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.eventTitle {
-  font-size: $font-size-lg;
-  color: $primary-color;
-  margin-bottom: var(--space-2);
-}
-
-.eventMeta {
-  color: $light-text-color;
-  margin-bottom: var(--space-1);
-}
-
 .pastTitle {
   font-size: $font-size-lg;
   color: $dark-text-color;
@@ -51,9 +28,62 @@
   }
 }
 
+.eventList {
+  display: grid;
+  gap: var(--space-6);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.eventCard {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba($blue-color, 0.16);
+  border-radius: 0.75rem;
+  background-color: $background-color;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 8px 20px rgba(0, 0, 0, 0.08);
+
+  @media (min-width: $mobile-breakpoint) {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
 .pastEventCard {
   border-color: rgba($light-text-color, 0.2);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.eventThumb {
+  display: block;
+  flex-shrink: 0;
+  line-height: 0;
+  background-color: rgba($blue-color, 0.06);
+
+  // Centred rather than stretched: the source photos are 4:3, so a 4:3 box
+  // shows the whole frame instead of cropping the subject out of a tall slice.
+  @media (min-width: $mobile-breakpoint) {
+    align-self: center;
+    width: 240px;
+  }
+}
+
+.eventThumbImage {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+
+  @media (min-width: $mobile-breakpoint) {
+    height: auto;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.eventBody {
+  padding: var(--space-6);
 }
 
 .pastBadge {
@@ -68,20 +98,59 @@
   letter-spacing: 0.04em;
 }
 
+.eventTitle {
+  font-size: $font-size-lg;
+  color: $primary-color;
+  margin-bottom: var(--space-2);
+}
+
 .eventSubtitle {
   color: $purple-color;
   font-style: italic;
   margin-bottom: var(--space-2);
 }
 
-.eventLink {
-  display: inline-block;
+.eventMeta {
+  color: $light-text-color;
+  margin-bottom: var(--space-1);
+}
+
+.eventActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   margin-top: var(--space-4);
-  color: $primary-color;
-  text-decoration: underline;
-  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  text-align: center;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.pillPrimary {
+  background-color: $primary-color;
+  color: $background-color;
 
   &:hover {
-    color: $yellow-color;
+    background-color: $purple-color;
+  }
+}
+
+.pillSecondary {
+  border-color: rgba($primary-color, 0.4);
+  color: $primary-color;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.08);
+    border-color: $primary-color;
   }
 }
