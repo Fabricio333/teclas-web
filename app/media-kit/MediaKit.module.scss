@@ -1,0 +1,401 @@
+@use '../../styles/variables' as *;
+@use '../../styles/components' as *;
+
+.section {
+  @extend .sectionPadding;
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100dvh - var(--header-height));
+  background-color: var(--neutral-0);
+  background-image:
+    radial-gradient(
+      52rem 28rem at 12% -4%,
+      rgb(var(--green-rgb) / 0.18),
+      transparent 62%
+    ),
+    radial-gradient(
+      44rem 26rem at 88% 6%,
+      rgb(var(--blue-rgb) / 0.12),
+      transparent 60%
+    );
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  max-width: 60rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.title {
+  font-size: $font-size-xl;
+  margin-bottom: 0.75rem;
+  color: var(--blue-900);
+  line-height: var(--leading-tight);
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: $font-size-xxl;
+  }
+}
+
+.subtitle {
+  max-width: 40rem;
+  margin: 1.5rem auto 0;
+  color: var(--neutral-600);
+  line-height: var(--leading-normal);
+}
+
+// ---------- Blocks ----------
+
+.block {
+  margin-bottom: 2.5rem;
+  padding: 1.75rem;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.blockTitle {
+  font-size: 1.35rem;
+  margin-bottom: 0.35rem;
+  color: var(--blue-900);
+}
+
+.blockText {
+  margin-bottom: 1.25rem;
+  font-size: 0.92rem;
+  color: var(--neutral-600);
+  line-height: var(--leading-normal);
+}
+
+// ---------- Assets ----------
+
+.assetGrid,
+.photoGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+}
+
+.asset,
+.photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--neutral-50);
+  text-align: center;
+}
+
+// The isotipo is a green circle; a mid-grey tile keeps it visible whether the
+// visitor is checking it on light or dark.
+.assetPreview {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 7rem;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(45deg, #eceff4 25%, transparent 25%) -8px 0 / 16px 16px,
+    linear-gradient(-45deg, #eceff4 25%, transparent 25%) -8px 0 / 16px 16px,
+    linear-gradient(45deg, transparent 75%, #eceff4 75%) 0 0 / 16px 16px,
+    linear-gradient(-45deg, transparent 75%, #eceff4 75%) 0 0 / 16px 16px,
+    #fff;
+}
+
+.assetImage {
+  width: 4.5rem;
+  height: auto;
+}
+
+.photoFrame {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.photoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.assetMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.assetName {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--blue-900);
+
+  small {
+    margin-left: 0.3rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-xs);
+    background: rgb(var(--blue-rgb) / 0.1);
+    color: $primary-color;
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+}
+
+.assetDetail {
+  font-size: 0.78rem;
+  color: $light-text-color;
+}
+
+.download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: auto;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid $primary-color;
+  color: $primary-color;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: $primary-color;
+    color: #fff;
+  }
+}
+
+// ---------- Usage rules ----------
+
+.rules {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border);
+
+  @media (min-width: $mobile-breakpoint) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.ruleCol {
+  min-width: 0;
+}
+
+.ruleTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.ruleDo {
+  color: var(--green-700);
+}
+
+.ruleDont {
+  color: var(--pink-700);
+}
+
+.ruleList {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--neutral-600);
+
+  li {
+    margin-bottom: 0.3rem;
+  }
+}
+
+// ---------- Palette ----------
+
+.palette {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.swatchChip {
+  display: grid;
+  place-items: center;
+  height: 4.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.swatchMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  padding: 0.7rem 0.85rem;
+  background: #fff;
+}
+
+.swatchName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--blue-900);
+}
+
+.swatchUsage {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: $light-text-color;
+}
+
+// ---------- Fonts ----------
+
+.fontList {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.font {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--neutral-50);
+}
+
+.fontSample {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-size: 1.5rem;
+  color: var(--blue-900);
+}
+
+.fontMeta {
+  display: flex;
+  flex-direction: column;
+}
+
+.fontName {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--blue-900);
+}
+
+.fontRole {
+  font-size: 0.75rem;
+  color: $light-text-color;
+}
+
+// ---------- Boilerplate ----------
+
+.textBlock {
+  margin-bottom: 0.85rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  background: var(--neutral-50);
+}
+
+.textHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.textLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $light-text-color;
+}
+
+.textBody {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--neutral-800);
+}
+
+// ---------- Facts ----------
+
+.facts {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.fact {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--color-border);
+
+  @media (min-width: $mobile-breakpoint) {
+    grid-template-columns: 9rem 1fr;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.factLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: $light-text-color;
+}
+
+.factValue {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--neutral-800);
+
+  a {
+    color: $primary-color;
+    text-decoration: underline;
+  }
+}
+
+// ---------- Missing ----------
+
+.missing {
+  background: var(--green-50);
+  border-color: rgb(var(--green-rgb) / 0.4);
+}
+
+.contact {
+  margin-top: 1.25rem;
+}

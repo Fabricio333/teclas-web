@@ -188,6 +188,34 @@ export const calibracionMetadata: Metadata = {
   },
 };
 
+/**
+ * New page — added, not altered, per the SEO rule in CLAUDE.md.
+ *
+ * Indexable on purpose: a media kit exists to be found by journalists and
+ * partners searching for the school's assets.
+ */
+export const mediaKitMetadata: Metadata = {
+  title: 'Media kit | TECLAS Ciudad Jardín',
+  description:
+    'Logo, colores, tipografías, fotos y textos de TECLAS Ciudad Jardín para prensa, notas y colaboraciones.',
+  alternates: {
+    canonical: 'https://teclasciudadjardin.com.ar/media-kit',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    url: 'https://teclasciudadjardin.com.ar/media-kit',
+    title: 'Media kit | TECLAS Ciudad Jardín',
+    description:
+      'Logo, colores, tipografías, fotos y textos de TECLAS Ciudad Jardín para prensa, notas y colaboraciones.',
+    siteName: 'TECLAS',
+    images: [{ url: '/teclas.jpg' }],
+  },
+};
+
 export default {
   homeMetadata,
   eventsMetadata,
@@ -197,4 +225,5 @@ export default {
   earTrainingMetadata,
   progresoMetadata,
   calibracionMetadata,
+  mediaKitMetadata,
 };

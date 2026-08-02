@@ -1,0 +1,36 @@
+@use '../../../styles/variables' as *;
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: $light-text-color;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    border-color: $primary-color;
+    color: $primary-color;
+  }
+}
+
+.copied {
+  border-color: var(--green-600);
+  background: var(--green-50);
+  color: var(--green-700);
+
+  &:hover {
+    border-color: var(--green-600);
+    color: var(--green-700);
+  }
+}

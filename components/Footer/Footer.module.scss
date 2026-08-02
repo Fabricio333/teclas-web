@@ -96,6 +96,19 @@
     }
   }
 
+  .footerLinks {
+    margin-bottom: 0.4rem;
+
+    a {
+      text-decoration: underline;
+      transition: color var(--dur-base) var(--ease-out);
+
+      &:hover {
+        color: var(--green-900);
+      }
+    }
+  }
+
   .footerBottom {
     border-top: 1px solid $primary-color;
     margin-top: 3rem;

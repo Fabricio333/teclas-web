@@ -43,6 +43,11 @@ export default function Footer() {
         </div>
 
         <div className={styles.footerBottom}>
+          {/* Utility link, not marketing copy: a media kit nobody can find is
+              a media kit nobody uses. */}
+          <p className={styles.footerLinks}>
+            <Link href="/media-kit">Media kit</Link>
+          </p>
           <p>
             &copy; {new Date().getFullYear()} Teclas Ciudad Jardín. Todos los
             derechos reservados.

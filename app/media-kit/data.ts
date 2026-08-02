@@ -1,0 +1,216 @@
+/**
+ * Media kit contents.
+ *
+ * Kept as data so the page stays readable and so every asset listed here is a
+ * file that actually exists in `public/`. Nothing is offered that the site
+ * cannot serve — see `MISSING` at the bottom for what the school does not have
+ * yet, which is stated on the page rather than quietly omitted.
+ *
+ * Every fact below is taken from the existing site (footer, instructor bio,
+ * social links). Nothing is invented: no founding year, no student numbers, no
+ * awards.
+ */
+
+export interface Asset {
+  name: string;
+  file: string;
+  format: string;
+  detail: string;
+}
+
+export interface Swatch {
+  name: string;
+  hex: string;
+  usage: string;
+  /** Text colour for the chip, so the label stays readable on the fill. */
+  ink?: string;
+}
+
+/**
+ * The two marks in `public/` are NOT the same image, which is easy to get
+ * wrong: `icon.svg` is a green circle with a treble clef, `icon.png` is a
+ * black grand piano on a cream square. Each is described as what it actually
+ * is, and the mismatch is called out under MISSING.
+ */
+export const LOGO_ASSETS: Asset[] = [
+  {
+    name: 'Isotipo verde',
+    file: '/icon.svg',
+    format: 'SVG',
+    detail:
+      'Clave de sol sobre círculo verde · vectorial, escala sin perder nitidez',
+  },
+  {
+    name: 'Marca piano',
+    file: '/icon.png',
+    format: 'PNG',
+    detail: '667 × 667 px · fondo crema, no transparente',
+  },
+  {
+    name: 'Favicon',
+    file: '/favicon.ico',
+    format: 'ICO',
+    detail: 'Isotipo verde · para navegadores y accesos directos',
+  },
+];
+
+export const PHOTO_ASSETS: Asset[] = [
+  {
+    name: 'Roxana Arena',
+    file: '/fotoDeFrente.jpg',
+    format: 'JPG',
+    detail: '1280 × 1280 px · retrato de la directora',
+  },
+  {
+    name: 'Teclas',
+    file: '/teclas.jpg',
+    format: 'JPG',
+    detail: '5768 × 4094 px · imagen general de marca',
+  },
+];
+
+export const PALETTE: Swatch[] = [
+  {
+    name: 'Verde Teclas',
+    hex: '#A5CE39',
+    usage: 'Color principal. Header, pie de página e isotipo.',
+    ink: '#35450F',
+  },
+  {
+    name: 'Verde profundo',
+    hex: '#35450F',
+    usage: 'Texto sobre verde. Nunca usar blanco sobre el verde principal.',
+  },
+  {
+    name: 'Azul',
+    hex: '#415CA9',
+    usage: 'Color secundario. Bloques de contenido y botones.',
+  },
+  {
+    name: 'Azul noche',
+    hex: '#141D36',
+    usage: 'Títulos y texto sobre fondos claros.',
+  },
+  {
+    name: 'Violeta',
+    hex: '#8658A7',
+    usage: 'Acento. Entrenamiento auditivo.',
+  },
+  {
+    name: 'Rosa',
+    hex: '#ED3B95',
+    usage: 'Acento. Progreso y detalles.',
+  },
+  {
+    name: 'Amarillo',
+    hex: '#FFD122',
+    usage: 'Acento. Subrayados y foco.',
+    ink: '#141D36',
+  },
+  {
+    name: 'Celeste',
+    hex: '#60C9DE',
+    usage: 'Acento. Notas y elementos decorativos.',
+    ink: '#141D36',
+  },
+  {
+    name: 'Naranja',
+    hex: '#F3862C',
+    usage: 'Acento. Rachas de práctica.',
+    ink: '#141D36',
+  },
+];
+
+export interface FontSpec {
+  name: string;
+  role: string;
+  weights: string;
+  url: string;
+  cssVar: string;
+}
+
+export const FONTS: FontSpec[] = [
+  {
+    name: 'Lobster',
+    role: 'Logotipo y títulos de marca',
+    weights: '400',
+    url: 'https://fonts.google.com/specimen/Lobster',
+    cssVar: '--font-lobster',
+  },
+  {
+    name: 'Delius',
+    role: 'Textos destacados',
+    weights: '400',
+    url: 'https://fonts.google.com/specimen/Delius',
+    cssVar: '--font-delius',
+  },
+  {
+    name: 'Comic Neue',
+    role: 'Apoyo, materiales para chicos',
+    weights: '400',
+    url: 'https://fonts.google.com/specimen/Comic+Neue',
+    cssVar: '--font-comic-neue',
+  },
+];
+
+export const BOILERPLATE = {
+  short:
+    'TECLAS es una escuela de piano en Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires, con clases presenciales personalizadas para chicos y adultos.',
+  medium:
+    'TECLAS es una escuela de piano en Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires. Dirigida por Roxana Arena, ofrece clases presenciales personalizadas para chicos desde los 4 años y para adultos, con un método propio pensado para aprender de manera interactiva, divertida y efectiva.',
+  long: 'TECLAS es una escuela de piano en Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires. Su directora, Roxana Arena, comenzó sus estudios musicales en el Conservatorio Beethoven de Córdoba Capital a los 6 años y estudió Composición y Educación Musical en la Universidad Nacional de Córdoba. Dio clases particulares desde los 14 años y fundó Teclas, donde desarrolló un método propio para aprender música de manera interactiva, divertida y efectiva. La escuela ofrece clases presenciales personalizadas para chicos desde los 4 años y para adultos, y acompaña a sus estudiantes en la preparación de exámenes de conservatorio y presentaciones en conciertos. El sitio suma además herramientas interactivas gratuitas para practicar entre clase y clase.',
+};
+
+export const FACTS: { label: string; value: string; href?: string }[] = [
+  { label: 'Nombre', value: 'TECLAS — Escuela de Piano' },
+  { label: 'Directora', value: 'Roxana Arena' },
+  {
+    label: 'Dirección',
+    value:
+      'Blvd. F.i.n.c.a 6142 Local 12, Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires',
+  },
+  {
+    label: 'Teléfono',
+    value: '(+54) 9 11 3416-2288',
+    href: 'tel:+541134162288',
+  },
+  {
+    label: 'Sitio',
+    value: 'teclasciudadjardin.com.ar',
+    href: 'https://teclasciudadjardin.com.ar',
+  },
+  {
+    label: 'Instagram',
+    value: '@teclas.ciudadjardin',
+    href: 'https://www.instagram.com/teclas.ciudadjardin/',
+  },
+  {
+    label: 'YouTube',
+    value: '@roxanaarena618',
+    href: 'https://www.youtube.com/@roxanaarena618',
+  },
+];
+
+export const USAGE_DO = [
+  'Usá el isotipo sobre fondos claros o sobre el verde de marca.',
+  'Dejá un margen libre alrededor del isotipo de al menos la mitad de su alto.',
+  'Escribí el nombre en mayúsculas: TECLAS.',
+];
+
+export const USAGE_DONT = [
+  'No deformes ni rotes el isotipo.',
+  'No le cambies los colores ni le agregues sombras o contornos.',
+  'No lo pongas sobre fotos con mucho detalle donde pierda contraste.',
+];
+
+/**
+ * Assets the school does not have yet. Listed on the page on purpose: telling
+ * a journalist what is missing is more useful than letting them hunt for it.
+ */
+export const MISSING = [
+  'Una marca única: hoy conviven dos, el isotipo verde y la marca piano',
+  'La marca piano en vectorial y con fondo transparente',
+  'Logotipo horizontal (isotipo + texto) como archivo',
+  'Versión monocromática del isotipo para impresión a un color',
+  'Fotos del espacio de clases y de alumnos en actividad',
+];
