@@ -101,38 +101,118 @@
   margin-bottom: var(--space-4);
 }
 
-.bigNote {
-  font-size: clamp(2.5rem, 10vw, 4rem);
+// The wizard is five screens long and used to give no sense of that, so the
+// microphone prompt arrived with no indication of how much was left.
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0 0 var(--space-5);
+  padding: 0;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  min-width: 0;
+}
+
+.stepDot {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  font-size: 0.7rem;
+  font-weight: var(--weight-bold);
+}
+
+.stepLabel {
+  // The labels are the first thing to go on a narrow screen; the numbered
+  // dots still carry the position.
+  display: none;
+
+  @media (min-width: $mobile-breakpoint) {
+    display: inline;
+  }
+}
+
+.stepDone {
+  color: var(--green-700);
+
+  .stepDot {
+    background: $green-color;
+    border-color: $green-color;
+    color: var(--green-900);
+  }
+}
+
+.stepCurrent {
+  color: $primary-color;
+  font-weight: var(--weight-bold);
+
+  .stepDot {
+    background: $primary-color;
+    border-color: $primary-color;
+    color: #fff;
+  }
+}
+
+.keyboard {
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.targetName {
+  color: var(--green-700);
+}
+
+.countdown {
+  font-size: clamp(2rem, 8vw, 3rem);
   font-weight: var(--weight-bold);
   color: $primary-color;
   line-height: 1.1;
-  margin: var(--space-4) 0;
-}
-
-.coverage {
-  display: flex;
-  justify-content: center;
-  gap: 0.4rem;
   margin-bottom: var(--space-4);
+  font-variant-numeric: tabular-nums;
 }
 
-.coverageDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+// Where this note sits against equal temperament. Centre is dead on, the
+// full width is a quarter tone either way — so "how far off" is a glance
+// rather than arithmetic on a cents figure.
+.centsTrack {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 60px;
+  height: 4px;
+  align-self: center;
+  border-radius: var(--radius-pill);
   background: var(--color-bg-sunken);
-  border: 1px solid var(--color-border);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -3px;
+    bottom: -3px;
+    width: 1px;
+    background: var(--color-border-strong);
+  }
 }
 
-.coverageDone {
-  background: $green-color;
-  border-color: $green-color;
-}
-
-.coverageCurrent {
-  background: $yellow-color;
-  border-color: $orange-color;
-  transform: scale(1.3);
+.centsBar {
+  position: absolute;
+  top: -3px;
+  width: 6px;
+  height: 10px;
+  margin-left: -3px;
+  border-radius: var(--radius-pill);
+  background: $primary-color;
 }
 
 .actions {
@@ -216,14 +296,16 @@
 
 .noteRow {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-2);
+  gap: var(--space-3);
   padding: 0.4rem 0;
   border-bottom: 1px solid var(--color-border);
   font-size: var(--text-sm);
 }
 
 .noteName {
+  flex: 0 0 3.5rem;
   font-weight: var(--weight-bold);
   color: var(--color-text);
 }

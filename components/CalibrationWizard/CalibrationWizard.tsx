@@ -17,10 +17,11 @@ import styles from './CalibrationWizard.module.scss';
 // reads goes through `midiToSolfege`.
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { midiToSolfege } from '@/lib/piano-player/noteNames';
-import CalibrationKeyboard from './CalibrationKeyboard';
+import PianoKeyboard from '@/components/PianoKeyboard';
 import {
   captureNote,
   fitTuning,
+  frameToMidi,
   measureNoise,
   openCapture,
   readFrame,
@@ -56,6 +57,26 @@ const VOCAL_PLANS: Record<'quick' | 'full', number[]> = {
 };
 
 /**
+ * The steps in order, for the progress bar. `silence` is folded into the
+ * microphone stage rather than given its own dot: it is three seconds long,
+ * and a step you cannot fail is not a step the student needs to count.
+ */
+const STEP_ORDER: { key: Step; label: string }[] = [
+  { key: 'intro', label: 'Tu instrumento' },
+  { key: 'mic', label: 'Micrófono' },
+  { key: 'notes', label: 'Notas' },
+  { key: 'review', label: 'Listo' },
+];
+
+const STEP_INDEX: Record<Step, number> = {
+  intro: 0,
+  mic: 1,
+  silence: 1,
+  notes: 2,
+  review: 3,
+};
+
+/**
  * Was `Do4 (C4)` — and only for the 48-71 range, since it came from the ear
  * training map; anything outside it fell back to the bare English name. Now
  * fixed-do across the whole keyboard, with no English in parentheses.
@@ -71,6 +92,8 @@ export default function CalibrationWizard() {
   const [error, setError] = useState<string | null>(null);
 
   const [level, setLevel] = useState(0);
+  /** What the microphone is hearing this instant, or null if nothing clear. */
+  const [liveMidi, setLiveMidi] = useState<number | null>(null);
   const [noise, setNoise] = useState<NoiseProfile | null>(null);
   const [silenceProgress, setSilenceProgress] = useState(0);
 
@@ -92,6 +115,21 @@ export default function CalibrationWizard() {
 
   const [existing, setExisting] = useState<CalibrationProfile | null>(null);
   const [saved, setSaved] = useState<CalibrationProfile | null>(null);
+
+  /**
+   * What the microphone reported, kept in state rather than read back off the
+   * handle when the profile is built.
+   *
+   * `stopCapture` nulls the handle on the way into the review step, and the
+   * Save button runs there — so every profile was being written with the
+   * fallback 48 kHz and all-null capture flags regardless of the device it
+   * had just measured. Reading it during render was also what the "cannot
+   * access refs during render" warning was pointing at.
+   */
+  const [device, setDevice] = useState<{
+    sampleRate: number;
+    flags: CaptureHandle['flags'];
+  } | null>(null);
 
   const handleRef = useRef<CaptureHandle | null>(null);
   const abortRef = useRef<{ aborted: boolean }>({ aborted: false });
@@ -120,12 +158,19 @@ export default function CalibrationWizard() {
     setError(null);
     try {
       abortRef.current = { aborted: false };
-      handleRef.current = await openCapture();
+      const handle = await openCapture();
+      handleRef.current = handle;
+      setDevice({ sampleRate: handle.context.sampleRate, flags: handle.flags });
       setStep('mic');
 
       const tick = () => {
         if (!handleRef.current || abortRef.current.aborted) return;
-        setLevel(readFrame(handleRef.current).rms);
+        const frame = readFrame(handleRef.current);
+        setLevel(frame.rms);
+        // Naming the note during the mic check doubles as proof the microphone
+        // works: a moving bar says "something arrived", a note name says "we
+        // understood it".
+        setLiveMidi(frameToMidi(frame));
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
@@ -146,6 +191,7 @@ export default function CalibrationWizard() {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     setStep('silence');
     setSilenceProgress(0);
+    setLiveMidi(null);
     const profile = await measureNoise(handleRef.current, 3000, (p, rms) => {
       setSilenceProgress(p);
       setLevel(rms);
@@ -167,6 +213,7 @@ export default function CalibrationWizard() {
     abortRef.current = localAbort;
     setCaptureState('waiting');
     setMismatch(null);
+    setLiveMidi(null);
 
     // Floor the gate at the room's measured p95 so a noisy room doesn't
     // self-trigger; `captureNote` additionally requires a rise above its own
@@ -176,9 +223,10 @@ export default function CalibrationWizard() {
     void captureNote(handleRef.current, {
       targetMidi: targets[noteIndex],
       gate,
-      onLevel: (rms, state) => {
+      onLevel: (rms, state, detected) => {
         setLevel(rms);
         setCaptureState(state);
+        setLiveMidi(detected);
       },
       signal: localAbort,
     }).then((result) => {
@@ -268,12 +316,12 @@ export default function CalibrationWizard() {
       sourceKind,
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      sampleRate: handleRef.current?.context.sampleRate ?? 48000,
+      sampleRate: device?.sampleRate ?? 48000,
       tuningA4Hz,
       globalCentsOffset,
       notes: captured,
       noise: noise ?? { rmsMedian: 0, rmsP95: 0, measuredAt: Date.now() },
-      captureFlags: handleRef.current?.flags ?? {
+      captureFlags: device?.flags ?? {
         autoGainControl: null,
         echoCancellation: null,
         noiseSuppression: null,
@@ -297,6 +345,9 @@ export default function CalibrationWizard() {
     setNoteIndex(0);
     setNoise(null);
     setSaved(null);
+    setLiveMidi(null);
+    setDevice(null);
+    setError(null);
     setStep('intro');
   };
 
@@ -306,9 +357,47 @@ export default function CalibrationWizard() {
   const clipping = level > 0.6;
   const tooQuiet = level > 0 && level < 0.01;
 
+  const target = targets[noteIndex];
+  // Only worth drawing the heard note when it is *not* the one being asked
+  // for; on the target key the green highlight already says everything.
+  const heardWrong = liveMidi !== null && liveMidi !== target ? liveMidi : null;
+  const doneNotes = new Set(targets.slice(0, noteIndex));
+
   return (
     <div className={styles.wizard}>
-      {error && <p className={styles.error}>{error}</p>}
+      <ol className={styles.steps} aria-label="Progreso">
+        {STEP_ORDER.map((s, i) => {
+          const current = STEP_INDEX[step] === i;
+          return (
+            <li
+              aria-current={current ? 'step' : undefined}
+              className={[
+                styles.stepItem,
+                i < STEP_INDEX[step] ? styles.stepDone : '',
+                current ? styles.stepCurrent : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              key={s.key}
+            >
+              <span className={styles.stepDot}>
+                {i < STEP_INDEX[step] ? (
+                  <FontAwesomeIcon icon={faCheck} />
+                ) : (
+                  i + 1
+                )}
+              </span>
+              <span className={styles.stepLabel}>{s.label}</span>
+            </li>
+          );
+        })}
+      </ol>
+
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
 
       {step === 'intro' && (
         <div className={styles.panel}>
@@ -375,6 +464,16 @@ export default function CalibrationWizard() {
             </div>
           </fieldset>
 
+          {/* Which keys are coming, before the microphone is ever opened. */}
+          <p className={styles.legend}>Vas a tocar estas notas</p>
+          <PianoKeyboard
+            className={styles.keyboard}
+            markedMidi={new Set(targets)}
+            fromMidi={Math.min(...targets)}
+            labels="solfege"
+            toMidi={Math.max(...targets)}
+          />
+
           {sourceKind === 'whistle' && (
             <p className={styles.hint}>
               Con silbido usamos el detector simple, que anda mejor: un silbido
@@ -395,7 +494,9 @@ export default function CalibrationWizard() {
       {step === 'mic' && (
         <div className={styles.panel}>
           <h2 className={styles.panelTitle}>Probá el micrófono</h2>
-          <p className={styles.panelText}>Tocá algo, cualquier cosa.</p>
+          <p className={styles.panelText}>
+            Tocá algo, cualquier cosa. Te vamos a decir qué escuchamos.
+          </p>
 
           <div className={styles.meter} aria-hidden="true">
             <div
@@ -409,12 +510,14 @@ export default function CalibrationWizard() {
               ? 'Se está saturando. Alejate un poco o bajá el volumen.'
               : tooQuiet
                 ? 'Está muy bajo. Acercate al micrófono.'
-                : levelPct > 5
-                  ? 'Perfecto, se escucha bien.'
-                  : 'Esperando que toques…'}
+                : liveMidi !== null
+                  ? `Te escuchamos: ${noteLabel(liveMidi)}`
+                  : levelPct > 5
+                    ? 'Perfecto, se escucha bien.'
+                    : 'Esperando que toques…'}
           </p>
 
-          {handleRef.current?.flags.autoGainControl === true && (
+          {device?.flags.autoGainControl === true && (
             <p className={styles.hint}>
               Tu navegador está ajustando el volumen solo. Vamos a reconocer las
               notas igual, pero la fuerza del golpe va a ser menos precisa.
@@ -452,36 +555,44 @@ export default function CalibrationWizard() {
               style={{ width: `${Math.round(silenceProgress * 100)}%` }}
             />
           </div>
-          <p className={styles.verdict} role="status">
-            {Math.ceil(3 - silenceProgress * 3)}…
+          <p className={styles.countdown} role="status">
+            {Math.ceil(3 - silenceProgress * 3)}
           </p>
+
+          <div className={styles.actions}>
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={restart}
+            >
+              <FontAwesomeIcon icon={faArrowLeft} /> Cancelar
+            </button>
+          </div>
         </div>
       )}
 
       {step === 'notes' && noteIndex < targets.length && (
         <div className={styles.panel}>
+          {/* The note used to be named three times over — heading, a huge
+              display line, and again under the keyboard. The keyboard is the
+              instruction now; the heading just says where you are. */}
           <h2 className={styles.panelTitle}>
-            Tocá {noteLabel(targets[noteIndex])}
+            Nota {noteIndex + 1} de {targets.length}
           </h2>
           <p className={styles.panelText}>
-            Nota {noteIndex + 1} de {targets.length}
+            Tocá la tecla verde:{' '}
+            <strong className={styles.targetName}>{noteLabel(target)}</strong>
           </p>
 
-          <div className={styles.bigNote}>{noteLabel(targets[noteIndex])}</div>
-
-          {/* Naming the note assumes the student can already find it on the
-              instrument, which is exactly the assumption a beginners' school
-              should not make — and getting the octave wrong here silently
-              poisons the tuning fit. */}
-          <CalibrationKeyboard
-            // `noteIndex`, not `captured.length`: a skipped note advances the
-            // index without adding a capture, and the two would drift apart.
-            completedCount={noteIndex}
-            // `mismatch.midi` is what was actually heard — `captureNote`
-            // labels the take with the detected note, not the requested one.
-            detectedMidi={mismatch?.midi ?? null}
-            targetMidi={targets[noteIndex]}
-            targets={targets}
+          <PianoKeyboard
+            className={styles.keyboard}
+            markedMidi={doneNotes}
+            fromMidi={Math.min(...targets)}
+            labels="solfege"
+            scrollToMidi={target}
+            targetMidi={target}
+            toMidi={Math.max(...targets)}
+            wrongMidi={heardWrong}
           />
 
           <div
@@ -497,23 +608,10 @@ export default function CalibrationWizard() {
           <p className={styles.captureState} role="status">
             {captureState === 'recording'
               ? 'Grabando…'
-              : 'Escuchando… tocá la nota cuando quieras'}
+              : heardWrong !== null
+                ? `Estás tocando ${noteLabel(heardWrong)} — buscá ${noteLabel(target)}`
+                : 'Escuchando… tocá la nota cuando quieras'}
           </p>
-
-          <div className={styles.coverage} aria-hidden="true">
-            {targets.map((m, i) => (
-              <span
-                key={m}
-                className={`${styles.coverageDot} ${
-                  i < noteIndex
-                    ? styles.coverageDone
-                    : i === noteIndex
-                      ? styles.coverageCurrent
-                      : ''
-                }`}
-              />
-            ))}
-          </div>
 
           {noteMessage && (
             <p className={styles.verdict} role="status">
@@ -534,7 +632,7 @@ export default function CalibrationWizard() {
             <button
               type="button"
               className={styles.secondaryBtn}
-              onClick={() => playReference(targets[noteIndex])}
+              onClick={() => playReference(target)}
             >
               <FontAwesomeIcon icon={faVolumeHigh} /> Escuchar
             </button>
@@ -551,6 +649,15 @@ export default function CalibrationWizard() {
               onClick={skipNote}
             >
               <FontAwesomeIcon icon={faForward} /> Saltear
+            </button>
+            {/* There was no way out of this step but forward, one note at a
+                time. */}
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={restart}
+            >
+              <FontAwesomeIcon icon={faArrowLeft} /> Cancelar
             </button>
           </div>
         </div>
@@ -582,10 +689,29 @@ export default function CalibrationWizard() {
                 })()}
               </p>
 
+              <PianoKeyboard
+                className={styles.keyboard}
+                markedMidi={new Set(captured.map((n) => n.midi))}
+                fromMidi={Math.min(...captured.map((n) => n.midi))}
+                labels="solfege"
+                toMidi={Math.max(...captured.map((n) => n.midi))}
+              />
+
               <ul className={styles.noteList}>
                 {captured.map((n) => (
                   <li key={n.midi} className={styles.noteRow}>
                     <span className={styles.noteName}>{noteLabel(n.midi)}</span>
+                    {/* A number tells you the deviation; the bar tells you
+                        whether it matters. Centre line is equal temperament,
+                        full width is a quarter tone either way. */}
+                    <span className={styles.centsTrack} aria-hidden="true">
+                      <span
+                        className={styles.centsBar}
+                        style={{
+                          left: `${50 + Math.max(-50, Math.min(50, (n.centsFromEqual / 50) * 50))}%`,
+                        }}
+                      />
+                    </span>
                     <span className={styles.noteDetail}>
                       {n.f0Hz.toFixed(1)} Hz
                     </span>
@@ -608,7 +734,7 @@ export default function CalibrationWizard() {
           )}
 
           {saved && (
-            <p className={styles.savedNote}>
+            <p className={styles.savedNote} role="status">
               <FontAwesomeIcon icon={faCheck} /> Guardado. Ya lo estamos usando
               en los ejercicios.
             </p>

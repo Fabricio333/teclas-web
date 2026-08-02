@@ -139,6 +139,20 @@ export function readFrame(handle: CaptureHandle): Frame {
   return { rms, frequency, clarity };
 }
 
+/**
+ * The note a single frame is hearing, or null when nothing in it is clear
+ * enough to name.
+ *
+ * One frame is not evidence — a take is still judged on the median of many —
+ * but it is exactly what a live readout wants, so the student can see which
+ * key they are actually on while they are on it.
+ */
+export function frameToMidi({ frequency, clarity }: Frame): number | null {
+  if (clarity <= 0.8) return null;
+  if (frequency < MIN_FREQUENCY || frequency > MAX_FREQUENCY) return null;
+  return frequencyToMidi(frequency);
+}
+
 function percentile(values: number[], p: number): number {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
@@ -278,7 +292,18 @@ export interface NoteCaptureOptions {
   timeoutMs?: number;
   /** How long to record once an onset is detected, ms. */
   captureMs?: number;
-  onLevel?: (rms: number, state: CaptureState) => void;
+  /**
+   * Per-frame progress. `detectedMidi` is what the microphone is hearing right
+   * now, or null when nothing is clear enough to name — it is the same
+   * estimate the take is judged on, surfaced live so the student can see they
+   * are on the wrong key *while* they are on it, rather than after a failed
+   * take tells them so.
+   */
+  onLevel?: (
+    rms: number,
+    state: CaptureState,
+    detectedMidi: number | null,
+  ) => void;
   signal?: { aborted: boolean };
 }
 
@@ -317,9 +342,14 @@ export async function captureNote(
         return;
       }
 
-      const { rms, frequency, clarity } = readFrame(handle);
+      const frame = readFrame(handle);
+      const { rms, frequency, clarity } = frame;
       const now = performance.now();
-      onLevel?.(rms, onsetAt === null ? 'waiting' : 'recording');
+      onLevel?.(
+        rms,
+        onsetAt === null ? 'waiting' : 'recording',
+        frameToMidi(frame),
+      );
 
       if (onsetAt === null) {
         if (onset.push(rms)) onsetAt = now;
