@@ -36,6 +36,7 @@
 }
 
 .eventCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -45,9 +46,22 @@
   box-shadow:
     0 2px 4px rgba(0, 0, 0, 0.06),
     0 8px 20px rgba(0, 0, 0, 0.08);
+  transition:
+    box-shadow var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.08),
+      0 12px 28px rgba(0, 0, 0, 0.12);
+  }
+
+  // `row-reverse` keeps the picture first in the DOM — so it still leads on
+  // mobile, where the card stacks — while sitting on the right on wider
+  // screens.
   @media (min-width: $mobile-breakpoint) {
-    flex-direction: row;
+    flex-direction: row-reverse;
     align-items: stretch;
   }
 }
@@ -83,6 +97,7 @@
 }
 
 .eventBody {
+  flex: 1;
   padding: var(--space-6);
 }
 
@@ -123,6 +138,8 @@
 }
 
 .pill {
+  position: relative;
+  z-index: 2; // above the stretched overlay, so each pill keeps its own target
   display: inline-block;
   padding: 0.5rem 1.1rem;
   border-radius: 999px;
@@ -153,4 +170,12 @@
     background-color: rgba($primary-color, 0.08);
     border-color: $primary-color;
   }
+}
+
+// Whole-card click target: sits over the card at z-index 1, below the pills
+// at z-index 2, so each button keeps its own destination.
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }

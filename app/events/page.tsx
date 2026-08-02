@@ -18,12 +18,20 @@ function EventCard({ event }: { event: TeclasEvent }) {
     <article
       className={`${styles.eventCard} ${isPast ? styles.pastEventCard : ''}`}
     >
+      {/*
+        Whole-card click target. A real anchor rather than a `::after` overlay:
+        Chromium paints the pseudo-element above the pills whatever z-index it
+        is given, which swallowed the WhatsApp link. Hidden from assistive tech
+        and from the tab order — the visible "Leer más" pill below is the same
+        destination and is the one keyboard users reach.
+      */}
       <Link
         href={`/events/${event.slug}`}
-        className={styles.eventThumb}
+        className={styles.cardOverlay}
         aria-hidden="true"
         tabIndex={-1}
-      >
+      />
+      <div className={styles.eventThumb}>
         <Image
           src={event.image}
           alt={event.imageAlt}
@@ -31,7 +39,7 @@ function EventCard({ event }: { event: TeclasEvent }) {
           height={360}
           className={styles.eventThumbImage}
         />
-      </Link>
+      </div>
       <div className={styles.eventBody}>
         {isPast && <span className={styles.pastBadge}>Finalizado</span>}
         <h2 className={styles.eventTitle}>{event.title}</h2>
