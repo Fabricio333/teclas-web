@@ -75,36 +75,33 @@ se arma tecla por tecla y las notas y estrellas flotan hasta el final.
 
 ### 4. Publicar
 
-Los PNG quedan servidos por el sitio apenas se hace deploy. El MP4 no: se sube
-a mano a Instagram.
+Los PNG quedan servidos por el sitio apenas se hace deploy y aparecen solos en
+`/media-kit`. El MP4 no: se sube a mano a Instagram.
 
 ---
 
-## El endpoint oculto de descarga
+## Dónde se descarga todo
 
-**`https://teclasciudadjardin.com.ar/download`**
+**`https://teclasciudadjardin.com.ar/media-kit`**
 
-Una página que lista los flyers del evento próximo con vista previa, botón de
-descarga y la URL directa de cada archivo para copiar y pegar en un mensaje.
+Una sola página para todo el material descargable: logo, colores, tipografías,
+fotos, textos, el QR del sitio y **los flyers del evento próximo**, cada uno con
+vista previa y botón de descarga.
 
-Es **oculta a propósito**:
+Antes esto vivía en una página aparte, `/download`, oculta a propósito. Se
+eliminó: dos páginas para lo mismo era una de más, y la que estaba oculta era
+justamente la que nadie encontraba.
 
-- no está en el menú ni en el pie de página;
-- no está en `public/sitemap.xml`;
-- lleva `robots: { index: false, follow: false }`, así que Google no la indexa.
-
-No tiene contraseña — el sitio es un export estático y no hay servidor que
-pueda pedirla. Cualquiera con el link entra. Es un link para mandar, no un
-lugar secreto.
-
-Los archivos también se pueden bajar directo, sin pasar por la página:
+Los flyers también se pueden bajar directo, sin pasar por la página:
 
 ```
 https://teclasciudadjardin.com.ar/events/<slug>-flyer-stories.png
 https://teclasciudadjardin.com.ar/events/<slug>-flyer-post.png
 ```
 
----
+> `/media-kit` es pública e indexable, al revés que la vieja `/download`. Los
+> flyers ahora son material público — que es lo que son de todos modos, porque
+> se publican en redes.
 
 ## El QR del sitio
 

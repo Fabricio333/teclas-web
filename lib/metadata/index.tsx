@@ -216,27 +216,6 @@ export const mediaKitMetadata: Metadata = {
   },
 };
 
-/**
- * New page — added, not altered, per the SEO rule in CLAUDE.md.
- *
- * Unlisted on purpose: the flyers are meant to be reached from a link the
- * school sends, not found in search. It is in neither the nav, the footer nor
- * the sitemap, and `follow: false` keeps crawlers from walking into the PNGs
- * from here.
- */
-export const downloadMetadata: Metadata = {
-  title: 'Descargas | TECLAS Ciudad Jardín',
-  description:
-    'Flyers de los próximos eventos de TECLAS, listos para publicar.',
-  alternates: {
-    canonical: 'https://teclasciudadjardin.com.ar/download',
-  },
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
-
 export default {
   homeMetadata,
   eventsMetadata,
@@ -247,5 +226,4 @@ export default {
   progresoMetadata,
   calibracionMetadata,
   mediaKitMetadata,
-  downloadMetadata,
 };

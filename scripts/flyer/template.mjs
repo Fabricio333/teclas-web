@@ -255,6 +255,10 @@ function kicker(event) {
 }
 
 function headline(event) {
+  // An explicit poster headline wins: a page title and a thing you shout on a
+  // flyer are not always the same words in the same order.
+  if (event.flyerTitle) return event.flyerTitle;
+
   const rest = event.title.split(/:\s*/).slice(1).join(': ');
   if (!rest) return event.title;
   return rest.charAt(0).toUpperCase() + rest.slice(1);
@@ -434,7 +438,6 @@ ${fontFace('FlyerSupport', FONTS.comic)}
     <div class="stage">
       <span class="eyebrow">${esc(kicker(event))}</span>
       <h1 class="title">${esc(headline(event))}</h1>
-      <p class="subtitle">${esc(event.subtitle ?? event.summary)}</p>
       <div class="hero">
         <span class="heroBloom"></span>
         ${heroSvg(art)}

@@ -17,6 +17,12 @@ export type TeclasEvent = {
   location: string;
   image: string;
   imageAlt: string;
+  /**
+   * Headline for the generated flyer and story video, when the page title is
+   * not what should be shouted on a poster. Falls back to the part of `title`
+   * after the colon.
+   */
+  flyerTitle?: string;
   /** Label of the WhatsApp pill — an ended event should not say "inscribirme". */
   ctaLabel: string;
   /** Pre-filled WhatsApp message. */
@@ -40,6 +46,7 @@ export const events: TeclasEvent[] = [
   {
     slug: 'clase-abierta-piano-series-pelis-juegos',
     title: 'Clase abierta de piano: series, pelis y juegos',
+    flyerTitle: 'Pelis, Series y Juegos',
     subtitle: 'Niños y jóvenes interpretarán música de series, pelis y juegos',
     status: 'upcoming',
     date: 'Sábado 29 de Agosto de 2026',
@@ -56,14 +63,14 @@ export const events: TeclasEvent[] = [
     body: [
       'Una clase abierta para venir a escuchar y a tocar: niños y jóvenes de TECLAS interpretarán música de series, películas y videojuegos.',
       'Los temas que suenan en pantalla son la mejor puerta de entrada al piano — se reconocen de entrada, se disfrutan desde la primera nota y se aprenden tocando.',
-      'La entrada es libre y la clase está abierta a familias y a quienes estén pensando en empezar a estudiar piano.',
+      'La clase está abierta a familias y a quienes estén pensando en empezar a estudiar piano. La contribución es de $5.000.',
     ],
     facts: [
       { label: 'Fecha', value: 'Sábado 29 de Agosto de 2026' },
-      { label: 'Horario', value: 'A confirmar' },
+      { label: 'Horario', value: '17:00 hs.' },
       { label: 'Dirigido a', value: 'Niños y jóvenes, y sus familias' },
       { label: 'Lugar', value: 'Blvd. Aviador Finca 6142, Local 12' },
-      { label: 'Entrada', value: 'Libre — cupos limitados' },
+      { label: 'Entrada', value: '$5.000' },
     ],
     jsonLd: eventJsonLd,
   },

@@ -1,6 +1,6 @@
 /**
  * Flyer sizes, shared by the generator (`scripts/flyer/build.mjs`) and the
- * download page (`app/download`).
+ * media kit page (`app/media-kit`), which is where they are offered.
  *
  * Both sides derive the filename from `flyerPath`, so a renamed size can never
  * leave the page linking at a PNG the generator does not write.

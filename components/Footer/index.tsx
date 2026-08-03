@@ -14,9 +14,8 @@ import styles from './Footer.module.scss';
  * Labels are the site's own — the header's for sections, the cards on
  * `/resources` for the tools — so the same page is never called two things.
  *
- * Deliberately absent: `/calibracion`, which is a device setup step reached
- * from the tool that needs it rather than a destination, and `/download`,
- * which is unlisted on purpose (see README).
+ * Deliberately absent: `/calibracion`, a device setup step reached from the
+ * tool that needs it rather than a destination.
  */
 const SECTIONS = [
   { href: '/', label: 'Inicio' },

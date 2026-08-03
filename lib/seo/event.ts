@@ -5,15 +5,17 @@
  * with a 2024 date) at the site owner's explicit request. The address mirrors
  * `localBusiness.ts` so the two never disagree.
  *
- * `startDate` is date-only on purpose: the start time is still to be
- * confirmed, and inventing one would put a wrong hour in front of crawlers.
+ * `startDate` carries the hour now that the school confirmed it (17:00), and
+ * `offers.price` the contribution. Both mirror the `facts` list in
+ * `lib/events/index.ts`: structured data that disagrees with the page is worse
+ * than none at all.
  */
 export const eventJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Event',
   name: 'Clase abierta de piano: series, pelis y juegos',
   url: 'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos',
-  startDate: '2026-08-29',
+  startDate: '2026-08-29T17:00',
   eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
   eventStatus: 'https://schema.org/EventScheduled',
   location: {
@@ -40,7 +42,7 @@ export const eventJsonLd = {
   offers: {
     '@type': 'Offer',
     url: 'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos',
-    price: '0',
+    price: '5000',
     priceCurrency: 'ARS',
     availability: 'https://schema.org/InStock',
   },
