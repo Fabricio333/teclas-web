@@ -421,9 +421,19 @@
   }
 }
 
+/* Flex, not the grid it inherits from .assetPreview: in a grid whose row is
+   auto-sized, height:100% on the image has no definite height to resolve
+   against, so it fell back to the poster's natural height and got clipped.
+   Flex + max-height scales it down to fit instead. */
 .flyerPreview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 20rem;
   padding: 0.75rem;
+  /* Hard stop: even if the sizing ever regresses, it cannot spill over the
+     label and the download button below it. */
+  overflow: hidden;
 }
 
 .flyerImage {

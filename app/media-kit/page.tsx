@@ -176,6 +176,20 @@ export default function MediaKitPage() {
                               className={styles.flyerImage}
                               height={size.height}
                               src={href}
+                              /*
+                                Inline, not only in the module: a 9:16 poster
+                                given a class alone rendered at its natural
+                                ratio across the full card width and buried the
+                                label and the download button underneath it.
+                                An inline style outranks whatever was winning.
+                              */
+                              style={{
+                                maxHeight: '100%',
+                                maxWidth: '100%',
+                                height: 'auto',
+                                width: 'auto',
+                                objectFit: 'contain',
+                              }}
                               unoptimized
                               width={size.width}
                             />
