@@ -5,6 +5,25 @@ import type {
   PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  buildParticles,
+  PARTICLE_COLOR,
+  TAU,
+} from '@/lib/hero-artwork/particles';
+import {
+  DECORATIONS,
+  NOTE_SHAPES,
+  starPoints,
+  STARS,
+  type FloatSpeed,
+  type NoteGlyph,
+} from '@/lib/hero-artwork/decorations';
+import {
+  buildKeyboard,
+  VIEWBOX_HEIGHT,
+  VIEWBOX_WIDTH,
+  type HeroKey,
+} from '@/lib/hero-artwork/keyboard';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { midiToSolfege } from '@/lib/piano-player/noteNames';
 import styles from './AnimatedTeclasHero.module.scss';
@@ -13,40 +32,6 @@ type AnimatedTeclasHeroProps = {
   className?: string;
   enableSound?: boolean;
   reducedMotion?: boolean;
-};
-
-type Point = {
-  x: number;
-  y: number;
-};
-
-type CurveSample = {
-  center: Point;
-  top: Point;
-  bottom: Point;
-  tangent: Point;
-  normal: Point;
-};
-
-type HeroKeyKind = 'white' | 'black';
-
-type HeroKey = {
-  id: string;
-  midi: number;
-  kind: HeroKeyKind;
-  path: string;
-  frontPath?: string;
-  capPath?: string;
-  center: Point;
-};
-
-type Particle = {
-  x: number;
-  y: number;
-  radius: number;
-  phase: number;
-  drift: number;
-  alpha: number;
 };
 
 type Ripple = {
@@ -58,22 +43,6 @@ type Ripple = {
 type ToneModule = typeof import('tone');
 type ToneSampler = import('tone').Sampler;
 
-const VIEWBOX_WIDTH = 1000;
-const VIEWBOX_HEIGHT = 710;
-const TAU = Math.PI * 2;
-const WHITE_KEY_COUNT = 36;
-const KEY_HALF_WIDTH = 84;
-const BLACK_KEY_LENGTH = 122;
-const BLACK_KEY_WIDTH_FACTOR = 0.4;
-const BLACK_KEY_BACK_OVERHANG = 8;
-const BLACK_KEY_FRONT_WIDTH = 8;
-const BLACK_KEY_SHOULDER_WIDTH = 7;
-const BLACK_KEY_CAP_DEPTH = 16;
-const WHITE_KEY_FRONT_DEPTH = 13;
-const START_MIDI = 48;
-const NATURAL_OFFSETS = [0, 2, 4, 5, 7, 9, 11];
-const BLACK_AFTER_NATURAL_INDEX = new Set([0, 1, 3, 4, 5]);
-const BURST_COLORS = ['#415ca9', '#ed3b95', '#f3862c', '#8658a7', '#60c9de'];
 const SAMPLE_NOTES = [
   'C',
   'Db',
@@ -88,326 +57,6 @@ const SAMPLE_NOTES = [
   'Bb',
   'B',
 ];
-
-const curveA = {
-  start: { x: 120, y: 415 },
-  c1: { x: 270, y: 235 },
-  c2: { x: 440, y: 220 },
-  end: { x: 548, y: 292 },
-};
-
-const curveB = {
-  start: curveA.end,
-  c1: { x: 650, y: 350 },
-  c2: { x: 830, y: 505 },
-  end: { x: 970, y: 438 },
-};
-
-function point(x: number, y: number): Point {
-  return { x, y };
-}
-
-function add(a: Point, b: Point): Point {
-  return point(a.x + b.x, a.y + b.y);
-}
-
-function subtract(a: Point, b: Point): Point {
-  return point(a.x - b.x, a.y - b.y);
-}
-
-function scale(a: Point, value: number): Point {
-  return point(a.x * value, a.y * value);
-}
-
-function normalize(a: Point): Point {
-  const length = Math.hypot(a.x, a.y);
-
-  if (length === 0) return point(1, 0);
-
-  return point(a.x / length, a.y / length);
-}
-
-function cubicPoint(p0: Point, p1: Point, p2: Point, p3: Point, t: number) {
-  const inverse = 1 - t;
-
-  return point(
-    inverse ** 3 * p0.x +
-      3 * inverse ** 2 * t * p1.x +
-      3 * inverse * t ** 2 * p2.x +
-      t ** 3 * p3.x,
-    inverse ** 3 * p0.y +
-      3 * inverse ** 2 * t * p1.y +
-      3 * inverse * t ** 2 * p2.y +
-      t ** 3 * p3.y,
-  );
-}
-
-function cubicDerivative(
-  p0: Point,
-  p1: Point,
-  p2: Point,
-  p3: Point,
-  t: number,
-) {
-  const inverse = 1 - t;
-
-  return point(
-    3 * inverse ** 2 * (p1.x - p0.x) +
-      6 * inverse * t * (p2.x - p1.x) +
-      3 * t ** 2 * (p3.x - p2.x),
-    3 * inverse ** 2 * (p1.y - p0.y) +
-      6 * inverse * t * (p2.y - p1.y) +
-      3 * t ** 2 * (p3.y - p2.y),
-  );
-}
-
-function sampleKeyboardCurve(t: number): CurveSample {
-  const split = 0.54;
-  const segment = t <= split ? curveA : curveB;
-  const localT = t <= split ? t / split : (t - split) / (1 - split);
-  const center = cubicPoint(
-    segment.start,
-    segment.c1,
-    segment.c2,
-    segment.end,
-    localT,
-  );
-  const tangent = normalize(
-    cubicDerivative(segment.start, segment.c1, segment.c2, segment.end, localT),
-  );
-  const normal = normalize(point(-tangent.y, tangent.x));
-  const top = subtract(center, scale(normal, KEY_HALF_WIDTH));
-  const bottom = add(center, scale(normal, KEY_HALF_WIDTH));
-
-  return {
-    center,
-    top,
-    bottom,
-    tangent,
-    normal,
-  };
-}
-
-function pathFromPoints(points: Point[]) {
-  const [first, ...rest] = points;
-
-  return [
-    `M ${first.x.toFixed(2)} ${first.y.toFixed(2)}`,
-    ...rest.map((item) => `L ${item.x.toFixed(2)} ${item.y.toFixed(2)}`),
-    'Z',
-  ].join(' ');
-}
-
-function openPathFromPoints(points: Point[]) {
-  const [first, ...rest] = points;
-
-  return [
-    `M ${first.x.toFixed(2)} ${first.y.toFixed(2)}`,
-    ...rest.map((item) => `L ${item.x.toFixed(2)} ${item.y.toFixed(2)}`),
-  ].join(' ');
-}
-
-function keySegmentPath(startT: number, endT: number, inset = 0) {
-  const start = sampleKeyboardCurve(startT);
-  const end = sampleKeyboardCurve(endT);
-  const topStart = add(start.top, scale(start.tangent, inset));
-  const topEnd = subtract(end.top, scale(end.tangent, inset));
-  const bottomEnd = subtract(end.bottom, scale(end.tangent, inset));
-  const bottomStart = add(start.bottom, scale(start.tangent, inset));
-
-  return pathFromPoints([topStart, topEnd, bottomEnd, bottomStart]);
-}
-
-function whiteKeyDividerPath(t: number) {
-  const sample = sampleKeyboardCurve(t);
-  const back = add(sample.top, scale(sample.normal, 8));
-  const front = sample.bottom;
-
-  return openPathFromPoints([back, front]);
-}
-
-function whiteKeyFrontPath(startT: number, endT: number, inset = 0) {
-  const start = sampleKeyboardCurve(startT);
-  const end = sampleKeyboardCurve(endT);
-  const frontStart = add(start.bottom, scale(start.tangent, inset));
-  const frontEnd = subtract(end.bottom, scale(end.tangent, inset));
-  const backEnd = subtract(frontEnd, scale(end.normal, WHITE_KEY_FRONT_DEPTH));
-  const backStart = subtract(
-    frontStart,
-    scale(start.normal, WHITE_KEY_FRONT_DEPTH),
-  );
-
-  return pathFromPoints([backStart, backEnd, frontEnd, frontStart]);
-}
-
-function blackKeyPath(centerT: number, keyStep: number) {
-  const halfT = keyStep * BLACK_KEY_WIDTH_FACTOR * 0.5;
-  const start = sampleKeyboardCurve(centerT - halfT);
-  const end = sampleKeyboardCurve(centerT + halfT);
-  const center = sampleKeyboardCurve(centerT);
-  const topStart = subtract(
-    start.top,
-    scale(start.normal, BLACK_KEY_BACK_OVERHANG),
-  );
-  const topEnd = subtract(end.top, scale(end.normal, BLACK_KEY_BACK_OVERHANG));
-  const bottomEnd = add(
-    center.top,
-    add(
-      scale(center.normal, BLACK_KEY_LENGTH),
-      scale(center.tangent, BLACK_KEY_FRONT_WIDTH),
-    ),
-  );
-  const bottomStart = add(
-    center.top,
-    add(
-      scale(center.normal, BLACK_KEY_LENGTH),
-      scale(center.tangent, -BLACK_KEY_FRONT_WIDTH),
-    ),
-  );
-
-  return pathFromPoints([topStart, topEnd, bottomEnd, bottomStart]);
-}
-
-function blackKeyCapPath(centerT: number) {
-  const center = sampleKeyboardCurve(centerT);
-  const backDistance = BLACK_KEY_LENGTH - BLACK_KEY_CAP_DEPTH;
-  const frontDistance = BLACK_KEY_LENGTH - 2;
-  const backLeft = add(
-    center.top,
-    add(
-      scale(center.normal, backDistance),
-      scale(center.tangent, -BLACK_KEY_SHOULDER_WIDTH),
-    ),
-  );
-  const backRight = add(
-    center.top,
-    add(
-      scale(center.normal, backDistance),
-      scale(center.tangent, BLACK_KEY_SHOULDER_WIDTH),
-    ),
-  );
-  const frontRight = add(
-    center.top,
-    add(
-      scale(center.normal, frontDistance),
-      scale(center.tangent, BLACK_KEY_FRONT_WIDTH),
-    ),
-  );
-  const frontLeft = add(
-    center.top,
-    add(
-      scale(center.normal, frontDistance),
-      scale(center.tangent, -BLACK_KEY_FRONT_WIDTH),
-    ),
-  );
-
-  return pathFromPoints([backLeft, backRight, frontRight, frontLeft]);
-}
-
-function getNaturalMidi(index: number) {
-  const octave = Math.floor(index / NATURAL_OFFSETS.length);
-  const noteIndex = index % NATURAL_OFFSETS.length;
-
-  return START_MIDI + octave * 12 + NATURAL_OFFSETS[noteIndex];
-}
-
-function buildKeyboard() {
-  const whiteKeys: HeroKey[] = [];
-  const blackKeys: HeroKey[] = [];
-  const whiteKeyDividers: string[] = [];
-  const keyStep = 1 / WHITE_KEY_COUNT;
-
-  for (let index = 0; index < WHITE_KEY_COUNT; index++) {
-    const startT = index * keyStep;
-    const endT = (index + 1) * keyStep;
-    const center = sampleKeyboardCurve(startT + keyStep / 2).center;
-
-    whiteKeys.push({
-      id: `white-${index}`,
-      midi: getNaturalMidi(index),
-      kind: 'white',
-      path: keySegmentPath(startT, endT, 1.2),
-      frontPath: whiteKeyFrontPath(startT, endT, 1.2),
-      center,
-    });
-  }
-
-  for (let index = 1; index < WHITE_KEY_COUNT; index++) {
-    whiteKeyDividers.push(whiteKeyDividerPath(index * keyStep));
-  }
-
-  for (let index = 0; index < WHITE_KEY_COUNT - 1; index++) {
-    const noteIndex = index % NATURAL_OFFSETS.length;
-    if (!BLACK_AFTER_NATURAL_INDEX.has(noteIndex)) continue;
-
-    const centerT = (index + 1) * keyStep;
-    const sample = sampleKeyboardCurve(centerT);
-
-    blackKeys.push({
-      id: `black-${index}`,
-      midi: getNaturalMidi(index) + 1,
-      kind: 'black',
-      path: blackKeyPath(centerT, keyStep),
-      capPath: blackKeyCapPath(centerT),
-      center: add(sample.top, scale(sample.normal, BLACK_KEY_LENGTH * 0.56)),
-    });
-  }
-
-  return {
-    whiteKeys,
-    blackKeys,
-    whiteKeyDividers,
-    keyboardEdgePath: buildKeyboardEdgePath(),
-  };
-}
-
-function buildKeyboardEdgePath() {
-  const topPoints: Point[] = [];
-  const bottomPoints: Point[] = [];
-
-  for (let index = 0; index <= 72; index++) {
-    const sample = sampleKeyboardCurve(index / 72);
-    topPoints.push(sample.top);
-    bottomPoints.push(sample.bottom);
-  }
-
-  return pathFromPoints([...topPoints, ...bottomPoints.reverse()]);
-}
-
-function seededWave(x: number, y: number) {
-  return Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-}
-
-function buildParticles() {
-  const particles: Particle[] = [];
-  const step = 16;
-  const centerX = 560;
-  const centerY = 360;
-  const radius = 460;
-
-  for (let y = -55; y <= 775; y += step) {
-    for (let x = 5; x <= 1065; x += step) {
-      const distance = Math.hypot(x - centerX, y - centerY);
-      const field = 1 - distance / radius;
-
-      if (field <= 0.015) continue;
-
-      const wobble = seededWave(x, y) % 1;
-      const softenedField = field ** 1.35;
-
-      particles.push({
-        x,
-        y,
-        radius: Math.max(0.7, 0.8 + softenedField * 7 + wobble * 0.9),
-        phase: (x * 0.018 + y * 0.027) % TAU,
-        drift: 0.8 + Math.abs(wobble) * 1.8,
-        alpha: 0.18 + Math.min(0.64, softenedField * 0.7),
-      });
-    }
-  }
-
-  return particles;
-}
 
 function buildSamplerUrls() {
   const urls: Record<string, string> = {};
@@ -427,78 +76,48 @@ function buildSamplerUrls() {
   return urls;
 }
 
-function starPoints(
-  centerX: number,
-  centerY: number,
-  outerRadius: number,
-  innerRadius: number,
-) {
-  const points: string[] = [];
-
-  for (let index = 0; index < 10; index++) {
-    const angle = (-90 + index * 36) * (Math.PI / 180);
-    const radius = index % 2 === 0 ? outerRadius : innerRadius;
-    points.push(
-      `${(centerX + Math.cos(angle) * radius).toFixed(1)},${(
-        centerY +
-        Math.sin(angle) * radius
-      ).toFixed(1)}`,
+/** One glyph, drawn from the shared shape list. */
+function Glyph({ glyph }: { glyph: NoteGlyph }) {
+  if (glyph === 'treble') {
+    return (
+      <text className={styles.trebleClef} x="0" y="148">
+        𝄞
+      </text>
     );
   }
 
-  return points.join(' ');
-}
-
-function SingleNote() {
   return (
     <g fill="currentColor">
-      <ellipse cx="0" cy="48" rx="14" ry="10" transform="rotate(-18 0 48)" />
-      <path
-        d="M 13 47 L 19 2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="7"
-      />
-      <path
-        d="M 18 2 C 42 12 42 36 25 48"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="6"
-      />
+      {NOTE_SHAPES[glyph].map((shape, index) =>
+        shape.kind === 'ellipse' ? (
+          <ellipse
+            key={index}
+            cx={shape.cx}
+            cy={shape.cy}
+            rx={shape.rx}
+            ry={shape.ry}
+            transform={shape.transform}
+          />
+        ) : (
+          <path
+            key={index}
+            d={shape.d}
+            fill={shape.strokeWidth ? 'none' : undefined}
+            stroke={shape.strokeWidth ? 'currentColor' : undefined}
+            strokeLinecap={shape.round ? 'round' : undefined}
+            strokeWidth={shape.strokeWidth}
+          />
+        ),
+      )}
     </g>
   );
 }
 
-function DoubleNote() {
-  return (
-    <g fill="currentColor">
-      <ellipse cx="0" cy="51" rx="14" ry="10" transform="rotate(-16 0 51)" />
-      <ellipse cx="51" cy="46" rx="14" ry="10" transform="rotate(-16 51 46)" />
-      <path
-        d="M 13 50 L 13 2"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="6"
-      />
-      <path
-        d="M 64 45 L 64 -6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="6"
-      />
-      <path d="M 13 2 L 64 -6 L 64 7 L 13 16 Z" />
-    </g>
-  );
-}
-
-function TrebleMark() {
-  return (
-    <text className={styles.trebleClef} x="0" y="148">
-      𝄞
-    </text>
-  );
-}
+const FLOAT_CLASS: Record<FloatSpeed, string> = {
+  slow: styles.floatSlow,
+  medium: styles.floatMedium,
+  tiny: styles.floatTiny,
+};
 
 function renderDecorations(motionIsReduced: boolean, sceneBurstId: number) {
   return (
@@ -509,87 +128,26 @@ function renderDecorations(motionIsReduced: boolean, sceneBurstId: number) {
         motionIsReduced ? styles.reducedMotion : styles.sceneBurst,
       )}
     >
-      <g transform="translate(202 62) rotate(-8) scale(0.86)">
-        <g className={styles.floatSlow} style={{ color: '#415ca9' }}>
-          <TrebleMark />
+      {DECORATIONS.map((decoration, index) => (
+        <g key={`note-${index}`} transform={decoration.transform}>
+          <g
+            className={FLOAT_CLASS[decoration.float]}
+            style={{ color: decoration.color }}
+          >
+            <Glyph glyph={decoration.glyph} />
+          </g>
         </g>
-      </g>
-      <g transform="translate(388 50) rotate(-14) scale(1.08)">
-        <g className={styles.floatMedium} style={{ color: '#ed3b95' }}>
-          <DoubleNote />
-        </g>
-      </g>
-      <g transform="translate(735 86) rotate(5) scale(1.04)">
-        <g className={styles.floatSlow} style={{ color: '#f3862c' }}>
-          <DoubleNote />
-        </g>
-      </g>
-      <g transform="translate(606 158) rotate(9) scale(1.04)">
-        <g className={styles.floatTiny} style={{ color: '#8658a7' }}>
-          <SingleNote />
-        </g>
-      </g>
-      <g transform="translate(770 245) rotate(4) scale(0.68)">
-        <g className={styles.floatMedium} style={{ color: '#60c9de' }}>
-          <DoubleNote />
-        </g>
-      </g>
-      <g transform="translate(878 294) rotate(25) scale(0.72)">
-        <g className={styles.floatTiny} style={{ color: '#8658a7' }}>
-          <DoubleNote />
-        </g>
-      </g>
-      <g transform="translate(268 588) rotate(6) scale(0.74)">
-        <g className={styles.floatSlow} style={{ color: '#ed3b95' }}>
-          <SingleNote />
-        </g>
-      </g>
-      <g transform="translate(515 515) rotate(-4) scale(0.48)">
-        <g className={styles.floatMedium} style={{ color: '#415ca9' }}>
-          <SingleNote />
-        </g>
-      </g>
-      <g transform="translate(802 630) rotate(22) scale(0.74)">
-        <g className={styles.floatSlow} style={{ color: '#8658a7' }}>
-          <SingleNote />
-        </g>
-      </g>
+      ))}
 
-      <g className={styles.floatTiny}>
-        <polygon
-          fill="#8658a7"
-          points={starPoints(72, 292, 58, 29)}
-          transform="rotate(18 72 292)"
-        />
-      </g>
-      <g className={styles.floatSlow}>
-        <polygon
-          fill="#74c8dc"
-          points={starPoints(900, 205, 58, 29)}
-          transform="rotate(10 900 205)"
-        />
-      </g>
-      <g className={styles.floatMedium}>
-        <polygon
-          fill="#415ca9"
-          points={starPoints(930, 390, 44, 22)}
-          transform="rotate(12 930 390)"
-        />
-      </g>
-      <g className={styles.floatTiny}>
-        <polygon
-          fill="#f3862c"
-          points={starPoints(410, 600, 70, 34)}
-          transform="rotate(-18 410 600)"
-        />
-      </g>
-      <g className={styles.floatSlow}>
-        <polygon
-          fill="#ffd122"
-          points={starPoints(665, 650, 34, 17)}
-          transform="rotate(16 665 650)"
-        />
-      </g>
+      {STARS.map((star, index) => (
+        <g key={`star-${index}`} className={FLOAT_CLASS[star.float]}>
+          <polygon
+            fill={star.fill}
+            points={starPoints(star.cx, star.cy, star.outer, star.inner)}
+            transform={`rotate(${star.rotate} ${star.cx} ${star.cy})`}
+          />
+        </g>
+      ))}
     </g>
   );
 }
@@ -661,7 +219,7 @@ export default function AnimatedTeclasHero({
 
     const draw = (timestamp: number) => {
       context.clearRect(0, 0, VIEWBOX_WIDTH, VIEWBOX_HEIGHT);
-      context.fillStyle = '#a5ce39';
+      context.fillStyle = PARTICLE_COLOR;
 
       const activeRipples = rippleRef.current.filter(
         (ripple) => timestamp - ripple.startedAt < 900,
