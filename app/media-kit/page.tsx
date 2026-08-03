@@ -16,6 +16,7 @@ import {
   FACTS,
   FONTS,
   LOGO_ASSETS,
+  QR_ASSETS,
   MISSING,
   PALETTE,
   PHOTO_ASSETS,
@@ -105,6 +106,43 @@ export default function MediaKitPage() {
                   ))}
                 </ul>
               </div>
+            </div>
+          </Reveal>
+
+          {/* ---------- QR ---------- */}
+          <Reveal as="section" className={styles.block}>
+            <h2 className={styles.blockTitle}>Código QR</h2>
+            <p className={styles.blockText}>
+              Lleva directo a teclasciudadjardin.com.ar y tiene el piano de la
+              escuela en el centro. Está generado con corrección de errores
+              alta, así que se puede imprimir en un flyer, en un cartel o en una
+              tarjeta y se sigue escaneando.
+            </p>
+
+            <div className={styles.assetGrid}>
+              {QR_ASSETS.map((asset) => (
+                <div className={styles.asset} key={asset.file}>
+                  <div className={styles.assetPreview}>
+                    <Image
+                      alt="Código QR de TECLAS con el piano en el centro"
+                      className={styles.assetImage}
+                      height={128}
+                      src="/media-kit/qr-teclasciudadjardin.png"
+                      unoptimized
+                      width={128}
+                    />
+                  </div>
+                  <div className={styles.assetMeta}>
+                    <span className={styles.assetName}>
+                      {asset.name} <small>{asset.format}</small>
+                    </span>
+                    <span className={styles.assetDetail}>{asset.detail}</span>
+                  </div>
+                  <a className={styles.download} download href={asset.file}>
+                    <FontAwesomeIcon icon={faDownload} /> Descargar
+                  </a>
+                </div>
+              ))}
             </div>
           </Reveal>
 

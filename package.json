@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "flyer": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/flyer/build.mjs",
+    "video:artwork": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/story-video/sync-artwork.mjs",
+    "qr": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/qr/build.mjs",
+    "video:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/story-video/check-layout.mjs"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -43,7 +47,9 @@
     "@webgpu/types": "^0.1.54",
     "eslint": "^9.37.0",
     "eslint-config-next": "^16.1.6",
+    "jsqr": "^1.4.0",
     "prettier": "^3.4.2",
+    "qrcode": "^1.5.4",
     "sass": "^1.89.2",
     "typescript": "^5"
   }
