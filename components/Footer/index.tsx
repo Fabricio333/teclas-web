@@ -4,6 +4,35 @@ import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { faMapPin, faPhone } from '@fortawesome/free-solid-svg-icons';
 import styles from './Footer.module.scss';
 
+/**
+ * Every page a visitor should be able to reach on their own.
+ *
+ * The header only carries five links and `/events` is commented out there, so
+ * without this the events page and all three practice tools were reachable
+ * only by typing the URL or by already being inside another tool.
+ *
+ * Labels are the site's own — the header's for sections, the cards on
+ * `/resources` for the tools — so the same page is never called two things.
+ *
+ * Deliberately absent: `/calibracion`, which is a device setup step reached
+ * from the tool that needs it rather than a destination, and `/download`,
+ * which is unlisted on purpose (see README).
+ */
+const SECTIONS = [
+  { href: '/', label: 'Inicio' },
+  { href: '/#about-academy', label: 'La Academia' },
+  { href: '/#about-teacher', label: 'La Profesora' },
+  { href: '/events', label: 'Eventos' },
+  { href: '/resources', label: 'Recursos' },
+  { href: '/faq', label: 'Preguntas Frecuentes' },
+];
+
+const TOOLS = [
+  { href: '/piano-player', label: 'Aprende Piano' },
+  { href: '/ear-training', label: 'Entrenamiento Auditivo' },
+  { href: '/progreso', label: 'Mi progreso' },
+];
+
 export default function Footer() {
   return (
     <footer className={styles.footer}>
@@ -24,6 +53,28 @@ export default function Footer() {
             </div>
           </div>
 
+          <nav className={styles.footerNav} aria-label="Secciones del sitio">
+            <h3 className={styles.footerTitle}>Navegación</h3>
+            <ul className={styles.navList}>
+              {SECTIONS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav className={styles.footerNav} aria-label="Herramientas">
+            <h3 className={styles.footerTitle}>Herramientas</h3>
+            <ul className={styles.navList}>
+              {TOOLS.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href}>{item.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
           <div className={styles.footerContact}>
             <h3 className={styles.footerTitle}>Contacto</h3>
             <div className={styles.contactContent}>
@@ -43,11 +94,6 @@ export default function Footer() {
         </div>
 
         <div className={styles.footerBottom}>
-          {/* Utility link, not marketing copy: a media kit nobody can find is
-              a media kit nobody uses. */}
-          <p className={styles.footerLinks}>
-            <Link href="/media-kit">Media kit</Link>
-          </p>
           <p>
             &copy; {new Date().getFullYear()} Teclas Ciudad Jardín. Todos los
             derechos reservados.
