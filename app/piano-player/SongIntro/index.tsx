@@ -1,6 +1,13 @@
+'use client';
+
 import Link from 'next/link';
-import { isGrandStaff, type Level } from '@/lib/piano-player/songs';
+import {
+  getLevelById,
+  isGrandStaff,
+  type Level,
+} from '@/lib/piano-player/songs';
 import { difficultyLabel, getSongPage } from '@/lib/piano-player/songPages';
+import { useCurrentSongId } from '@/hooks/use-current-song';
 import styles from './SongIntro.module.scss';
 
 /**
@@ -12,11 +19,21 @@ import styles from './SongIntro.module.scss';
  * shared link or from search, instead of being the hub with a different song
  * loaded.
  *
+ * It follows the picker rather than staying on the song the page was built
+ * for: switching songs rewrites the address bar and re-renders the score, and
+ * a heading still naming the previous piece would contradict both. The server
+ * still renders this page's own song, so the prerendered HTML — the thing a
+ * crawler reads — is unchanged.
+ *
  * The facts underneath come from the level itself, so they cannot describe a
  * piece the game does not play.
  */
 export default function SongIntro({ level }: { level: Level }) {
-  const page = getSongPage(level);
+  const currentId = useCurrentSongId(level.id);
+  // The development-only debug level has no page and no copy; fall back to the
+  // song this page is about rather than rendering an empty header.
+  const shown = (currentId && getLevelById(currentId)) || level;
+  const page = getSongPage(shown);
 
   return (
     <header className={`container ${styles.intro}`}>
@@ -32,15 +49,15 @@ export default function SongIntro({ level }: { level: Level }) {
       <dl className={styles.facts}>
         <div className={styles.fact}>
           <dt>Nivel</dt>
-          <dd>{difficultyLabel(level)}</dd>
+          <dd>{difficultyLabel(shown)}</dd>
         </div>
         <div className={styles.fact}>
           <dt>Notas</dt>
-          <dd>{level.notes.length}</dd>
+          <dd>{shown.notes.length}</dd>
         </div>
         <div className={styles.fact}>
           <dt>Manos</dt>
-          <dd>{isGrandStaff(level) ? 'Derecha o izquierda' : 'Derecha'}</dd>
+          <dd>{isGrandStaff(shown) ? 'Derecha o izquierda' : 'Derecha'}</dd>
         </div>
       </dl>
 

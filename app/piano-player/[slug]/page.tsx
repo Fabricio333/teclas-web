@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation';
 import LearnOnboarding from '@/components/LearnOnboarding';
 import PianoPlayer from '@/components/PianoPlayer';
 import { LEVELS, getLevelById, songPath } from '@/lib/piano-player/songs';
-import { songPageDescription } from '@/lib/piano-player/songPages';
+import {
+  songPageDescription,
+  songPageTitle,
+} from '@/lib/piano-player/songPages';
 import { pianoSongJsonLd } from '@/lib/seo/pianoSong';
 import SongIntro from '../SongIntro';
 import SongLinks from '../SongLinks';
@@ -36,7 +39,7 @@ export async function generateMetadata({
   if (!level) return {};
 
   const url = `https://teclasciudadjardin.com.ar${songPath(level.id)}`;
-  const title = `${level.name} en piano - Partitura interactiva | TECLAS Ciudad Jardín`;
+  const title = songPageTitle(level);
   const description = songPageDescription(level);
 
   return {

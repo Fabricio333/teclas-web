@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
 import { LEVELS, songPath, type Level } from '@/lib/piano-player/songs';
+import { useCurrentSongId } from '@/hooks/use-current-song';
 import styles from './SongLinks.module.scss';
 
 /**
@@ -21,6 +24,10 @@ const GROUPS: { difficulty: Level['difficulty']; title: string }[] = [
 ];
 
 export default function SongLinks({ currentId }: { currentId?: string }) {
+  // Marks whichever song the player has loaded, not just the one this page was
+  // built for — on the hub that is how the list says what you are playing.
+  const activeId = useCurrentSongId(currentId);
+
   return (
     <nav className={`container ${styles.songLinks}`} aria-label="Canciones">
       <h2 className={styles.title}>Todas las canciones</h2>
@@ -41,7 +48,7 @@ export default function SongLinks({ currentId }: { currentId?: string }) {
                 (level) => level.difficulty === group.difficulty,
               ).map((level) => (
                 <li key={level.id}>
-                  {level.id === currentId ? (
+                  {level.id === activeId ? (
                     <span className={styles.current} aria-current="page">
                       {level.name}
                     </span>

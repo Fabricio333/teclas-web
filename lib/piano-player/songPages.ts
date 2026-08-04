@@ -208,6 +208,16 @@ export function difficultyLabel(level: Level): string {
 }
 
 /**
+ * The song page's `<title>`, and the browser tab.
+ *
+ * One function so the tab the player rewrites when you switch songs cannot
+ * drift from the title the route rendered.
+ */
+export function songPageTitle(level: Level): string {
+  return `${level.name} en piano - Partitura interactiva | TECLAS Ciudad Jardín`;
+}
+
+/**
  * The song's meta description, counted off the level itself.
  *
  * Built rather than written so that it cannot contradict the piece: the note

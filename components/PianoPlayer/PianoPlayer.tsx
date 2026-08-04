@@ -25,6 +25,7 @@ import {
   voiceClassForHand,
 } from '@/lib/piano-player/songs';
 import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
+import { songPageTitle } from '@/lib/piano-player/songPages';
 import ShareButton from '@/components/ShareButton';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
 import { useCalibrationSettings } from '@/hooks/use-calibration-settings';
@@ -364,6 +365,9 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
     // at a 404.
     if (!level || !LEVELS.some((lev) => lev.id === level.id)) return;
     window.history.replaceState(null, '', songPath(level.id));
+    // The tab goes with the address. A bookmark taken after switching songs
+    // would otherwise be filed under the piece the page was built for.
+    document.title = songPageTitle(level);
   }, [levelIndex]);
 
   const practiceHandRef = useRef(practiceHand);
@@ -1623,8 +1627,14 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         currentLevelIndex = idx;
         level = ALL_LEVELS[idx];
         SONG = notesForHand(level, practiceHandRef.current);
+        // The id travels with the index because the index is not a stable name
+        // for a song: `ALL_LEVELS` carries the debug level in development, so
+        // the same number means different things in different builds. Anything
+        // outside this component identifies the song by id.
         window.dispatchEvent(
-          new CustomEvent('teclas:level-changed', { detail: { index: idx } }),
+          new CustomEvent('teclas:level-changed', {
+            detail: { index: idx, id: level.id },
+          }),
         );
         sections = getSongSections(level);
         patterns = getSongPatterns(level);
