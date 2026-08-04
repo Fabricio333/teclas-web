@@ -116,6 +116,89 @@ const DEFAULT_VELOCITY_BY_SOURCE: Record<InputSource, number> = {
 const MIN_QWERTY_OFFSET = -24;
 const MAX_QWERTY_OFFSET = 24;
 
+/** Semitones of the octave that are white keys. */
+const WHITE_SET = new Set([0, 2, 4, 5, 7, 9, 11]);
+/** Rendered white-key pitch, border included — the step the CSS uses. */
+const KEY_STEP = 50;
+const BLACK_HALF = 18;
+
+const LETTER_BY_MIDI = new Map(
+  [...WHITE_KEYS, ...BLACK_KEYS].map((k) => [k.midi, k]),
+);
+
+/**
+ * Draws the keys for a midi range into the piano container.
+ *
+ * Extracted so fullscreen can widen the keyboard without re-running the engine
+ * effect, which owns the synth, the MIDI bindings and the sheet. Only the keys
+ * are replaced; the pointer handlers live on the container and survive.
+ *
+ * Black keys carry an inline `left` instead of the per-slot CSS rules, which
+ * were pixel values hand-set for exactly one octave and could not describe a
+ * third one.
+ */
+function buildPianoKeys(
+  pianoDiv: HTMLElement,
+  fromMidi: number,
+  toMidi: number,
+) {
+  pianoDiv.innerHTML = '';
+
+  const whites: number[] = [];
+  for (let m = fromMidi; m <= toMidi; m += 1) {
+    if (WHITE_SET.has(((m % 12) + 12) % 12)) whites.push(m);
+  }
+  const spanPx = whites.length * KEY_STEP;
+  pianoDiv.style.setProperty('--piano-span', `${spanPx}px`);
+
+  whites.forEach((midi) => {
+    const known = LETTER_BY_MIDI.get(midi);
+    const wEl = document.createElement('div');
+    wEl.className = styles.key;
+    wEl.dataset.midi = String(midi);
+
+    const labelEl = document.createElement('span');
+    labelEl.className = styles.keyLabel;
+    const letterEl = document.createElement('span');
+    letterEl.className = styles.keyLetter;
+    letterEl.textContent = known?.label ?? '';
+    labelEl.appendChild(letterEl);
+    const fingerEl = document.createElement('span');
+    fingerEl.className = styles.keyFinger;
+    fingerEl.textContent = known ? String(known.finger) : '';
+    labelEl.appendChild(fingerEl);
+    wEl.appendChild(labelEl);
+
+    pianoDiv.appendChild(wEl);
+  });
+
+  for (let m = fromMidi; m <= toMidi; m += 1) {
+    if (WHITE_SET.has(((m % 12) + 12) % 12)) continue;
+    // Whites strictly below this black key decide where it sits.
+    const slot = whites.filter((w) => w < m).length;
+    const known = LETTER_BY_MIDI.get(m);
+
+    const bEl = document.createElement('div');
+    bEl.className = `${styles.key} ${styles.black}`;
+    bEl.dataset.midi = String(m);
+    bEl.style.left = `calc(50% - ${spanPx / 2}px + ${slot * KEY_STEP - BLACK_HALF}px)`;
+
+    const bLabel = document.createElement('span');
+    bLabel.className = styles.keyLabel;
+    const bLetter = document.createElement('span');
+    bLetter.className = styles.keyLetter;
+    bLetter.textContent = known?.label ?? '';
+    bLabel.appendChild(bLetter);
+    const bFinger = document.createElement('span');
+    bFinger.className = styles.keyFinger;
+    bFinger.textContent = known ? String(known.finger) : '';
+    bLabel.appendChild(bFinger);
+    bEl.appendChild(bLabel);
+
+    pianoDiv.appendChild(bEl);
+  }
+}
+
 export default function PianoPlayer() {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
@@ -261,6 +344,26 @@ export default function PianoPlayer() {
       setMicEnabled(started);
     }
   }, [micEnabled, startListening, stopListening]);
+
+  /*
+   * Fullscreen widens the keyboard to three octaves.
+   *
+   * The engine effect below runs once and owns the synth, MIDI and sheet, so
+   * it cannot be re-run just to redraw keys. It does not cache key elements —
+   * every lookup is a querySelector by data-midi at call time — and the
+   * pointer handlers are delegated on the container, so swapping the children
+   * underneath it is safe.
+   *
+   * The extra octaves are for reading along: only the middle one is reachable
+   * from the computer keyboard, which the badge below the piano says out loud
+   * when that is the chosen input.
+   */
+  useEffect(() => {
+    const pianoDiv = pianoRef.current;
+    if (!pianoDiv) return;
+    if (isFullscreen) buildPianoKeys(pianoDiv, 48, 83);
+    else buildPianoKeys(pianoDiv, 60, 71);
+  }, [isFullscreen]);
 
   useEffect(() => {
     let synth: any; // Tone.Sampler
@@ -604,53 +707,7 @@ export default function PianoPlayer() {
       };
 
       // ---------- Build piano DOM ----------
-      pianoDiv.innerHTML = '';
-      WHITE_KEYS.forEach((white, i) => {
-        const wEl = document.createElement('div');
-        wEl.className = styles.key;
-        wEl.dataset.midi = String(white.midi);
-
-        const labelEl = document.createElement('span');
-        labelEl.className = styles.keyLabel;
-
-        const letterEl = document.createElement('span');
-        letterEl.className = styles.keyLetter;
-        letterEl.textContent = white.label;
-        labelEl.appendChild(letterEl);
-
-        const fingerEl = document.createElement('span');
-        fingerEl.className = styles.keyFinger;
-        fingerEl.textContent = String(white.finger);
-        labelEl.appendChild(fingerEl);
-
-        wEl.appendChild(labelEl);
-
-        pianoDiv.appendChild(wEl);
-      });
-
-      BLACK_KEYS.forEach((black) => {
-        const bEl = document.createElement('div');
-        bEl.className = `${styles.key} ${styles.black}`;
-        bEl.dataset.midi = String(black.midi);
-        bEl.dataset.keyPosition = String(black.afterWhiteIndex);
-
-        const bLabel = document.createElement('span');
-        bLabel.className = styles.keyLabel;
-
-        const bLetter = document.createElement('span');
-        bLetter.className = styles.keyLetter;
-        bLetter.textContent = black.label;
-        bLabel.appendChild(bLetter);
-
-        const bFinger = document.createElement('span');
-        bFinger.className = styles.keyFinger;
-        bFinger.textContent = String(black.finger);
-        bLabel.appendChild(bFinger);
-
-        bEl.appendChild(bLabel);
-
-        pianoDiv.appendChild(bEl);
-      });
+      buildPianoKeys(pianoDiv, 60, 71);
 
       // ---------- Sheet music ----------
       /** Durations of the rendered notes, in whole-notes, parallel to
@@ -1892,6 +1949,23 @@ export default function PianoPlayer() {
                 </button>
               </>
             )}
+            {/*
+              Reopens the first-run "how are you going to play?" prompt.
+              Clearing the setting is the whole mechanism: LearnOnboarding
+              shows itself whenever inputMode is `unset`, so there is nothing
+              to wire between the two components. Until this existed the choice
+              was genuinely one-way — the prompt appeared once and a student
+              who picked wrong had no way back.
+            */}
+            <button
+              type="button"
+              className={styles.sheetToolBtn}
+              onClick={() => updateSettings({ inputMode: 'unset' })}
+              title="Cambiar cómo tocás: piano acústico, teclado MIDI o el teclado de la compu"
+              aria-label="Cambiar cómo tocás"
+            >
+              <FontAwesomeIcon icon={faSliders} />
+            </button>
             <button
               type="button"
               className={`${styles.sheetToolBtn} ${isFullscreen ? styles.sheetToolBtnOn : ''}`}
@@ -1947,6 +2021,13 @@ export default function PianoPlayer() {
             Octava 4
           </span>
           <div ref={pianoRef} className={styles.piano} />
+          {isFullscreen && settings.inputMode === 'keyboard' && (
+            <p className={styles.keyboardReachNote}>
+              <FontAwesomeIcon icon={faKeyboard} />
+              Con el teclado de la compu tocás la octava del medio. Las otras
+              dos son para leer.
+            </p>
+          )}
         </div>
 
         {/*

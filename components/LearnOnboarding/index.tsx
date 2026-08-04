@@ -37,6 +37,24 @@ export default function LearnOnboarding() {
   // the hydration gate this would flash open for every returning student.
   const open = hydrated && !dismissed && settings.inputMode === 'unset';
 
+  /*
+   * Re-arm when the setting goes back to `unset`.
+   *
+   * That is how "cambiar cómo tocás" reopens this: the toolbar button clears
+   * `inputMode` rather than reaching across the tree for a handle on this
+   * dialog. Without re-arming, a student who closed the prompt earlier in the
+   * session could never get it back.
+   *
+   * Adjusted during render rather than in an effect — the React-documented
+   * shape for "reset state when a value changes", and it avoids the extra
+   * commit an effect would cost.
+   */
+  const [lastMode, setLastMode] = useState(settings.inputMode);
+  if (lastMode !== settings.inputMode) {
+    setLastMode(settings.inputMode);
+    if (settings.inputMode === 'unset') setDismissed(false);
+  }
+
   const choose = useCallback((inputMode: 'acoustic' | 'midi' | 'keyboard') => {
     updateSettings({ inputMode });
   }, []);
