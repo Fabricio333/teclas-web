@@ -494,6 +494,17 @@
     justify-content: center;
   }
 
+  // ...but centring is only right *while* it fits. A centred flex child that
+  // is taller than its container overflows at both edges, so the top of the
+  // scroller ends up above the viewport by half the excess — and every
+  // translateY, which is measured from the top of the scroller, then lands
+  // that much short. Fullscreen therefore showed a band from the middle of
+  // the piece and never the system being played. followCurrentSystem() adds
+  // this class whenever it actually has to scroll.
+  .sheetViewportScrolls {
+    justify-content: flex-start;
+  }
+
   // 700px is a page constraint, not a fullscreen one — let the score use the
   // width it is given, which also makes the staff proportionally taller.
   .sheet {

@@ -420,6 +420,12 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
     drawnRangeRef.current = range;
     buildPianoKeys(pianoDiv, range.from, range.to);
 
+    // Redrawing replaces every key element, which throws away the outline on
+    // the key the student is supposed to play next — so going fullscreen left
+    // nothing marked until the next correct note. The engine owns that
+    // highlight, so ask it to put it back on the keys that now exist.
+    window.dispatchEvent(new Event('teclas:keyboard-redrawn'));
+
     // The engine only refreshes this on an octave shift, and a widened
     // keyboard never shifts — so say what it now shows.
     const el = document.getElementById('octave-indicator');
@@ -947,6 +953,15 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         const fitsEntirely =
           document.fullscreenElement !== null &&
           sheetLayout.systems.length <= lines;
+
+        // The offsets below are measured from the top of the scroller, which
+        // only coincides with the top of the viewport while the score is not
+        // being centred. See `.sheetViewportScrolls`.
+        sheetViewport()?.classList.toggle(
+          styles.sheetViewportScrolls,
+          !fitsEntirely,
+        );
+
         const offset = fitsEntirely
           ? 0
           : scrollOffsetFor(sheetLayout, system, lines);
@@ -1644,6 +1659,27 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
       window.addEventListener('teclas:hand-changed', onHandChanged);
       cleanupFns.push(() =>
         window.removeEventListener('teclas:hand-changed', onHandChanged),
+      );
+
+      // Fullscreen rebuilds the keyboard from one octave to three and back, so
+      // every key element the engine had marked is gone. Nothing here can be
+      // recovered from the old nodes — they are detached — so drop the stale
+      // references and re-derive the marks from `pos`, which is the state that
+      // actually survived.
+      //
+      // `highlightCurrent` also re-runs `checkOctaveShift`, which matters on
+      // the way *out* of fullscreen: a note that had its own key across three
+      // octaves may need the one-octave keyboard transposed under it again.
+      const onKeyboardRedrawn = () => {
+        pressedElements.clear();
+        highlightCurrent();
+      };
+      window.addEventListener('teclas:keyboard-redrawn', onKeyboardRedrawn);
+      cleanupFns.push(() =>
+        window.removeEventListener(
+          'teclas:keyboard-redrawn',
+          onKeyboardRedrawn,
+        ),
       );
 
       const octaveDownBtn = document.getElementById('qwerty-octave-down');
