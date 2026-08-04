@@ -36,7 +36,16 @@ interface Step {
  *  is about listening, and seven choices is already plenty. */
 const POOL = WHITE_KEYS.map((k) => k.midi);
 
-const BEAT_MS = 620;
+const BEAT_MS = 800;
+
+/**
+ * Share of the beat the note is actually held for.
+ *
+ * The sequence used to be legato — every note filled its whole beat, so one
+ * ran straight into the next and a child heard a smear rather than a count of
+ * notes. The rest is silence, and it is what makes each note land separately.
+ */
+const NOTE_HOLD = 0.78;
 /** Round at which long notes start appearing. The first rounds are pure
  *  pitch, so the rhythm rule is met only once the ear part is comfortable. */
 const RHYTHM_FROM_ROUND = 3;
@@ -58,8 +67,39 @@ const ROUND_GAP_MS = 1500;
 /** Points per note repeated correctly. */
 const POINTS_PER_NOTE = 10;
 
-function randomStep(round: number, beatsSoFar: number): Step {
-  const midi = POOL[Math.floor(Math.random() * POOL.length)];
+/**
+ * Next note of the sequence, chosen relative to the one before it.
+ *
+ * Picking uniformly from the seven keys sounds like nothing: one note in seven
+ * repeats the previous one, and most of the rest are its neighbours, so the
+ * melody crawls up and down the middle of the keyboard. Weighting by distance
+ * makes it move — and a sequence that leaps has to be *heard*, where a sequence
+ * that walks can be guessed by sliding a finger along the keys.
+ *
+ * The previous note is never repeated: two identical notes in a row are the one
+ * case where a student cannot tell from listening whether they missed a step.
+ */
+function randomMidi(previous: number | null): number {
+  if (previous === null) return POOL[Math.floor(Math.random() * POOL.length)];
+
+  const previousDegree = POOL.indexOf(previous);
+  const candidates = POOL.flatMap((midi, degree) => {
+    const distance = Math.abs(degree - previousDegree);
+    if (distance === 0) return [];
+    // A fourth or wider is three times as likely as a neighbouring note.
+    const weight = distance >= 3 ? 3 : distance === 2 ? 2 : 1;
+    return Array<number>(weight).fill(midi);
+  });
+
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function randomStep(
+  round: number,
+  beatsSoFar: number,
+  previous: number | null,
+): Step {
+  const midi = randomMidi(previous);
   // A long note starting on the last beat of a bar would have to be split
   // across the barline, which neither the notation nor the dots can express.
   const roomInBar = BEATS_PER_BAR - (beatsSoFar % BEATS_PER_BAR);
@@ -208,7 +248,7 @@ export default function SimonGame() {
       const sampler = await getSampler();
       sampler.triggerAttackRelease(
         midiNumberToNote(midi, undefined, true),
-        (beats * BEAT_MS) / 1000,
+        (beats * BEAT_MS * NOTE_HOLD) / 1000,
       );
     },
     [getSampler],
@@ -220,7 +260,9 @@ export default function SimonGame() {
       setPhase('listening');
       await getSampler();
 
-      let at = 250;
+      // Lead-in. Long enough to read "Escuchá…" and look up at the keyboard
+      // before the first note, which at 250ms had already gone by.
+      let at = 500;
       list.forEach((step, index) => {
         timersRef.current.push(
           setTimeout(() => {
@@ -251,7 +293,11 @@ export default function SimonGame() {
   const nextRound = useCallback(() => {
     const played = stepsRef.current;
     const beatsSoFar = played.reduce((sum, s) => sum + s.beats, 0);
-    const list = [...played, randomStep(played.length + 1, beatsSoFar)];
+    const previous = played.length ? played[played.length - 1].midi : null;
+    const list = [
+      ...played,
+      randomStep(played.length + 1, beatsSoFar, previous),
+    ];
     setSteps(list);
     void playSequence(list);
   }, [playSequence]);
