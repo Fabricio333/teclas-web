@@ -715,6 +715,46 @@ const SONG_SECTION_SPECS: Record<string, SongSectionSpec[]> = {
       patternName: 'Vecino cromatico',
     },
   ],
+  // A-A'-B-B'. Each half of the verse is the same eight bars with a different
+  // last bar, and so is each half of the chorus, so the pairs share a
+  // patternId: the tracker then says the tune comes back rather than showing
+  // four unrelated blocks.
+  'la-cuarta-estrella': [
+    {
+      id: 'estrofa',
+      name: 'Estrofa',
+      kind: 'verse',
+      length: 36,
+      patternId: 'verse',
+      patternName: 'Estrofa',
+      focus: 'Entradas despues del silencio, sobre La-Si-Do',
+    },
+    {
+      id: 'estrofa-repeat',
+      name: 'Estrofa otra vez',
+      kind: 'verse',
+      length: 36,
+      patternId: 'verse',
+      patternName: 'Estrofa',
+    },
+    {
+      id: 'estribillo',
+      name: 'Estribillo',
+      kind: 'chorus',
+      length: 29,
+      patternId: 'chorus',
+      patternName: 'Estribillo',
+      focus: 'Notas repetidas y el salto hasta Sol',
+    },
+    {
+      id: 'estribillo-ending',
+      name: 'Estribillo y final',
+      kind: 'ending',
+      length: 32,
+      patternId: 'chorus',
+      patternName: 'Estribillo',
+    },
+  ],
   'himno-alegria-completo': [
     {
       id: 'theme-a',
@@ -1133,7 +1173,67 @@ export const LEVELS: Level[] = applySongStructure([
       64, 64, 65, 67, 67, 65, 64, 62, 60, 60, 62, 64, 62, 60, 60,
     ],
   },
+  {
+    // Converted from a MuseScore file with `scripts/mscz-to-level.mjs`, which
+    // checks the abc against abcjs so the note elements and `notes` stay
+    // paired. The source is a single guitar line; nothing was transposed, so
+    // the melody sits where it was written, from A4 up to G5.
+    //
+    // The longest piece in the app by some way, and the only one whose phrases
+    // start off the beat — every bar of the verse opens with a rest. Rests are
+    // not note elements, so they take no slot in `notes`; they are what the
+    // student reads, not what the detector waits for.
+    id: 'la-cuarta-estrella',
+    name: 'La cuarta estrella',
+    difficulty: 3,
+    abc: [
+      'X:1',
+      'T:La cuarta estrella',
+      'M:4/4',
+      'L:1/4',
+      'K:C',
+      'z3/2 A/2 A B | c c/2 B/2 z/2 B/2 A | z3/2 A/2 c d | e e/2 d/2 z/2 c/2 e |',
+      'z3/2 e/2 e/2 e/2 f/2 e/2 | d d/2 c/2 z/2 c/2 B | z3/2 B/2 B/2 B/2 e/2 d/2 | c c/2 B/2 z/2 B/2 A |',
+      'z3/2 A/2 A B | c c/2 B/2 z/2 B/2 A | z3/2 A/2 c d | e e/2 d/2 z/2 c/2 e |',
+      'z3/2 e/2 e/2 e/2 f/2 e/2 | d d/2 c/2 z/2 c/2 B | z3/2 B/2 B/2 B/2 e/2 d/2 | c e/2 B/2 z/2 c/2 A |',
+      'z2 c d | e e e e/2 e/2 | z/2 e3/2 z f/2 e/2 | d g g f/2 g/2 |',
+      'z/2 d3/2 z d/2 d/2 | f f f f/2 f/2 | z/2 c3/2 z d/2 c/2 | e z2 d/2 c/2 |',
+      'd z c d | e e e e/2 e/2 | z/2 e3/2 z f/2 e/2 | d g g f/2 g/2 |',
+      'z/2 d3/2 z d/2 d/2 | f f f f/2 f/2 | z/2 f3/2 z g/2 f/2 | e f/2 e f/2 e |',
+    ].join('\n'),
+    notes: [
+      // Estrofa (36 notas)
+      69, 69, 71, 72, 72, 71, 71, 69, 69, 72, 74, 76, 76, 74, 72, 76, 76, 76,
+      76, 77, 76, 74, 74, 72, 72, 71, 71, 71, 71, 76, 74, 72, 72, 71, 71, 69,
+      // Estrofa otra vez (36 notas)
+      69, 69, 71, 72, 72, 71, 71, 69, 69, 72, 74, 76, 76, 74, 72, 76, 76, 76,
+      76, 77, 76, 74, 74, 72, 72, 71, 71, 71, 71, 76, 74, 72, 76, 71, 72, 69,
+      // Estribillo (29 notas)
+      72, 74, 76, 76, 76, 76, 76, 76, 77, 76, 74, 79, 79, 77, 79, 74, 74, 74,
+      77, 77, 77, 77, 77, 72, 74, 72, 76, 74, 72,
+      // Estribillo y final (32 notas)
+      74, 72, 74, 76, 76, 76, 76, 76, 76, 77, 76, 74, 79, 79, 77, 79, 74, 74,
+      74, 77, 77, 77, 77, 77, 77, 79, 77, 76, 77, 76, 77, 76,
+    ],
+  },
 ]);
+
+/**
+ * The level with this id, or undefined.
+ *
+ * A level id doubles as the slug of the song's own page, so this is what
+ * `/piano-player/[slug]` resolves — the same role `getEventBySlug` plays for
+ * the event pages. `DEBUG_LEVEL` is deliberately not searched: it is not in
+ * `LEVELS`, so it has no page and cannot be linked to.
+ */
+export function getLevelById(id: string): Level | undefined {
+  return LEVELS.find((level) => level.id === id);
+}
+
+/** URL of a song's own page. */
+export function songPath(id: string): string {
+  return `/piano-player/${id}`;
+}
 
 // Debug song: white-key scale from C3 to B5, ascending then descending.
 // Only shown in development (localhost). Tests octave shift across 3 octaves.

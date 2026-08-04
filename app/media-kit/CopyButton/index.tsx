@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faCopy } from '@fortawesome/free-solid-svg-icons';
+import { copyText } from '@/lib/clipboard';
 import styles from './CopyButton.module.scss';
 
 type CopyButtonProps = {
@@ -39,26 +40,7 @@ export default function CopyButton({
   );
 
   const copy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch {
-      // Clipboard access is refused on insecure origins and in some embedded
-      // browsers. Fall back to a selection the visitor can copy by hand
-      // rather than silently doing nothing.
-      const area = document.createElement('textarea');
-      area.value = value;
-      area.style.position = 'fixed';
-      area.style.opacity = '0';
-      document.body.appendChild(area);
-      area.select();
-      try {
-        document.execCommand('copy');
-      } catch {
-        document.body.removeChild(area);
-        return;
-      }
-      document.body.removeChild(area);
-    }
+    if (!(await copyText(value))) return;
 
     setCopied(true);
     if (timerRef.current) clearTimeout(timerRef.current);

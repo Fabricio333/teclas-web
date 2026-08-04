@@ -62,6 +62,106 @@
     <priority>0.6</priority>
   </url>
   <!--
+    One page per song, below the hub the picker lives on. Added, not altered:
+    the /piano-player entry above keeps its place and its priority. The
+    development-only debug level has no page and so is not listed.
+  -->
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/estrellita</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/estrellita-dos-manos</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/maria-corderito</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/martinillo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/london-bridge</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/au-clair-lune</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/rema-rema</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/oda-alegria</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/aura-lee</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/when-saints</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/cumpleanos</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/campanitas</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/amazing-grace</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/allegro-suzuki</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/greensleeves</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/minuet-g</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/para-elisa</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/himno-alegria-completo</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/piano-player/la-cuarta-estrella</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <!--
     /ear-training was indexable but missing from the sitemap. /calibracion and
     /progreso are deliberately absent: both are noindex, and listing a noindex
     URL in a sitemap is a contradiction Search Console reports as an error.

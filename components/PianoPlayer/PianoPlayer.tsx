@@ -21,9 +21,11 @@ import {
   getSongSections,
   isGrandStaff,
   notesForHand,
+  songPath,
   voiceClassForHand,
 } from '@/lib/piano-player/songs';
 import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
+import ShareButton from '@/components/ShareButton';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
 import { useCalibrationSettings } from '@/hooks/use-calibration-settings';
 import { recordRun, updateSettings, useSettings } from '@/lib/progress';
@@ -199,7 +201,17 @@ function buildPianoKeys(
   }
 }
 
-export default function PianoPlayer() {
+type PianoPlayerProps = {
+  /**
+   * Which song to open on, by `Level.id`. `/piano-player/[slug]` passes the
+   * song its page is about; the hub passes nothing and gets the first level,
+   * exactly as before. An unknown id falls back to the first level rather than
+   * to an empty player.
+   */
+  initialLevelId?: string;
+};
+
+export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
   const doneRef = useRef<HTMLDivElement>(null);
@@ -303,10 +315,22 @@ export default function PianoPlayer() {
   // Which level is loaded, mirrored out of the engine. The engine owns this
   // (the "next song" button changes levels without the <select> ever firing a
   // change event), so it announces switches and React follows.
-  const [levelIndex, setLevelIndex] = useState(0);
-  const levelIsGrandStaff = isGrandStaff(
-    ALL_LEVELS[levelIndex] ?? ALL_LEVELS[0],
+  const initialLevelIndex = Math.max(
+    0,
+    ALL_LEVELS.findIndex((lev) => lev.id === initialLevelId),
   );
+  const [levelIndex, setLevelIndex] = useState(initialLevelIndex);
+  const currentLevel = ALL_LEVELS[levelIndex] ?? ALL_LEVELS[0];
+  const levelIsGrandStaff = isGrandStaff(currentLevel);
+  // The development-only debug level is not in `LEVELS`, so it has no page and
+  // nothing worth sharing — better no button than a link to a 404.
+  const sharePath = LEVELS.some((lev) => lev.id === currentLevel.id)
+    ? songPath(currentLevel.id)
+    : null;
+
+  // The engine's effect runs once and never sees a later prop, so the starting
+  // index goes in through a ref like everything else it reads from React.
+  const initialLevelIndexRef = useRef(initialLevelIndex);
 
   useEffect(() => {
     const onLevelChanged = (event: Event) => {
@@ -317,6 +341,30 @@ export default function PianoPlayer() {
     return () =>
       window.removeEventListener('teclas:level-changed', onLevelChanged);
   }, []);
+
+  // Keep the address bar on the song being played, so the share button and a
+  // copied URL always mean the same thing as what is on screen.
+  //
+  // `history.replaceState` and not the router: a client navigation would
+  // remount this component and throw away the run in progress. Next supports
+  // the native call since 14.1 and keeps its own history state in sync.
+  //
+  // The ref remembers which level the address bar already shows rather than
+  // whether this is the first run: under StrictMode the effect fires twice on
+  // mount, and a "have I run yet" flag would let the second pass rewrite
+  // /piano-player to /piano-player/estrellita — leaving the hub's own URL
+  // unshareable. Comparing indices makes the effect idempotent, so it only
+  // ever fires on a real switch.
+  const urlLevelIndexRef = useRef(initialLevelIndex);
+  useEffect(() => {
+    if (urlLevelIndexRef.current === levelIndex) return;
+    urlLevelIndexRef.current = levelIndex;
+    const level = ALL_LEVELS[levelIndex];
+    // The debug level has no page; leave the URL alone rather than pointing it
+    // at a 404.
+    if (!level || !LEVELS.some((lev) => lev.id === level.id)) return;
+    window.history.replaceState(null, '', songPath(level.id));
+  }, [levelIndex]);
 
   const practiceHandRef = useRef(practiceHand);
   useEffect(() => {
@@ -527,7 +575,7 @@ export default function PianoPlayer() {
       };
 
       // ---------- Level state ----------
-      let currentLevelIndex = 0;
+      let currentLevelIndex = initialLevelIndexRef.current;
       let level = ALL_LEVELS[currentLevelIndex];
       let SONG = notesForHand(level, practiceHandRef.current);
       let sections = getSongSections(level);
@@ -1702,7 +1750,13 @@ export default function PianoPlayer() {
         <div className={styles.controls}>
           <label className={styles.selectLabel}>
             Cancion:{' '}
-            <select id="level-select" className={styles.select}>
+            {/* Uncontrolled: the engine owns the current level and writes this
+                value back itself, so React only sets where it starts. */}
+            <select
+              id="level-select"
+              className={styles.select}
+              defaultValue={initialLevelIndex}
+            >
               {ALL_LEVELS.map((lev, i) => (
                 <option key={lev.id} value={i}>
                   {getDifficultyLabel(lev.difficulty)} {lev.name}
@@ -1714,6 +1768,17 @@ export default function PianoPlayer() {
           <button id="restart-btn" className={styles.restartBtn}>
             Reiniciar
           </button>
+
+          {/* Next to the picker, because the thing being shared is the song
+              the picker is showing. The URL follows the picker, so this is
+              always a link to what is actually on screen. */}
+          {sharePath && (
+            <ShareButton
+              path={sharePath}
+              title={`${currentLevel.name} en piano`}
+              text={`Aprendé a tocar ${currentLevel.name} en piano, con la partitura en pantalla:`}
+            />
+          )}
 
           <button
             type="button"
@@ -2093,6 +2158,15 @@ export default function PianoPlayer() {
               <button id="done-replay-btn" className={styles.doneBtn}>
                 Repetir
               </button>
+              {/* The moment someone actually wants to send the link: they
+                  just finished the piece. */}
+              {sharePath && (
+                <ShareButton
+                  path={sharePath}
+                  title={`${currentLevel.name} en piano`}
+                  text={`Acabo de tocar ${currentLevel.name} en piano. Probala vos:`}
+                />
+              )}
               <button
                 id="done-next-btn"
                 className={`${styles.doneBtn} ${styles.doneBtnPrimary}`}

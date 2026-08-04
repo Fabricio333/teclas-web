@@ -1,0 +1,44 @@
+@use '../../styles/variables' as *;
+
+// Sized to sit in a row of small controls (the piano player's "Reiniciar" and
+// microphone buttons), not as a page call to action — hence none of the
+// `.btnPrimary` weight.
+.share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  // Between the piano player's toolbar buttons (6px 18px) and the buttons on
+  // its completion card (0.6rem 1.5rem) — it stands next to both.
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: $primary-color;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: #f1f5f9;
+    border-color: $primary-color;
+  }
+
+  &:active {
+    background: #e2e8f0;
+  }
+}
+
+.shared {
+  border-color: var(--green-600);
+  background: var(--green-50);
+  color: var(--green-700);
+
+  &:hover {
+    border-color: var(--green-600);
+    background: var(--green-50);
+  }
+}
