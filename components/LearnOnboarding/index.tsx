@@ -21,8 +21,9 @@ import styles from './LearnOnboarding.module.scss';
  * all. Before this, calibration was a toolbar button most students never
  * pressed, so the microphone was judged on its uncalibrated performance.
  *
- * Shown only while `settings.inputMode` is `unset`, so it appears exactly once
- * — and, because the field defaults to `unset`, once for existing students too.
+ * Shown unprompted only while `settings.inputMode` is `unset`, so it appears
+ * exactly once — and, because the field defaults to `unset`, once for existing
+ * students too. After that it opens on request, from the sheet toolbar.
  */
 export default function LearnOnboarding() {
   const hydrated = useHydrated();
@@ -30,40 +31,52 @@ export default function LearnOnboarding() {
   // Dismissing without choosing keeps `inputMode` unset, so the prompt returns
   // on the next visit. This flag just stops it reappearing within this one.
   const [dismissed, setDismissed] = useState(false);
+  // Opened from the toolbar, whatever the setting currently says.
+  const [requested, setRequested] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // `useSettings()` returns the empty-document defaults during the prerender
   // and the first client render, and `inputMode` is `unset` there — so without
   // the hydration gate this would flash open for every returning student.
-  const open = hydrated && !dismissed && settings.inputMode === 'unset';
+  const open =
+    hydrated && !dismissed && (requested || settings.inputMode === 'unset');
 
   /*
-   * Re-arm when the setting goes back to `unset`.
+   * Reopening is an explicit request, not a side effect of writing a setting.
    *
-   * That is how "cambiar cómo tocás" reopens this: the toolbar button clears
-   * `inputMode` rather than reaching across the tree for a handle on this
-   * dialog. Without re-arming, a student who closed the prompt earlier in the
-   * session could never get it back.
-   *
-   * Adjusted during render rather than in an effect — the React-documented
-   * shape for "reset state when a value changes", and it avoids the extra
-   * commit an effect would cost.
+   * The toolbar button used to set `inputMode` back to `unset` and let the
+   * condition above notice. That worked exactly once: dismissing without
+   * choosing leaves `inputMode` already `unset`, so the next press wrote the
+   * value it already had, nothing changed, and `dismissed` stayed true with no
+   * way to clear it — the button was dead for the rest of the session. It also
+   * threw away a choice the student had already made, just for opening the
+   * dialog to look at it.
    */
-  const [lastMode, setLastMode] = useState(settings.inputMode);
-  if (lastMode !== settings.inputMode) {
-    setLastMode(settings.inputMode);
-    if (settings.inputMode === 'unset') setDismissed(false);
-  }
+  useEffect(() => {
+    const onOpenRequest = () => {
+      setRequested(true);
+      setDismissed(false);
+    };
+    window.addEventListener('teclas:choose-input', onOpenRequest);
+    return () =>
+      window.removeEventListener('teclas:choose-input', onOpenRequest);
+  }, []);
+
+  const close = useCallback(() => {
+    setDismissed(true);
+    setRequested(false);
+  }, []);
 
   const choose = useCallback((inputMode: 'acoustic' | 'midi' | 'keyboard') => {
     updateSettings({ inputMode });
+    setRequested(false);
   }, []);
 
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDismissed(true);
+      if (event.key === 'Escape') close();
     };
     document.addEventListener('keydown', onKeyDown);
 
@@ -72,7 +85,7 @@ export default function LearnOnboarding() {
     dialogRef.current?.focus();
 
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open]);
+  }, [open, close]);
 
   if (!open) return null;
 
@@ -158,12 +171,8 @@ export default function LearnOnboarding() {
           a la derecha.
         </p>
 
-        <button
-          className={styles.later}
-          onClick={() => setDismissed(true)}
-          type="button"
-        >
-          Decidir después
+        <button className={styles.later} onClick={close} type="button">
+          Cerrar
         </button>
       </div>
     </div>

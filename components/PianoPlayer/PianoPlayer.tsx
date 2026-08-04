@@ -2080,6 +2080,34 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
             >
               <FontAwesomeIcon icon={faVolumeHigh} />
             </button>
+            {/*
+              Also here, not only in the controls panel above: in fullscreen
+              that panel is off screen entirely, so a student practising on an
+              acoustic piano had no way to turn the microphone on or off
+              without leaving fullscreen first.
+            */}
+            <button
+              type="button"
+              className={`${styles.sheetToolBtn} ${micStatus === 'listening' ? styles.sheetToolBtnMicOn : ''} ${micStatus === 'error' ? styles.sheetToolBtnError : ''}`}
+              onClick={toggleMic}
+              aria-pressed={micStatus === 'listening'}
+              title={
+                micStatus === 'listening'
+                  ? 'Desactivar el micrófono'
+                  : 'Activar el micrófono para tocar tu propio piano'
+              }
+              aria-label={
+                micStatus === 'listening'
+                  ? 'Desactivar el micrófono'
+                  : 'Activar el micrófono'
+              }
+            >
+              <FontAwesomeIcon
+                icon={
+                  micStatus === 'listening' ? faMicrophone : faMicrophoneSlash
+                }
+              />
+            </button>
             {isFullscreen && (
               <>
                 {/* The on-state indicator. A pressed icon button alone gave no
@@ -2108,16 +2136,20 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
             )}
             {/*
               Reopens the first-run "how are you going to play?" prompt.
-              Clearing the setting is the whole mechanism: LearnOnboarding
-              shows itself whenever inputMode is `unset`, so there is nothing
-              to wire between the two components. Until this existed the choice
-              was genuinely one-way — the prompt appeared once and a student
-              who picked wrong had no way back.
+
+              It asks LearnOnboarding to open rather than clearing `inputMode`
+              and letting it notice. Clearing only worked while the setting was
+              actually changing: a student who had dismissed the prompt was
+              already on `unset`, so the write was a no-op and the button did
+              nothing from then on. It also wiped a choice they had made just
+              for opening the dialog to look at it.
             */}
             <button
               type="button"
               className={styles.sheetToolBtn}
-              onClick={() => updateSettings({ inputMode: 'unset' })}
+              onClick={() =>
+                window.dispatchEvent(new Event('teclas:choose-input'))
+              }
               title="Cambiar cómo tocás: piano acústico, teclado MIDI o el teclado de la compu"
               aria-label="Cambiar cómo tocás"
             >

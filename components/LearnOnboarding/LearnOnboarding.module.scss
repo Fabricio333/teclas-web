@@ -162,16 +162,27 @@
   color: var(--neutral-600);
 }
 
+// A pill, not an underlined link: this closes the dialog, which is the same
+// kind of action as the options above it, and an underline read as "another
+// place to go" next to three things that really were.
 .later {
-  margin-top: 0.75rem;
-  border: 0;
-  background: none;
+  margin-top: 1rem;
+  padding: 0.5rem 1.6rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
   color: var(--neutral-600);
   font-size: 0.85rem;
-  text-decoration: underline;
+  font-weight: 600;
   cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 
   &:hover {
+    border-color: $primary-color;
+    background: #f1f5f9;
     color: $primary-color;
   }
 }

@@ -441,11 +441,38 @@
   }
 }
 
-// Toggled-on state for the toolbar buttons (fullscreen, show piano).
+// Toggled-on state for the toolbar buttons (fullscreen, show piano, mic).
 .sheetToolBtnOn {
   background: $primary-color;
   border-color: $primary-color;
   color: #fff;
+}
+
+// The mic's on-state is green rather than the toolbar blue, matching the
+// microphone button in the controls panel: the same control in two places
+// must not signal "listening" in two different colours.
+.sheetToolBtnMicOn {
+  background: $success-color;
+  border-color: $success-color;
+  color: #fff;
+
+  &:hover {
+    background: color.adjust($success-color, $lightness: -8%);
+    border-color: color.adjust($success-color, $lightness: -8%);
+    color: #fff;
+  }
+}
+
+// The microphone failed — permission refused, or no input device. Same shape
+// as `.micBtnError` on the controls panel so the two say the same thing.
+.sheetToolBtnError {
+  border-color: $error-color;
+  color: $error-color;
+
+  &:hover {
+    background: $error-color;
+    color: #fff;
+  }
 }
 
 // Fullscreen now applies to the whole play area, so the keyboard comes with the
