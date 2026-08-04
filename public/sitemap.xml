@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<!--
+  The `image` namespace declares, per URL, the images that page actually shows,
+  so the event photos can be found in Google Images and tied back to the page
+  they belong to. Only `<image:loc>` is listed: Google dropped support for
+  `image:title`, `image:caption`, `image:license` and `image:geo_location`, and
+  the alt text on the page is what describes the picture now.
+-->
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+>
   <url>
     <loc>https://teclasciudadjardin.com.ar/</loc>
     <changefreq>weekly</changefreq>
@@ -9,6 +19,12 @@
     <loc>https://teclasciudadjardin.com.ar/events</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/taller-piano-adultos-principiantes.jpg</image:loc>
+    </image:image>
   </url>
   <!--
     Event detail pages. Added, not altered: each is a new indexable page with
@@ -18,11 +34,17 @@
     <loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://teclasciudadjardin.com.ar/events/taller-piano-adultos-principiantes</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/taller-piano-adultos-principiantes.jpg</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://teclasciudadjardin.com.ar/faq</loc>
@@ -48,6 +70,20 @@
     <loc>https://teclasciudadjardin.com.ar/ear-training</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <!--
+    One page per listening game, below the hub that links to both. Added, not
+    altered: the hub entry above keeps its place and its priority.
+  -->
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/ear-training/encontra-la-nota</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/ear-training/simon</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://teclasciudadjardin.com.ar/media-kit</loc>

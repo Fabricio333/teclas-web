@@ -155,6 +155,68 @@ export const earTrainingMetadata: Metadata = {
 };
 
 /**
+ * New pages — added, never altering the entries above (see CLAUDE.md).
+ *
+ * Each listening game now has a page of its own. The hub at /ear-training is
+ * untouched and stays indexable; these two are what a search for "juego para
+ * reconocer notas" or "simon musical piano" can actually land on, and they are
+ * self-canonical because each one is the game's own page, not a variant of the
+ * hub.
+ */
+export const earTrainingEncontraLaNotaMetadata: Metadata = {
+  title: 'Encontrá la Nota - Juego de Oído Online | TECLAS Ciudad Jardín',
+  description:
+    'Escuchá una nota y encontrala en el piano. Cinco niveles, de Do Re Mi a dos octavas, para jugar con el mouse, el teclado, un MIDI o tu propio piano.',
+  alternates: {
+    canonical:
+      'https://teclasciudadjardin.com.ar/ear-training/encontra-la-nota',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    url: 'https://teclasciudadjardin.com.ar/ear-training/encontra-la-nota',
+    title: 'Encontrá la Nota - Juego de Oído Online | TECLAS Ciudad Jardín',
+    description:
+      'Escuchá una nota y encontrala en el piano. Cinco niveles, de Do Re Mi a dos octavas, para jugar con el mouse, el teclado, un MIDI o tu propio piano.',
+    siteName: 'TECLAS',
+    images: [
+      {
+        url: '/teclas.jpg',
+      },
+    ],
+  },
+};
+
+export const earTrainingSimonMetadata: Metadata = {
+  title: 'Simon Musical - Juego de Oído y Memoria | TECLAS Ciudad Jardín',
+  description:
+    'La app toca una secuencia de notas y vos la repetís en el piano. Un juego de oído y memoria con las siete notas de la octava, sin saber música.',
+  alternates: {
+    canonical: 'https://teclasciudadjardin.com.ar/ear-training/simon',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: 'website',
+    url: 'https://teclasciudadjardin.com.ar/ear-training/simon',
+    title: 'Simon Musical - Juego de Oído y Memoria | TECLAS Ciudad Jardín',
+    description:
+      'La app toca una secuencia de notas y vos la repetís en el piano. Un juego de oído y memoria con las siete notas de la octava, sin saber música.',
+    siteName: 'TECLAS',
+    images: [
+      {
+        url: '/teclas.jpg',
+      },
+    ],
+  },
+};
+
+/**
  * Personal dashboard — noindex on purpose. It shows one student's own saved
  * progress and has no value in search results.
  */
@@ -223,6 +285,8 @@ export default {
   resourcesMetadata,
   pianoPlayerMetadata,
   earTrainingMetadata,
+  earTrainingEncontraLaNotaMetadata,
+  earTrainingSimonMetadata,
   progresoMetadata,
   calibracionMetadata,
   mediaKitMetadata,

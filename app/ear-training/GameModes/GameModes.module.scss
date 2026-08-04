@@ -39,3 +39,21 @@
     color: #fff;
   }
 }
+
+.permalinks {
+  margin: -0.75rem auto 1.25rem;
+  text-align: center;
+  color: $light-text-color;
+  font-size: $font-size-sm;
+}
+
+.permalink {
+  color: $primary-color;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+
+  &:hover {
+    color: $purple-color;
+  }
+}
