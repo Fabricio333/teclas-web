@@ -358,11 +358,27 @@ export default function PianoPlayer() {
    * from the computer keyboard, which the badge below the piano says out loud
    * when that is the chosen input.
    */
+  /*
+   * What the piano currently draws. The engine effect below is a closure that
+   * runs once, so it reads the range through this ref rather than capturing a
+   * value that would go stale the moment fullscreen widened the keyboard.
+   */
+  const drawnRangeRef = useRef({ from: 60, to: 71 });
+
   useEffect(() => {
     const pianoDiv = pianoRef.current;
     if (!pianoDiv) return;
-    if (isFullscreen) buildPianoKeys(pianoDiv, 48, 83);
-    else buildPianoKeys(pianoDiv, 60, 71);
+    const range = isFullscreen ? { from: 48, to: 83 } : { from: 60, to: 71 };
+    drawnRangeRef.current = range;
+    buildPianoKeys(pianoDiv, range.from, range.to);
+
+    // The engine only refreshes this on an octave shift, and a widened
+    // keyboard never shifts — so say what it now shows.
+    const el = document.getElementById('octave-indicator');
+    if (el && isFullscreen) {
+      el.textContent = `${midiToSolfege(range.from, { octave: true })} - ${midiToSolfege(range.to, { octave: true })}`;
+      el.style.opacity = '0.5';
+    }
   }, [isFullscreen]);
 
   useEffect(() => {
@@ -495,10 +511,7 @@ export default function PianoPlayer() {
       const pressedElements = new Map<number, HTMLElement>();
 
       const pressKey = (midiNumber: number) => {
-        const baseMidi = midiNumber - midiOffset;
-        const el = pianoDiv.querySelector<HTMLElement>(
-          `[data-midi="${baseMidi}"]`,
-        );
+        const el = keyEl(midiNumber);
         if (el) {
           el.classList.add(styles.pressed);
           pressedElements.set(midiNumber, el);
@@ -549,16 +562,48 @@ export default function PianoPlayer() {
 
       // ---------- Octave shift ----------
       let midiOffset = 0; // added to base MIDI (KEY_TO_MIDI) to get actual MIDI
+
+      /*
+       * Which drawn key stands for a pitch.
+       *
+       * On the one-octave keyboard a note outside 60-71 has no key of its own,
+       * so the whole keyboard is shifted by `midiOffset` and the note is drawn
+       * on the transposed key. Once three octaves are on screen that trick is
+       * wrong: the real key exists, so use it. Everything that lights, hints or
+       * marks a key goes through here.
+       */
+      const keyEl = (midi: number): HTMLElement | null => {
+        const { from, to } = drawnRangeRef.current;
+        const wanted = midi >= from && midi <= to ? midi : midi - midiOffset;
+        return pianoDiv.querySelector<HTMLElement>(`[data-midi="${wanted}"]`);
+      };
+
+      /** True when the drawn keyboard already covers this pitch. */
+      const inDrawnRange = (midi: number) => {
+        const { from, to } = drawnRangeRef.current;
+        return midi >= from && midi <= to;
+      };
       // physical keyboard key → actual MIDI that was attacked (stable across offset changes)
       const physicalKeyMidi = new Map<string, number>();
 
       const updateOctaveIndicator = () => {
         const el = document.getElementById('octave-indicator');
         if (el) {
-          const octave = Math.floor((60 + midiOffset) / 12) - 1;
-          el.textContent = `Octava ${octave}`;
-          // Show/hide based on whether we're shifted
-          el.style.opacity = midiOffset === 0 ? '0.5' : '1';
+          const { from, to } = drawnRangeRef.current;
+          const wide = to - from > 11;
+          if (wide) {
+            // Nothing is being transposed here, so naming a single octave
+            // would be wrong. Say what is actually on screen.
+            const low = midiToSolfege(from, { octave: true });
+            const high = midiToSolfege(to, { octave: true });
+            el.textContent = `${low} - ${high}`;
+            el.style.opacity = '0.5';
+          } else {
+            const octave = Math.floor((60 + midiOffset) / 12) - 1;
+            el.textContent = `Octava ${octave}`;
+            // Show/hide based on whether we're shifted
+            el.style.opacity = midiOffset === 0 ? '0.5' : '1';
+          }
         }
 
         const windowEl = document.getElementById('qwerty-window');
@@ -692,6 +737,9 @@ export default function PianoPlayer() {
       const checkOctaveShift = () => {
         if (pos >= SONG.length) return;
         const target = SONG[pos];
+        // Three octaves already show this note on its own key — shifting the
+        // whole keyboard under the student would be a lie about where it is.
+        if (inDrawnRange(target)) return;
         const low = 60 + midiOffset;
         const high = 71 + midiOffset;
         if (target >= low && target <= high) return; // in range
@@ -1121,10 +1169,7 @@ export default function PianoPlayer() {
         );
         prevHint?.classList.remove(styles.hintKey);
         const expected = SONG[pos];
-        const baseMidi = expected - midiOffset;
-        const expectedEl = pianoDiv.querySelector<HTMLElement>(
-          `[data-midi="${baseMidi}"]`,
-        );
+        const expectedEl = keyEl(expected);
         if (expectedEl) expectedEl.classList.add(styles.hintKey);
 
         // progress bar
@@ -1154,10 +1199,7 @@ export default function PianoPlayer() {
       };
 
       const showFeedback = (midiNumber: number, ok: boolean) => {
-        const baseMidi = midiNumber - midiOffset;
-        const el = pianoDiv.querySelector<HTMLElement>(
-          `[data-midi="${baseMidi}"]`,
-        );
+        const el = keyEl(midiNumber);
         if (!el) return;
         let fb = el.querySelector<HTMLSpanElement>(`.${styles.feedback}`);
         if (!fb) {
@@ -1385,11 +1427,15 @@ export default function PianoPlayer() {
           `.${styles.key}`,
         );
         if (!target) return;
-        const baseMidi = Number(target.dataset.midi);
-        if (isNaN(baseMidi)) return;
+        const drawnMidi = Number(target.dataset.midi);
+        if (isNaN(drawnMidi)) return;
         e.preventDefault();
         pianoDiv.setPointerCapture(e.pointerId);
-        const midi = baseMidi + midiOffset;
+        // A widened keyboard draws real pitches, so the key already is the
+        // note. Only the shifted one-octave keyboard needs the offset.
+        const midi = inDrawnRange(drawnMidi)
+          ? drawnMidi
+          : drawnMidi + midiOffset;
         pointerMidi.set(e.pointerId, midi);
         handleNotePress(midi, 'pointer');
       };
