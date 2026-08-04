@@ -38,15 +38,55 @@ const BADGE = 0.26;
 
 const { buildKeyboard, VIEWBOX_WIDTH, VIEWBOX_HEIGHT } =
   await import('@/lib/hero-artwork/keyboard');
+const { DECORATIONS, NOTE_SHAPES, STARS, starPoints } =
+  await import('@/lib/hero-artwork/decorations');
+const { buildParticles, PARTICLE_COLOR } =
+  await import('@/lib/hero-artwork/particles');
 
 // ---------------------------------------------------------------- pieces
 
 /**
- * The keyboard alone — no notes, stars or dot field. At a fifth of a QR code
- * the decoration would read as noise rather than as artwork.
+ * The same scene as the flyer — green dot field, keyboard, stars and notes —
+ * cropped to the keyboard's band so it fills a square badge.
+ *
+ * Everything drawn here sits on top of QR modules and spends the error
+ * correction budget that keeps the code readable. Nothing about that is
+ * visible by eye, which is why the decode check at the bottom of this file is
+ * not optional.
  */
 function pianoBadge() {
   const keyboard = buildKeyboard();
+
+  const field = buildParticles()
+    .map(
+      (p) =>
+        `<circle cx="${p.x}" cy="${p.y}" r="${p.radius.toFixed(2)}" opacity="${p.alpha.toFixed(3)}"/>`,
+    )
+    .join('');
+
+  const stars = STARS.map(
+    (st) =>
+      `<polygon fill="${st.fill}" points="${starPoints(st.cx, st.cy, st.outer, st.inner)}" transform="rotate(${st.rotate} ${st.cx} ${st.cy})"/>`,
+  ).join('');
+
+  // The treble clef is a text glyph the badge has no font for, same as on the
+  // flyer and the story video.
+  const notes = DECORATIONS.filter((d) => d.glyph !== 'treble')
+    .map((d) => {
+      const shapes = NOTE_SHAPES[d.glyph]
+        .map((shape) =>
+          shape.kind === 'ellipse'
+            ? `<ellipse cx="${shape.cx}" cy="${shape.cy}" rx="${shape.rx}" ry="${shape.ry}"${shape.transform ? ` transform="${shape.transform}"` : ''}/>`
+            : `<path d="${shape.d}"${
+                shape.strokeWidth
+                  ? ` fill="none" stroke="${d.color}" stroke-width="${shape.strokeWidth}"${shape.round ? ' stroke-linecap="round"' : ''}`
+                  : ''
+              }/>`,
+        )
+        .join('');
+      return `<g transform="${d.transform}" fill="${d.color}">${shapes}</g>`;
+    })
+    .join('');
 
   const whiteKeys = keyboard.whiteKeys
     .map((k) => `<path d="${k.path}" fill="#ffffff"/>`)
@@ -83,9 +123,12 @@ function pianoBadge() {
 
   return {
     viewBox: `0 ${bandTop} ${VIEWBOX_WIDTH} ${bandHeight}`,
-    markup: `${whiteKeys}${fronts}${dividers}
+    markup: `<g fill="${PARTICLE_COLOR}">${field}</g>
+      ${stars}
+      ${whiteKeys}${fronts}${dividers}
       <path d="${keyboard.keyboardEdgePath}" fill="none" stroke="#b9bcae" stroke-width="4" stroke-linejoin="round"/>
-      ${blackKeys}${caps}`,
+      ${blackKeys}${caps}
+      ${notes}`,
   };
 }
 
