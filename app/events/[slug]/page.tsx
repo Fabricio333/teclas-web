@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { events, getEventBySlug, whatsappUrl } from '@/lib/events';
+import { FLYER_SIZES, flyerPath } from '@/lib/flyer';
 import styles from './EventDetail.module.scss';
 
 type EventPageProps = { params: Promise<{ slug: string }> };
@@ -118,6 +119,35 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             </dl>
           </aside>
         </div>
+        {!isPast && (
+          <section className={styles.flyers}>
+            <h2 className={styles.flyersTitle}>Flyers del evento</h2>
+            <div className={styles.flyerGrid}>
+              {FLYER_SIZES.map((size) => {
+                const href = flyerPath(event.slug, size.key);
+
+                return (
+                  <a
+                    key={size.key}
+                    href={href}
+                    download
+                    className={styles.flyer}
+                  >
+                    <Image
+                      src={href}
+                      alt={`Flyer ${size.label} de ${event.title}, ${event.date}`}
+                      width={size.width}
+                      height={size.height}
+                      className={styles.flyerImage}
+                      unoptimized
+                    />
+                    <span>Descargar {size.label}</span>
+                  </a>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </article>
   );

@@ -76,17 +76,18 @@ se arma tecla por tecla y las notas y estrellas flotan hasta el final.
 ### 4. Publicar
 
 Los PNG quedan servidos por el sitio apenas se hace deploy y aparecen solos en
-`/media-kit`. El MP4 no: se sube a mano a Instagram.
+la página de detalle del evento, dentro de `/events`. El MP4 no: se sube a mano a Instagram.
 
 ---
 
 ## Dónde se descarga todo
 
-**`https://teclasciudadjardin.com.ar/media-kit`**
+Los flyers se descargan desde la página de detalle del próximo evento:
 
-Una sola página para todo el material descargable: logo, colores, tipografías,
-fotos, textos, el QR del sitio y **los flyers del evento próximo**, cada uno con
-vista previa y botón de descarga.
+**`https://teclasciudadjardin.com.ar/events/<slug>`**
+
+Ahí tienen vista previa y botón de descarga. `/media-kit` queda reservado para
+los recursos institucionales: logo, colores, tipografías, fotos, textos y QR.
 
 Antes esto vivía en una página aparte, `/download`, oculta a propósito. Se
 eliminó: dos páginas para lo mismo era una de más, y la que estaba oculta era
@@ -99,9 +100,8 @@ https://teclasciudadjardin.com.ar/events/<slug>-flyer-stories.png
 https://teclasciudadjardin.com.ar/events/<slug>-flyer-post.png
 ```
 
-> `/media-kit` es pública e indexable, al revés que la vieja `/download`. Los
-> flyers ahora son material público — que es lo que son de todos modos, porque
-> se publican en redes.
+> La página del evento y sus flyers son públicos e indexables; el sitemap de
+> imágenes vincula cada formato con el evento correspondiente.
 
 ## El QR del sitio
 

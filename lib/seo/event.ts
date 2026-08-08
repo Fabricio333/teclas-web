@@ -35,8 +35,11 @@ export const eventJsonLd = {
     name: 'TECLAS',
     url: 'https://teclasciudadjardin.com.ar',
   },
-  image:
+  image: [
     'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg',
+    'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-post.png',
+    'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-stories.png',
+  ],
   description:
     'Clase abierta de piano en TECLAS Ciudad Jardín: niños y jóvenes interpretarán música de series, películas y videojuegos.',
   offers: {

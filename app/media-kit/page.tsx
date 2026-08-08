@@ -8,8 +8,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
-import { upcomingEvents } from '@/lib/events';
-import { FLYER_SIZES, flyerPath } from '@/lib/flyer';
 import { mediaKitMetadata } from '@/lib/metadata';
 import { mediaKitJsonLd } from '@/lib/seo/mediaKit';
 import CopyButton from './CopyButton';
@@ -147,72 +145,6 @@ export default function MediaKitPage() {
               ))}
             </div>
           </Reveal>
-
-          {/* ---------- Event flyers ---------- */}
-          {upcomingEvents.length > 0 && (
-            <Reveal as="section" className={styles.block}>
-              <h2 className={styles.blockTitle}>Flyers del evento</h2>
-              <p className={styles.blockText}>
-                Listos para publicar, en los dos tamaños que usa Instagram. Se
-                generan con <code>npm run flyer</code> a partir de los datos del
-                evento, así que siempre dicen lo mismo que la web.
-              </p>
-
-              {upcomingEvents.map((event) => (
-                <div key={event.slug} className={styles.flyerEvent}>
-                  <h3 className={styles.flyerEventTitle}>
-                    {event.title} <small>{event.date}</small>
-                  </h3>
-                  <div className={styles.assetGrid}>
-                    {FLYER_SIZES.map((size) => {
-                      const href = flyerPath(event.slug, size.key);
-                      return (
-                        <div className={styles.asset} key={size.key}>
-                          <div
-                            className={`${styles.assetPreview} ${styles.flyerPreview}`}
-                          >
-                            <Image
-                              alt={`Flyer ${size.label} de ${event.title}`}
-                              className={styles.flyerImage}
-                              height={size.height}
-                              src={href}
-                              /*
-                                Inline, not only in the module: a 9:16 poster
-                                given a class alone rendered at its natural
-                                ratio across the full card width and buried the
-                                label and the download button underneath it.
-                                An inline style outranks whatever was winning.
-                              */
-                              style={{
-                                maxHeight: '100%',
-                                maxWidth: '100%',
-                                height: 'auto',
-                                width: 'auto',
-                                objectFit: 'contain',
-                              }}
-                              unoptimized
-                              width={size.width}
-                            />
-                          </div>
-                          <div className={styles.assetMeta}>
-                            <span className={styles.assetName}>
-                              {size.label} <small>PNG</small>
-                            </span>
-                            <span className={styles.assetDetail}>
-                              {size.width} × {size.height} px · {size.usage}
-                            </span>
-                          </div>
-                          <a className={styles.download} download href={href}>
-                            <FontAwesomeIcon icon={faDownload} /> Descargar
-                          </a>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </Reveal>
-          )}
 
           {/* ---------- Colours ---------- */}
           <Reveal as="section" className={styles.block}>
