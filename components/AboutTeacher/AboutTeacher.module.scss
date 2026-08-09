@@ -33,8 +33,9 @@
 
 .imageWrapper {
   position: relative;
-  width: 100%;
-  height: 500px;
+  width: min(100%, 26rem);
+  aspect-ratio: 662 / 1020;
+  justify-self: center;
   overflow: hidden;
   border-radius: var(--radius-xl);
   // A hairline of brand green around the portrait, echoing the buttons.

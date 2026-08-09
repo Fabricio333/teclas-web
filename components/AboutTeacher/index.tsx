@@ -14,7 +14,7 @@ export default function AboutTeacher() {
         <div className={styles.instructorGrid}>
           <Reveal className={styles.imageWrapper} variant="left">
             <Image
-              src="/fotoDeFrente.jpg?height=800&width=600"
+              src="/roxana.webp"
               alt="Instructora de piano frente al piano"
               fill
               className={styles.instructorImage}
