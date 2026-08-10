@@ -49,6 +49,7 @@
     "eslint-config-next": "^16.1.6",
     "jsqr": "^1.4.0",
     "prettier": "^3.4.2",
+    "puppeteer": "^25.5.0",
     "qrcode": "^1.5.4",
     "sass": "^1.89.2",
     "sharp": "^0.35.3",
