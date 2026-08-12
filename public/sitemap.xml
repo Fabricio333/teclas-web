@@ -37,12 +37,6 @@
     <image:image>
       <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg</image:loc>
     </image:image>
-    <image:image>
-      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-post.png</image:loc>
-    </image:image>
-    <image:image>
-      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-stories.png</image:loc>
-    </image:image>
   </url>
   <url>
     <loc>https://teclasciudadjardin.com.ar/events/taller-piano-adultos-principiantes</loc>
@@ -195,5 +189,11 @@
     <loc>https://teclasciudadjardin.com.ar/media-kit</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-post.png</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-stories.png</image:loc>
+    </image:image>
   </url>
 </urlset>

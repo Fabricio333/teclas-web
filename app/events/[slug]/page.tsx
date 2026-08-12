@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { events, getEventBySlug, whatsappUrl } from '@/lib/events';
-import { FLYER_SIZES, flyerPath } from '@/lib/flyer';
+import { flyerPath } from '@/lib/flyer';
 import styles from './EventDetail.module.scss';
 
 type EventPageProps = { params: Promise<{ slug: string }> };
@@ -49,6 +49,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   if (!event) notFound();
 
   const isPast = event.status === 'past';
+  const bannerImage = isPast ? event.image : flyerPath(event.slug, 'post');
 
   return (
     <article className={styles.eventDetail}>
@@ -59,12 +60,14 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
       <div className={styles.banner}>
         <Image
-          src={event.image}
-          alt={event.imageAlt}
-          width={1600}
-          height={900}
+          src={bannerImage}
+          alt={isPast ? event.imageAlt : `Flyer de ${event.title}`}
+          width={isPast ? 1600 : 1080}
+          height={isPast ? 900 : 1350}
           priority
-          className={styles.bannerImage}
+          className={`${styles.bannerImage} ${
+            isPast ? '' : styles.flyerBannerImage
+          }`}
         />
       </div>
 
@@ -119,35 +122,6 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             </dl>
           </aside>
         </div>
-        {!isPast && (
-          <section className={styles.flyers}>
-            <h2 className={styles.flyersTitle}>Flyers del evento</h2>
-            <div className={styles.flyerGrid}>
-              {FLYER_SIZES.map((size) => {
-                const href = flyerPath(event.slug, size.key);
-
-                return (
-                  <a
-                    key={size.key}
-                    href={href}
-                    download
-                    className={styles.flyer}
-                  >
-                    <Image
-                      src={href}
-                      alt={`Flyer ${size.label} de ${event.title}, ${event.date}`}
-                      width={size.width}
-                      height={size.height}
-                      className={styles.flyerImage}
-                      unoptimized
-                    />
-                    <span>Descargar {size.label}</span>
-                  </a>
-                );
-              })}
-            </div>
-          </section>
-        )}
       </div>
     </article>
   );

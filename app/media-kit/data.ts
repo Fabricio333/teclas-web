@@ -57,9 +57,9 @@ export const LOGO_ASSETS: Asset[] = [
 export const PHOTO_ASSETS: Asset[] = [
   {
     name: 'Roxana Arena',
-    file: '/fotoDeFrente.jpg',
-    format: 'JPG',
-    detail: '1280 × 1280 px · retrato de la directora',
+    file: '/roxana.webp',
+    format: 'WEBP',
+    detail: '662 × 1020 px · retrato de la directora',
   },
   {
     name: 'Teclas',

@@ -116,6 +116,14 @@
   height: auto;
 }
 
+.flyerImage {
+  width: auto;
+  max-width: 100%;
+  height: min(65vh, 38rem);
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
 .photoFrame {
   width: 100%;
   aspect-ratio: 1;

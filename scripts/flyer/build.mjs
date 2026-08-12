@@ -5,7 +5,7 @@
  *
  * Renders every upcoming event in `lib/events/index.ts` at every size in
  * `lib/flyer/index.ts` and writes the results into `public/events/`, where the
- * hidden `/download` page picks them up.
+ * `/media-kit` page picks them up.
  *
  * The event copy is imported from the site's own TypeScript rather than
  * retyped, so the flyer cannot advertise a date the page has already moved —
@@ -233,4 +233,4 @@ for (const event of upcomingEvents) {
   }
 }
 
-console.log('\nDone. The flyers are listed at /download.');
+console.log('\nDone. The flyers are listed at /media-kit.');

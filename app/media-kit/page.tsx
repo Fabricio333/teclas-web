@@ -8,6 +8,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
+import { upcomingEvents } from '@/lib/events';
+import { FLYER_SIZES, flyerPath } from '@/lib/flyer';
 import { mediaKitMetadata } from '@/lib/metadata';
 import { mediaKitJsonLd } from '@/lib/seo/mediaKit';
 import CopyButton from './CopyButton';
@@ -106,6 +108,44 @@ export default function MediaKitPage() {
                   ))}
                 </ul>
               </div>
+            </div>
+          </Reveal>
+
+          {/* ---------- Event flyers ---------- */}
+          <Reveal as="section" className={styles.block}>
+            <h2 className={styles.blockTitle}>Flyers de eventos</h2>
+            <p className={styles.blockText}>
+              Piezas listas para compartir en redes y WhatsApp.
+            </p>
+
+            <div className={styles.assetGrid}>
+              {upcomingEvents.flatMap((event) =>
+                FLYER_SIZES.map((size) => {
+                  const href = flyerPath(event.slug, size.key);
+
+                  return (
+                    <div className={styles.asset} key={href}>
+                      <Image
+                        alt={`Flyer ${size.label} de ${event.title}, ${event.date}`}
+                        className={styles.flyerImage}
+                        height={size.height}
+                        src={href}
+                        unoptimized
+                        width={size.width}
+                      />
+                      <div className={styles.assetMeta}>
+                        <span className={styles.assetName}>{size.label}</span>
+                        <span className={styles.assetDetail}>
+                          {event.title} · {size.usage}
+                        </span>
+                      </div>
+                      <a className={styles.download} download href={href}>
+                        <FontAwesomeIcon icon={faDownload} /> Descargar
+                      </a>
+                    </div>
+                  );
+                }),
+              )}
             </div>
           </Reveal>
 

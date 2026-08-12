@@ -29,6 +29,14 @@
   }
 }
 
+.flyerBannerImage {
+  width: min(100%, 1080px);
+  height: auto;
+  aspect-ratio: 1080 / 420;
+  margin: 0 auto;
+  object-position: top;
+}
+
 .header {
   max-width: 760px;
   margin: 0 auto;
@@ -180,40 +188,4 @@
   dd {
     color: $text-color;
   }
-}
-
-.flyers {
-  max-width: 960px;
-  margin: var(--space-10) auto 0;
-}
-
-.flyersTitle {
-  margin-bottom: var(--space-5);
-  color: $primary-color;
-  text-align: center;
-}
-
-.flyerGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-6);
-  align-items: start;
-}
-
-.flyer {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: center;
-  color: $primary-color;
-  font-weight: 600;
-  text-align: center;
-}
-
-.flyerImage {
-  width: auto;
-  max-width: 100%;
-  height: min(65vh, 620px);
-  object-fit: contain;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.14);
 }
