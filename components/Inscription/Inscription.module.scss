@@ -1,38 +1,16 @@
 @use '../../styles/variables' as *;
 @use '../../styles/components' as *;
 
-// The final call to action started as a white section with a pale lilac button
-// — the lowest-contrast element on a page whose whole job is to get that click.
-// It briefly became a deep green band, which read as heavy and olive next to
-// the light green footer. It is now a light lilac-to-pink wash: still clearly
-// a band, but bright, and it uses hues the brand already carries in the hero
-// artwork rather than a fourth shade of green.
 .inscriptionSection {
   @extend .sectionPadding;
   position: relative;
   overflow: hidden;
   text-align: center;
-  background-image: var(--grad-lilac);
-  // Deep plum rather than white: on a light surface white text would be
-  // unreadable. --purple-900 is 6.2:1 at the darkest end of the wash.
+  background-color: #ffffff;
   color: var(--purple-900);
   box-shadow:
     0 -4px 12px rgba(0, 0, 0, 0.18),
     0 4px 12px rgba(0, 0, 0, 0.18);
-
-  // A soft pink bloom behind the button, so the eye lands on the CTA before it
-  // lands anywhere else in the band.
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(
-      42rem 22rem at 50% 76%,
-      rgb(var(--pink-rgb) / 0.22),
-      transparent 68%
-    );
-    pointer-events: none;
-  }
 
   .sectionTitle {
     font-size: 2rem;
@@ -48,8 +26,6 @@
 
   .sectionSubtitle {
     font-size: 1.25rem;
-    // --purple-800, not --purple-700: at 20px regular this needs 4.5:1, and
-    // --purple-700 on the darkest end of the wash is only 4.1:1.
     color: var(--purple-800);
     margin-bottom: 2.5rem;
     max-width: 40rem;
