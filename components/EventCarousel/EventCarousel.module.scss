@@ -50,6 +50,9 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-lg);
+  // Belt and braces with the wheel handler's preventDefault: a horizontal
+  // scrub must never chain into the browser's back-navigation gesture.
+  overscroll-behavior-x: contain;
 }
 
 // The strips of cloned slides, moved with a single `transform`. No native

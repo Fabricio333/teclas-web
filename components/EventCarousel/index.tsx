@@ -19,7 +19,10 @@ const AUTOPLAY_MS = 6000;
 // copy it is re-based one set without animation, which is seamless because the
 // copies are pixel-identical. Native scroll/snap is never involved, so drags
 // are the only thing that moves the track.
-const COPIES = 3;
+// Five copies rather than three: a free scrub can overshoot the middle copy by
+// a card or so before it settles, and the extra sets guarantee there are always
+// full cards drawn either side of that overshoot instead of empty track.
+const COPIES = 5;
 const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const DURATION_MS = 650;
 
@@ -41,25 +44,23 @@ export default function EventCarousel() {
   const dragRef = useRef<{
     pointerId: number;
     startX: number;
+    // Position the gesture started from, shifted by a whole set whenever the
+    // scrub re-bases, so `startPos + offset` stays continuous across the wrap.
     startPos: number;
-    // Offset in cards from `startPos`, kept here instead of read back out of
-    // the style string so the snap can never disagree with what is on screen.
-    offset: number;
     moved: boolean;
   } | null>(null);
-  // Wheel gestures arrive as a burst of events; they are accumulated and only
-  // turned into a move once they add up to a card, then locked out until the
-  // slide transition ends. Otherwise a single trackpad swipe restarts the
-  // animation every frame and the track shakes in place.
-  const wheelRef = useRef({ delta: 0, lockedUntilMove: false });
+  // A wheel gesture scrubs the track freely, exactly like a drag: the position
+  // is carried here across the burst of events and only snapped to a card once
+  // the burst (including trackpad momentum) goes quiet.
+  const wheelRef = useRef<{ pos: number } | null>(null);
   const wheelIdleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rebaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const suppressClickRef = useRef(false);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
   const count = events.length;
-  const high = count * (COPIES - 1) - 1; // last index inside a drawn copy
-  const low = count; // first index of the middle copy
+  const low = count * Math.floor(COPIES / 2); // first index of the middle copy
 
   const step = useCallback(() => {
     const track = trackRef.current;
@@ -85,24 +86,41 @@ export default function EventCarousel() {
     [step],
   );
 
-  const move = useCallback(
-    (direction: -1 | 1) => {
-      const s = step();
-      if (!s) return;
-      let target = posRef.current + direction;
-      // Re-base into a drawn copy — identical cards, so no visible jump.
-      if (target > high) target -= count;
-      else if (target < low) target += count;
+  // Fold any position — fractional included — back onto the middle copy. The
+  // copies are pixel-identical, so this is invisible, and it is what lets a free
+  // scrub run forever instead of sliding off the end of the strip.
+  const rebase = useCallback(
+    (pos: number) => low + normalize(pos - low, count),
+    [count, low],
+  );
+
+  // Animate to `target` as given, then fold silently once it has landed.
+  // Re-basing *before* an animated move is what made looping whoosh backwards
+  // across the whole set; folding after the glide keeps the wrap invisible.
+  const glideTo = useCallback(
+    (target: number) => {
       render(target, true);
       setCurrent(normalize(target, count));
+      if (rebaseTimerRef.current) clearTimeout(rebaseTimerRef.current);
+      rebaseTimerRef.current = setTimeout(() => {
+        if (dragRef.current || wheelRef.current) return; // a new gesture owns it
+        render(rebase(posRef.current), false);
+      }, DURATION_MS + 50);
     },
-    [count, high, low, render, step],
+    [count, rebase, render],
+  );
+
+  const move = useCallback(
+    (direction: -1 | 1) => {
+      if (!step()) return;
+      glideTo(Math.round(posRef.current) + direction);
+    },
+    [glideTo, step],
   );
 
   const goTo = useCallback(
     (logical: number) => {
-      const s = step();
-      if (!s) return;
+      if (!step()) return;
       const logicalPos = normalize(logical, count);
       // Pick the nearest drawn copy so far jumps animate over the short way.
       let target = logicalPos + low;
@@ -118,10 +136,9 @@ export default function EventCarousel() {
       ) {
         target -= count;
       }
-      render(target, true);
-      setCurrent(logicalPos);
+      glideTo(target);
     },
-    [count, low, render, step],
+    [count, glideTo, low, step],
   );
 
   const stopAutoplay = useCallback(() => {
@@ -141,7 +158,13 @@ export default function EventCarousel() {
     }, AUTOPLAY_MS);
   }, [count, move, paused, stopAutoplay]);
 
-  // ------------------------------- drag and wheel
+  // ------------------------------- free scrubbing (drag and wheel)
+
+  // Glide from wherever a free scrub left the track to the nearest card.
+  const settle = useCallback(() => {
+    glideTo(Math.round(posRef.current));
+    startAutoplay();
+  }, [glideTo, startAutoplay]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLUListElement>) => {
     const track = trackRef.current;
@@ -162,7 +185,6 @@ export default function EventCarousel() {
       pointerId: e.pointerId,
       startX: e.clientX,
       startPos,
-      offset: 0,
       moved: false,
     };
     stopAutoplay();
@@ -170,17 +192,20 @@ export default function EventCarousel() {
 
   const onPointerMove = (e: React.PointerEvent<HTMLUListElement>) => {
     const drag = dragRef.current;
-    const track = trackRef.current;
     const s = step();
-    if (!drag || drag.pointerId !== e.pointerId || !track || !s) return;
-    const diff = (e.clientX - drag.startX) / s;
-    drag.offset = diff;
+    if (!drag || drag.pointerId !== e.pointerId || !s) return;
     if (Math.abs(e.clientX - drag.startX) > 4) drag.moved = true;
-    // Direct transform during the drag: transitions off so it never lags the
-    // pointer, and off-copy positions are allowed (the wrap is re-based at
-    // release).
-    track.style.transition = 'none';
-    track.style.transform = `translate3d(${-(drag.startPos + diff) * s}px, 0, 0)`;
+
+    // Follow the pointer one-to-one, transition off so it never lags. Fractional
+    // positions are the point: the track scrubs continuously and only lands on a
+    // card at release.
+    const offset = (e.clientX - drag.startX) / s;
+    const wrapped = rebase(drag.startPos + offset);
+    // Re-base mid-drag so the strip never runs out underneath a long swipe;
+    // shifting startPos by the same amount keeps the pointer tracking exact.
+    drag.startPos += wrapped - (drag.startPos + offset);
+    render(wrapped, false);
+    setCurrent(normalize(Math.round(wrapped), count));
   };
 
   const endDrag = () => {
@@ -195,42 +220,45 @@ export default function EventCarousel() {
     }
     // A drag that ends on a card must not also open it.
     suppressClickRef.current = true;
-    // Snap to the nearest card from where the drag actually left the track,
-    // then re-base into a drawn copy.
-    let target = Math.round(drag.startPos + drag.offset);
-    while (target > high) target -= count;
-    while (target < low) target += count;
-    render(target, true);
-    setCurrent(normalize(target, count));
-    startAutoplay();
+    settle();
   };
 
-  const onWheel = (e: React.WheelEvent<HTMLUListElement>) => {
-    // Vertical intent belongs to the page.
-    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
-    stopAutoplay();
+  // Wheel is bound natively rather than through React so it can be non-passive:
+  // without preventDefault the browser also pans the page sideways and fires the
+  // back-navigation gesture mid-scrub.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
 
-    const wheel = wheelRef.current;
-    if (!wheel.lockedUntilMove) {
-      wheel.delta += e.deltaX;
-      const threshold = step() * 0.35 || 60;
-      if (Math.abs(wheel.delta) >= threshold) {
-        move(wheel.delta > 0 ? 1 : -1);
-        wheel.delta = 0;
-        wheel.lockedUntilMove = true;
+    const onWheel = (e: WheelEvent) => {
+      // Vertical intent belongs to the page.
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+      const s = step();
+      if (!s) return;
+      e.preventDefault();
+      stopAutoplay();
+
+      // First event of a burst: start scrubbing from what is on screen now.
+      if (!wheelRef.current) {
+        const matrix = new DOMMatrixReadOnly(getComputedStyle(track).transform);
+        wheelRef.current = { pos: -matrix.m41 / s };
       }
-    }
+      wheelRef.current.pos = rebase(wheelRef.current.pos + e.deltaX / s);
+      render(wheelRef.current.pos, false);
+      setCurrent(normalize(Math.round(wheelRef.current.pos), count));
 
-    // The burst ends when the events stop arriving: release the lock, drop any
-    // leftover delta so the tail of the gesture cannot kick a second slide, and
-    // hand autoplay back.
-    if (wheelIdleRef.current) clearTimeout(wheelIdleRef.current);
-    wheelIdleRef.current = setTimeout(() => {
-      wheelRef.current.delta = 0;
-      wheelRef.current.lockedUntilMove = false;
-      startAutoplay();
-    }, 220);
-  };
+      // Trackpad momentum keeps delivering events after the fingers lift; the
+      // gesture is over once they stop, and only then does it snap.
+      if (wheelIdleRef.current) clearTimeout(wheelIdleRef.current);
+      wheelIdleRef.current = setTimeout(() => {
+        wheelRef.current = null;
+        settle();
+      }, 140);
+    };
+
+    track.addEventListener('wheel', onWheel, { passive: false });
+    return () => track.removeEventListener('wheel', onWheel);
+  }, [count, rebase, render, settle, step, stopAutoplay]);
 
   useEffect(() => {
     // Land on the middle copy without animating on first paint, once layout
@@ -247,6 +275,7 @@ export default function EventCarousel() {
   useEffect(
     () => () => {
       if (wheelIdleRef.current) clearTimeout(wheelIdleRef.current);
+      if (rebaseTimerRef.current) clearTimeout(rebaseTimerRef.current);
     },
     [],
   );
@@ -308,7 +337,6 @@ export default function EventCarousel() {
             onPointerMove={onPointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
-            onWheel={onWheel}
             onClickCapture={(e) => {
               if (!suppressClickRef.current) return;
               suppressClickRef.current = false;
