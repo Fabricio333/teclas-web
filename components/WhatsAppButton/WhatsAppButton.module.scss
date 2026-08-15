@@ -1,4 +1,8 @@
 @use 'sass:color';
+
+// Bigger than the 3.5rem it was — this is the only always-present way to reach
+// the academy, so it earns the size — and it drifts rather than sitting still,
+// which is what makes it read as available instead of as page furniture.
 .whatsappButton {
   position: fixed;
   right: 1.5rem;
@@ -8,16 +12,51 @@
   z-index: var(--z-fab);
   background-color: #25d366;
   color: white;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 4.25rem;
+  height: 4.25rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: background-color 0.3s;
+  font-size: 1.6rem;
+  // Tinted with the button's own green rather than flat black, so the lift
+  // reads as the button glowing rather than as a grey smudge under it.
+  box-shadow:
+    0 6px 18px rgb(0 0 0 / 0.28),
+    0 10px 30px rgb(37 211 102 / 0.35);
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-spring);
 
   &:hover {
     background-color: color.scale(#25d366, $lightness: -5%);
+    transform: scale(1.06);
+    box-shadow:
+      0 10px 24px rgb(0 0 0 / 0.32),
+      0 16px 44px rgb(37 211 102 / 0.45);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  // The float lives on the element and the hover uses `transform` too, so the
+  // animation is paused on hover: otherwise the two fight and the button
+  // stutters under the cursor.
+  .whatsappButton {
+    animation: whatsapp-float 4s var(--ease-in-out) infinite;
+  }
+
+  .whatsappButton:hover {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes whatsapp-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }

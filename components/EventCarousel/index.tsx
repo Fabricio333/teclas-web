@@ -9,6 +9,7 @@ import {
   faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import AmbientNotes from '@/components/AmbientNotes';
+import ScrollCue from '@/components/ScrollCue';
 import { events } from '@/lib/events';
 import styles from './EventCarousel.module.scss';
 
@@ -415,6 +416,8 @@ export default function EventCarousel() {
             />
           ))}
         </nav>
+
+        <ScrollCue href="#about-teacher" />
       </div>
     </section>
   );

@@ -96,36 +96,8 @@
   line-height: var(--leading-normal);
 }
 
-.scrollCue {
-  display: none;
-
-  // Only meaningful where there is a fold to scroll past.
-  @media (min-width: $mobile-breakpoint) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    margin: 2.5rem auto 0;
-    border-radius: var(--radius-pill);
-    border: 1px solid rgb(var(--blue-rgb) / 0.24);
-    color: var(--blue-500);
-    background-color: rgb(255 255 255 / 0.7);
-    transition:
-      transform var(--dur-base) var(--ease-spring),
-      border-color var(--dur-base) var(--ease-out);
-
-    svg {
-      width: 1.4rem;
-      height: 1.4rem;
-    }
-
-    &:hover {
-      transform: translateY(3px);
-      border-color: var(--green-500);
-    }
-  }
-}
+// The cue's own look lives in <ScrollCue>, which every band now uses. What
+// stays here is only the hero's on-load entrance, applied through `className`.
 
 // Everything above the fold animates on load; the sections below animate on
 // scroll via <Reveal>. Nested in `no-preference` so the default — for anyone
@@ -160,11 +132,6 @@
     animation-delay: 520ms;
   }
 
-  .scrollCue svg {
-    animation: nudge-down 2.2s var(--ease-in-out) infinite;
-    animation-delay: 1.4s;
-  }
-
   .hero {
     animation: teclas-hero-wash 26s var(--ease-in-out) infinite alternate;
   }
@@ -196,17 +163,5 @@
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes nudge-down {
-  0%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.55;
-  }
-  50% {
-    transform: translateY(8px);
-    opacity: 1;
   }
 }

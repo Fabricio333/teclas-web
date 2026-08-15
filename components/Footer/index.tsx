@@ -45,10 +45,20 @@ export default function Footer() {
             </p>
             <div className={styles.footerLocation}>
               <FontAwesomeIcon icon={faMapPin} className={styles.icon} />
-              <p>
+              {/*
+                Opens the academy's own Google listing rather than a text
+                search: the cid is the one behind the map embedded on the
+                about-academy section, so both point at the same place.
+              */}
+              <a
+                href="https://maps.google.com/?cid=15286288650898029270"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.locationLink}
+              >
                 Blvd. F.i.n.c.a 6142 Local 12, Ciudad Jardín Lomas del Palomar,
                 Provincia de Buenos Aires
-              </p>
+              </a>
             </div>
           </div>
 

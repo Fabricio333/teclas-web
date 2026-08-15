@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMusic, faAward, faUsers } from '@fortawesome/free-solid-svg-icons';
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
+import ScrollCue from '@/components/ScrollCue';
 import styles from './AboutAcademy.module.scss';
 
 export default function AboutAcademy() {
@@ -74,6 +75,8 @@ export default function AboutAcademy() {
             referrerPolicy="no-referrer-when-downgrade"
           ></iframe>
         </Reveal>
+
+        <ScrollCue href="#philosophy" />
       </div>
     </section>
   );

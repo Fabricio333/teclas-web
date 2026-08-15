@@ -1,0 +1,76 @@
+@use '../../styles/variables' as *;
+
+.scrollCue {
+  display: none;
+
+  // Only meaningful where there is a fold to scroll past.
+  @media (min-width: $mobile-breakpoint) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 2.5rem auto 0;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    transition:
+      transform var(--dur-base) var(--ease-spring),
+      border-color var(--dur-base) var(--ease-out);
+
+    svg {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+
+    &:hover {
+      transform: translateY(3px);
+    }
+  }
+}
+
+// Pale bands: the blue ink and a white chip, as the hero has always had.
+.brand {
+  @media (min-width: $mobile-breakpoint) {
+    border-color: rgb(var(--blue-rgb) / 0.24);
+    color: var(--blue-500);
+    background-color: rgb(255 255 255 / 0.7);
+
+    &:hover {
+      border-color: var(--green-500);
+    }
+  }
+}
+
+// Dark blue bands: white ink on a translucent chip, since blue on blue would
+// vanish and a solid white chip would read as a third button.
+.light {
+  @media (min-width: $mobile-breakpoint) {
+    border-color: rgb(255 255 255 / 0.45);
+    color: #ffffff;
+    background-color: rgb(255 255 255 / 0.12);
+
+    &:hover {
+      border-color: #ffffff;
+      background-color: rgb(255 255 255 / 0.2);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scrollCue svg {
+    animation: nudge-down 2.2s var(--ease-in-out) infinite;
+    animation-delay: 1.4s;
+  }
+}
+
+@keyframes nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}

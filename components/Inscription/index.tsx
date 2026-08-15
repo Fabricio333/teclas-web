@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
+import ScrollCue from '@/components/ScrollCue';
 import styles from './Inscription.module.scss';
 
 // `'use client'` was here but nothing in this component needed it — no state,
@@ -26,6 +27,8 @@ export default function Inscription() {
             Inscribirme ahora
           </Link>
         </Reveal>
+
+        <ScrollCue href="#faq" tone="light" />
       </div>
     </section>
   );

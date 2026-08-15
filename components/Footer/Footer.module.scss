@@ -52,6 +52,20 @@
     p {
       font-size: 0.875rem;
     }
+
+    // Underlined on hover only: the address reads as prose, so it should not
+    // shout as a link until it is pointed at, but it must still be discoverable
+    // as one — hence the pointer and the colour shift shared with the other
+    // footer links.
+    .locationLink {
+      font-size: 0.875rem;
+      transition: color var(--dur-base) var(--ease-out);
+
+      &:hover {
+        color: var(--green-900);
+        text-decoration: underline;
+      }
+    }
   }
 
   // Four columns now, so they wrap instead of being squeezed to nothing.

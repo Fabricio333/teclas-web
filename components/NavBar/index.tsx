@@ -98,12 +98,8 @@ function NavLinks({ onNavigate }: NavLinksProps) {
   // underneath it). Using Link also satisfies next/no-html-link-for-pages.
   return (
     <>
-      <Link
-        href="/#about-academy"
-        className={styles.navLink}
-        onClick={onNavigate}
-      >
-        La Academia
+      <Link href="/events" className={styles.navLink} onClick={onNavigate}>
+        Eventos
       </Link>
       <Link
         href="/#about-teacher"
@@ -112,10 +108,6 @@ function NavLinks({ onNavigate }: NavLinksProps) {
       >
         La Profesora
       </Link>
-      {/*
-            <Link href="/events" className={styles.navLink}>
-                Eventos
-            </Link>*/}
       <Link href="/resources" className={styles.navLink} onClick={onNavigate}>
         Aprender
       </Link>

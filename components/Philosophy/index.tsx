@@ -1,5 +1,6 @@
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
+import ScrollCue from '@/components/ScrollCue';
 import styles from './Philosophy.module.scss';
 
 export default function Philosophy() {
@@ -40,6 +41,8 @@ export default function Philosophy() {
             </Reveal>
           </div>
         </div>
+
+        <ScrollCue href="#inscription" />
       </div>
     </section>
   );

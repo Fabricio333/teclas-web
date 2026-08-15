@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import AmbientNotes from '@/components/AmbientNotes';
 import AnimatedTeclasHero from '@/components/AnimatedTeclasHero';
+import ScrollCue from '@/components/ScrollCue';
 import styles from './Hero.module.scss';
 
 export default function HeroSection() {
@@ -37,21 +38,7 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <a
-          aria-label="Ir a la siguiente sección"
-          className={styles.scrollCue}
-          href="#events"
-        >
-          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 9l7 7 7-7"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </a>
+        <ScrollCue href="#events" className={styles.scrollCue} />
       </div>
     </section>
   );

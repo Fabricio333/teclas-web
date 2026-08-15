@@ -3,6 +3,7 @@ import Link from 'next/link';
 import AmbientNotes from '@/components/AmbientNotes';
 import BrandIcon from '@/components/BrandIcon';
 import Reveal from '@/components/Reveal';
+import ScrollCue from '@/components/ScrollCue';
 import styles from './AboutTeacher.module.scss';
 
 export default function AboutTeacher() {
@@ -65,6 +66,8 @@ export default function AboutTeacher() {
             </div>
           </Reveal>
         </div>
+
+        <ScrollCue href="#about-academy" tone="light" />
       </div>
     </section>
   );
