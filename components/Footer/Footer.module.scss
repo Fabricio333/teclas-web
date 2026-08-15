@@ -132,11 +132,35 @@
   }
 
   .footerBottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
     border-top: 1px solid $primary-color;
     margin-top: 3rem;
     padding-top: 1.5rem;
-    text-align: center;
     color: $dark-text-color;
     font-size: 0.875rem;
+
+    a {
+      flex: 0 0 auto;
+      border-radius: 0.75rem;
+
+      &:focus-visible {
+        outline: none;
+        box-shadow: var(--focus-ring);
+      }
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    @media (max-width: $mobile-breakpoint) {
+      flex-direction: column;
+      text-align: center;
+    }
   }
 }

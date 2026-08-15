@@ -97,6 +97,21 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Teclas Ciudad Jardín. Todos los
             derechos reservados.
           </p>
+          <a
+            href="https://www.teclas.ar"
+            target="_blank"
+            rel="noopener"
+            aria-label="teclas.ar, plataforma para profes de música"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element -- this badge is
+                intentionally hotlinked from teclas.ar for the backlink embed. */}
+            <img
+              src="https://www.teclas.ar/teclas-ar-badge.svg"
+              alt="teclas.ar, plataforma para profes de música"
+              width="240"
+              height="56"
+            />
+          </a>
         </div>
       </div>
     </footer>
