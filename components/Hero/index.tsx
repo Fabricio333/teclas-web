@@ -40,7 +40,7 @@ export default function HeroSection() {
         <a
           aria-label="Ir a la siguiente sección"
           className={styles.scrollCue}
-          href="#about-teacher"
+          href="#events"
         >
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
             <path

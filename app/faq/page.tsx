@@ -14,7 +14,7 @@ export default function FAQPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <section className={styles.faqSection}>
+      <section id="faq" className={styles.faqSection}>
         <AmbientNotes density="sparse" tone="brand" />
         <div className={`container ${styles.inner}`}>
           <div className={styles.faqContent}>

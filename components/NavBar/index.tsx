@@ -112,13 +112,6 @@ function NavLinks({ onNavigate }: NavLinksProps) {
       >
         La Profesora
       </Link>
-      <Link
-        href={inscriptionFormUrl}
-        className={`${styles.navLink} ${styles.navCta}`}
-        onClick={onNavigate}
-      >
-        Inscripción
-      </Link>
       {/*
             <Link href="/events" className={styles.navLink}>
                 Eventos
@@ -126,8 +119,15 @@ function NavLinks({ onNavigate }: NavLinksProps) {
       <Link href="/resources" className={styles.navLink} onClick={onNavigate}>
         Aprender
       </Link>
-      <Link href="/faq" className={styles.navLink} onClick={onNavigate}>
+      <Link href="/#faq" className={styles.navLink} onClick={onNavigate}>
         Preguntas Frecuentes
+      </Link>
+      <Link
+        href={inscriptionFormUrl}
+        className={`${styles.navLink} ${styles.navCta}`}
+        onClick={onNavigate}
+      >
+        Inscripción
       </Link>
     </>
   );

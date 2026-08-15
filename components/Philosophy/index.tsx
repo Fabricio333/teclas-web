@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
 import styles from './Philosophy.module.scss';
@@ -40,9 +39,6 @@ export default function Philosophy() {
               interpretar.
             </Reveal>
           </div>
-          <Link href="/events" className={`btnLight ${styles.eventsCta}`}>
-            Ver próximos eventos
-          </Link>
         </div>
       </div>
     </section>
