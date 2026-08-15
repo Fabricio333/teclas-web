@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, type WheelEvent } from 'react';
+import { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,13 +25,6 @@ export default function EventCarousel() {
     const current = Math.round(track.scrollLeft / slideWidth);
     const next = (current + direction + events.length) % events.length;
     track.scrollTo({ left: next * slideWidth, behavior: 'smooth' });
-  };
-
-  const keepVerticalScrollOnPage = (event: WheelEvent<HTMLUListElement>) => {
-    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-
-    event.preventDefault();
-    window.scrollBy({ top: event.deltaY });
   };
 
   return (
@@ -62,11 +55,7 @@ export default function EventCarousel() {
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
 
-          <ul
-            ref={trackRef}
-            className={styles.track}
-            onWheel={keepVerticalScrollOnPage}
-          >
+          <ul ref={trackRef} className={styles.track}>
             {events.map((event, index) => (
               <li
                 key={event.slug}
