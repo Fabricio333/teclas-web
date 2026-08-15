@@ -14,12 +14,14 @@ import styles from './EventCarousel.module.scss';
 
 const AUTOPLAY_MS = 6000;
 
-// How many full copies of the track are rendered. The middle "real" copy is
-// what the user navigates; the copies on each side exist so there is always
-// content to scroll into. Whenever the scroll position lands inside a side
-// copy it is snapped back one full set — seamless, because the slides are
-// identical — which is what makes the loop infinite.
+// The track renders three identical copies of the set and is moved with a CSS
+// transform. `position` is an index over those copies; when it would leave a
+// copy it is re-based one set without animation, which is seamless because the
+// copies are pixel-identical. Native scroll/snap is never involved, so drags
+// are the only thing that moves the track.
 const COPIES = 3;
+const EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+const DURATION_MS = 650;
 
 function prefersReducedMotion(): boolean {
   return (
@@ -35,73 +37,81 @@ function normalize(index: number, length: number): number {
 export default function EventCarousel() {
   const trackRef = useRef<HTMLUListElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const posRef = useRef(0);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startPos: number;
+    moved: boolean;
+  } | null>(null);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
   const count = events.length;
+  const high = count * (COPIES - 1) - 1; // last index inside a drawn copy
+  const low = count; // first index of the middle copy
 
-  const slideWidth = useCallback(
-    () =>
-      (trackRef.current?.firstElementChild as HTMLElement | null)
-        ?.offsetWidth ??
-      trackRef.current?.clientWidth ??
-      0,
-    [],
-  );
+  const step = useCallback(() => {
+    const track = trackRef.current;
+    if (!track?.firstElementChild) return 0;
+    const first = track.firstElementChild.getBoundingClientRect();
+    const second = track.children[1];
+    if (!second) return first.width || 0;
+    const secondRect = second.getBoundingClientRect();
+    return secondRect.left - first.left;
+  }, []);
 
-  /** Real scroll-tile index for a logical index: the middle copy starts at `count`. */
-  const realIndexFor = useCallback(
-    (logical: number) => normalize(logical, count) + count,
-    [count],
-  );
-
-  // Keep the native scroll position inside the middle copy no matter how far
-  // the user drags: step one full set as soon as the scroll enters a side copy.
-  const syncFromScroll = useCallback(() => {
-    if (rafRef.current !== null) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      const el = trackRef.current;
-      const width = slideWidth();
-      if (!el || !width) return;
-
-      let real = Math.round(el.scrollLeft / width);
-      if (real < count) real += count;
-      else if (real >= count * (COPIES - 1)) real -= count;
-
-      if (real * width !== el.scrollLeft) {
-        el.scrollTo({ left: real * width, behavior: 'auto' });
-      }
-      setCurrent(normalize(real, count));
-    });
-  }, [count, slideWidth]);
-
-  const goTo = useCallback(
-    (logical: number) => {
-      const el = trackRef.current;
-      const width = slideWidth();
-      const target = normalize(logical, count);
-      if (!el || !width) return;
-      el.scrollTo({ left: realIndexFor(target) * width, behavior: 'smooth' });
-      setCurrent(target);
+  const render = useCallback(
+    (pos: number, animate: boolean) => {
+      const track = trackRef.current;
+      const s = step();
+      if (!track || !s) return;
+      track.style.transition = animate
+        ? `transform ${DURATION_MS}ms ${EASE}`
+        : 'none';
+      track.style.transform = `translate3d(${-pos * s}px, 0, 0)`;
+      posRef.current = pos;
     },
-    [count, realIndexFor, slideWidth],
+    [step],
   );
 
   const move = useCallback(
     (direction: -1 | 1) => {
-      const el = trackRef.current;
-      const width = slideWidth();
-      if (!el || !width) return;
-      let real = Math.round(el.scrollLeft / width) + direction;
-      // Stay inside the middle copy with a single-step wrap.
-      if (real >= count * (COPIES - 1)) real -= count;
-      if (real < count) real += count;
-      el.scrollTo({ left: real * width, behavior: 'smooth' });
-      setCurrent(normalize(real, count));
+      const s = step();
+      if (!s) return;
+      let target = posRef.current + direction;
+      // Re-base into a drawn copy — identical cards, so no visible jump.
+      if (target > high) target -= count;
+      else if (target < low) target += count;
+      render(target, true);
+      setCurrent(normalize(target, count));
     },
-    [count, slideWidth],
+    [count, high, low, render, step],
+  );
+
+  const goTo = useCallback(
+    (logical: number) => {
+      const s = step();
+      if (!s) return;
+      const logicalPos = normalize(logical, count);
+      // Pick the nearest drawn copy so far jumps animate over the short way.
+      let target = logicalPos + low;
+      while (
+        Math.abs(target + count - posRef.current) <
+        Math.abs(target - posRef.current)
+      ) {
+        target += count;
+      }
+      while (
+        Math.abs(target - count - posRef.current) <
+        Math.abs(target - posRef.current)
+      ) {
+        target -= count;
+      }
+      render(target, true);
+      setCurrent(logicalPos);
+    },
+    [count, low, render, step],
   );
 
   const stopAutoplay = useCallback(() => {
@@ -117,29 +127,79 @@ export default function EventCarousel() {
 
     timerRef.current = setInterval(() => {
       if (document.hidden) return;
-      const el = trackRef.current;
-      const width = slideWidth();
-      if (!el || !width) return;
-      let next = Math.round(el.scrollLeft / width) + 1;
-      if (next >= count * (COPIES - 1)) next -= count;
-      el.scrollTo({ left: next * width, behavior: 'smooth' });
-      setCurrent(normalize(next, count));
+      move(1);
     }, AUTOPLAY_MS);
-  }, [count, paused, slideWidth, stopAutoplay]);
+  }, [count, move, paused, stopAutoplay]);
+
+  // ------------------------------- drag and wheel
+
+  const onPointerDown = (e: React.PointerEvent<HTMLUListElement>) => {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startPos: posRef.current,
+      moved: false,
+    };
+    stopAutoplay();
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLUListElement>) => {
+    const drag = dragRef.current;
+    const track = trackRef.current;
+    const s = step();
+    if (!drag || drag.pointerId !== e.pointerId || !track || !s) return;
+    const diff = (e.clientX - drag.startX) / s;
+    if (Math.abs(diff) > 0.05) drag.moved = true;
+    // Direct transform during the drag: transitions off so it never lags the
+    // pointer, and off-copy positions are allowed (the wrap is re-based at
+    // release).
+    track.style.transition = 'none';
+    track.style.transform = `translate3d(${-(drag.startPos + diff) * s}px, 0, 0)`;
+  };
+
+  const endDrag = () => {
+    const drag = dragRef.current;
+    dragRef.current = null;
+    const track = trackRef.current;
+    const s = step();
+    if (!drag || !drag.moved || !track || !s) return;
+    // Snap to the nearest card and re-base the position into a drawn copy.
+    const px = posRef.current * s - parseFloat(track.style.transform.slice(12));
+    let target = Math.round(px / s);
+    while (target > high) target -= count;
+    while (target < low) target += count;
+    render(target, true);
+    setCurrent(normalize(target, count));
+  };
+
+  const onWheel = (e: React.WheelEvent<HTMLUListElement>) => {
+    stopAutoplay();
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // page scrolls
+    move(e.deltaX > 0 ? 1 : -1);
+  };
 
   useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const width = slideWidth();
-    if (!width) return;
-    // Land on the real copy without animating on first paint.
-    el.scrollTo({ left: realIndexFor(0) * width, behavior: 'auto' });
-  }, [realIndexFor, slideWidth]);
+    // Land on the middle copy without animating on first paint, once layout
+    // has settled (fonts/images included).
+    const raf = requestAnimationFrame(() => render(low, false));
+    return () => cancelAnimationFrame(raf);
+  }, [low, render]);
 
   useEffect(() => {
     startAutoplay();
     return stopAutoplay;
   }, [startAutoplay, stopAutoplay]);
+
+  // Repaint whenever the track geometry could differ (resize, fonts, images
+  // loading) so the virtual position never drifts from the rendered pixels.
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const observer = new ResizeObserver(() => render(posRef.current, false));
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [render]);
 
   const slides = Array.from(
     { length: count * COPIES },
@@ -184,9 +244,11 @@ export default function EventCarousel() {
           <ul
             ref={trackRef}
             className={styles.track}
-            onScroll={syncFromScroll}
-            onTouchStart={() => stopAutoplay()}
-            onWheel={() => stopAutoplay()}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onWheel={onWheel}
           >
             {slides.map((event, index) => {
               const logical = index % count;
@@ -243,22 +305,22 @@ export default function EventCarousel() {
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
-
-          <nav className={styles.dots} aria-label="Ir a un evento">
-            {events.map((event, index) => (
-              <button
-                key={event.slug}
-                type="button"
-                className={`${styles.dot} ${
-                  index === current ? styles.dotActive : ''
-                }`}
-                aria-label={`Ir al evento ${index + 1}`}
-                aria-current={index === current}
-                onClick={() => goTo(index)}
-              />
-            ))}
-          </nav>
         </div>
+
+        <nav className={styles.dots} aria-label="Ir a un evento">
+          {events.map((event, index) => (
+            <button
+              key={event.slug}
+              type="button"
+              className={`${styles.dot} ${
+                index === current ? styles.dotActive : ''
+              }`}
+              aria-label={`Ir al evento ${index + 1}`}
+              aria-current={index === current}
+              onClick={() => goTo(index)}
+            />
+          ))}
+        </nav>
       </div>
     </section>
   );

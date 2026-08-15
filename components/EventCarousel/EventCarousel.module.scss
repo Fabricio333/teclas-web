@@ -48,38 +48,39 @@
 
 .carousel {
   position: relative;
-  max-width: 960px;
-  margin-inline: auto;
-}
-
-.track {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 100%;
-  overflow-x: auto;
+  overflow: hidden;
   border-radius: var(--radius-lg);
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  @media (min-width: $mobile-breakpoint) {
-    grid-auto-columns: 30%;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-  }
 }
 
+// The strips of cloned slides, moved with a single `transform`. No native
+// scrollbar and no touch-pan hijack: horizontal drags are handled in JS, and
+// vertical gestures bubble to the page untouched.
+.track {
+  display: flex;
+  will-change: transform;
+}
+
+// One card per viewport on mobile. From tablet up the cards are wide enough
+// that roughly three sit on screen, the neighbours cut by the carousel's
+// overflow — the "peek" that signals there is more to drag to.
 .slide {
+  flex: 0 0 100%;
   scroll-snap-align: start;
   padding-block: 1.5rem;
 
-  @media (min-width: $mobile-breakpoint) {
-    padding-inline: 0.75rem;
+  @media (min-width: 560px) {
+    flex-basis: 46%; // ~two and a bit; wide but still cut at the edges
     padding-block: 2rem;
+  }
+
+  @media (min-width: $mobile-breakpoint) {
+    flex-basis: 40%;
+  }
+
+  @media (min-width: $tablet-breakpoint) {
+    flex-basis: 33.333%;
+    // Hover-scale leaves room to breathe in every direction.
+    padding-inline: 1rem;
   }
 }
 
@@ -181,6 +182,10 @@
     background: var(--purple-900);
     color: white;
   }
+
+  @media (min-width: $mobile-breakpoint) {
+    display: none;
+  }
 }
 
 .previous {
@@ -192,10 +197,14 @@
 }
 
 .dots {
+  // Position above everything the neighbour sections paint, so their
+  // background or shadow never sits over the pagination.
+  position: relative;
+  z-index: 2;
   display: flex;
   justify-content: center;
   gap: 0.625rem;
-  margin-top: var(--space-5);
+  margin-top: var(--space-6);
 }
 
 .dot {
@@ -242,10 +251,17 @@
   .content {
     padding-bottom: 5.5rem;
   }
+
+  .slide {
+    // Full-width cards on phones: one per screen.
+    flex-basis: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .track {
-    scroll-behavior: auto;
+    // Animations are applied through `transition` at runtime; just make sure
+    // nothing tricks the eye out of nowhere under the reduced-motion setting.
+    transition-duration: 0.01ms !important;
   }
 }
