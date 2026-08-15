@@ -82,8 +82,6 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           {event.subtitle && (
             <p className={styles.subtitle}>{event.subtitle}</p>
           )}
-          <p className={styles.date}>{event.date}</p>
-          <p className={styles.location}>{event.location}</p>
         </header>
 
         <div className={styles.content}>

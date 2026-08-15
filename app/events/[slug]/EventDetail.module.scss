@@ -5,6 +5,20 @@
 .eventDetail {
   padding-bottom: var(--space-section);
   min-height: calc(100dvh - var(--header-height));
+  animation: event-enter var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes event-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eventDetail {
+    animation: none;
+  }
 }
 
 .banner {
@@ -75,16 +89,6 @@
   font-style: italic;
   font-size: $font-size-md;
   margin-bottom: var(--space-3);
-}
-
-.date {
-  color: $primary-color;
-  font-weight: 600;
-  margin-bottom: var(--space-1);
-}
-
-.location {
-  color: $light-text-color;
 }
 
 .content {

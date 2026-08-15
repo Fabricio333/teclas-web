@@ -171,7 +171,6 @@ export default function EventCarousel() {
     const track = trackRef.current;
     const s = step();
     if (!track || !s) return;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     suppressClickRef.current = false;
 
     // Grab the position that is on screen right now, not the target of a
@@ -195,7 +194,10 @@ export default function EventCarousel() {
     const drag = dragRef.current;
     const s = step();
     if (!drag || drag.pointerId !== e.pointerId || !s) return;
-    if (Math.abs(e.clientX - drag.startX) > 4) drag.moved = true;
+    if (!drag.moved && Math.abs(e.clientX - drag.startX) > 4) {
+      drag.moved = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
 
     // Follow the pointer one-to-one, transition off so it never lags. Fractional
     // positions are the point: the track scrubs continuously and only lands on a
