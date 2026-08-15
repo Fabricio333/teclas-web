@@ -61,30 +61,30 @@
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
-  touch-action: pan-y;
 
   &::-webkit-scrollbar {
     display: none;
   }
 
   @media (min-width: $mobile-breakpoint) {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-    overflow: visible;
-    scroll-snap-type: none;
+    grid-auto-columns: 50%;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
   }
 }
 
 .slide {
   scroll-snap-align: start;
+  padding-block: 1.5rem;
 
   @media (min-width: $mobile-breakpoint) {
-    scroll-snap-align: none;
+    padding-inline: 1rem;
+    padding-block: 2rem;
   }
 }
 
 .card {
+  position: relative;
   display: grid;
   height: 100%;
   overflow: hidden;
@@ -92,6 +92,20 @@
   border-radius: var(--radius-lg);
   background: white;
   box-shadow: var(--shadow-lg);
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out);
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.cardOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
 }
 
 .imageWrapper {
@@ -124,6 +138,11 @@
   p:not(.date) {
     color: var(--neutral-600);
     line-height: var(--leading-normal);
+  }
+
+  :global(.btnPrimary) {
+    position: relative;
+    z-index: 2;
   }
 }
 
@@ -162,10 +181,6 @@
     background: var(--purple-900);
     color: white;
   }
-
-  @media (min-width: $mobile-breakpoint) {
-    display: none;
-  }
 }
 
 .previous {
@@ -174,6 +189,39 @@
 
 .next {
   right: 0;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: var(--space-5);
+}
+
+.dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(var(--purple-rgb) / 0.3);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  &:hover {
+    background: var(--purple-700);
+  }
+}
+
+.dotActive {
+  background: var(--purple-900);
+  transform: scale(1.35);
+
+  &:hover {
+    background: var(--purple-900);
+  }
 }
 
 @media (max-width: 767.98px) {

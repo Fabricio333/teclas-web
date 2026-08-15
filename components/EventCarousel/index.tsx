@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,20 +12,92 @@ import AmbientNotes from '@/components/AmbientNotes';
 import { events } from '@/lib/events';
 import styles from './EventCarousel.module.scss';
 
+const AUTOPLAY_MS = 6000;
+
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  );
+}
+
 export default function EventCarousel() {
   const trackRef = useRef<HTMLUListElement>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
 
-  const move = (direction: -1 | 1) => {
-    const track = trackRef.current;
-    if (!track) return;
+  const slideWidth = useCallback(
+    () =>
+      (trackRef.current?.firstElementChild as HTMLElement | null)
+        ?.offsetWidth ??
+      trackRef.current?.clientWidth ??
+      0,
+    [],
+  );
 
-    const slideWidth =
-      (track.firstElementChild as HTMLElement | null)?.offsetWidth ??
-      track.clientWidth;
-    const current = Math.round(track.scrollLeft / slideWidth);
-    const next = (current + direction + events.length) % events.length;
-    track.scrollTo({ left: next * slideWidth, behavior: 'smooth' });
-  };
+  const syncFromScroll = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      const el = trackRef.current;
+      const width = slideWidth();
+      if (!el || !width) return;
+      setCurrent(Math.round(el.scrollLeft / width));
+    });
+  }, [slideWidth]);
+
+  const goTo = useCallback(
+    (index: number) => {
+      const el = trackRef.current;
+      const width = slideWidth();
+      if (!el || !width) return;
+      const next = (index + events.length) % events.length;
+      el.scrollTo({ left: next * width, behavior: 'smooth' });
+      setCurrent(next);
+    },
+    [slideWidth],
+  );
+
+  const move = useCallback(
+    (direction: -1 | 1) => {
+      const el = trackRef.current;
+      const width = slideWidth();
+      if (!el || !width) return;
+      const currentIndex = Math.round(el.scrollLeft / width);
+      goTo(currentIndex + direction);
+    },
+    [goTo, slideWidth],
+  );
+
+  const stopAutoplay = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const startAutoplay = useCallback(() => {
+    stopAutoplay();
+    if (paused || prefersReducedMotion() || events.length < 2) return;
+
+    timerRef.current = setInterval(() => {
+      if (document.hidden) return;
+      const el = trackRef.current;
+      const width = slideWidth();
+      if (!el || !width) return;
+      const currentIndex = Math.round(el.scrollLeft / width);
+      const next = (currentIndex + 1) % events.length;
+      el.scrollTo({ left: next * width, behavior: 'smooth' });
+      setCurrent(next);
+    }, AUTOPLAY_MS);
+  }, [paused, slideWidth, stopAutoplay]);
+
+  useEffect(() => {
+    startAutoplay();
+    return stopAutoplay;
+  }, [startAutoplay, stopAutoplay]);
 
   return (
     <section
@@ -45,7 +117,14 @@ export default function EventCarousel() {
           </Link>
         </div>
 
-        <div className={styles.carousel} aria-roledescription="carrusel">
+        <div
+          className={styles.carousel}
+          aria-roledescription="carrusel"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onFocus={() => setPaused(true)}
+          onBlur={() => setPaused(false)}
+        >
           <button
             type="button"
             className={`${styles.control} ${styles.previous}`}
@@ -55,7 +134,13 @@ export default function EventCarousel() {
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
 
-          <ul ref={trackRef} className={styles.track}>
+          <ul
+            ref={trackRef}
+            className={styles.track}
+            onScroll={syncFromScroll}
+            onTouchStart={() => stopAutoplay()}
+            onWheel={() => stopAutoplay()}
+          >
             {events.map((event, index) => (
               <li
                 key={event.slug}
@@ -64,6 +149,12 @@ export default function EventCarousel() {
                 aria-roledescription="diapositiva"
               >
                 <article className={styles.card}>
+                  <Link
+                    href={`/events/${event.slug}`}
+                    className={styles.cardOverlay}
+                    aria-hidden="true"
+                    tabIndex={-1}
+                  />
                   <div className={styles.imageWrapper}>
                     <Image
                       src={event.image}
@@ -99,6 +190,21 @@ export default function EventCarousel() {
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
+
+          <nav className={styles.dots} aria-label="Ir a un evento">
+            {events.map((event, index) => (
+              <button
+                key={event.slug}
+                type="button"
+                className={`${styles.dot} ${
+                  index === current ? styles.dotActive : ''
+                }`}
+                aria-label={`Ir al evento ${index + 1}`}
+                aria-current={index === current}
+                onClick={() => goTo(index)}
+              />
+            ))}
+          </nav>
         </div>
       </div>
     </section>
