@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, type WheelEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,6 +8,7 @@ import {
   faChevronLeft,
   faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
+import AmbientNotes from '@/components/AmbientNotes';
 import { events } from '@/lib/events';
 import styles from './EventCarousel.module.scss';
 
@@ -18,9 +19,19 @@ export default function EventCarousel() {
     const track = trackRef.current;
     if (!track) return;
 
-    const current = Math.round(track.scrollLeft / track.clientWidth);
+    const slideWidth =
+      (track.firstElementChild as HTMLElement | null)?.offsetWidth ??
+      track.clientWidth;
+    const current = Math.round(track.scrollLeft / slideWidth);
     const next = (current + direction + events.length) % events.length;
-    track.scrollTo({ left: next * track.clientWidth, behavior: 'smooth' });
+    track.scrollTo({ left: next * slideWidth, behavior: 'smooth' });
+  };
+
+  const keepVerticalScrollOnPage = (event: WheelEvent<HTMLUListElement>) => {
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+
+    event.preventDefault();
+    window.scrollBy({ top: event.deltaY });
   };
 
   return (
@@ -29,13 +40,14 @@ export default function EventCarousel() {
       className={styles.section}
       aria-labelledby="events-title"
     >
+      <AmbientNotes density="normal" tone="plum" />
       <div className={`container ${styles.inner}`}>
         <div className={styles.heading}>
           <div>
             <p className={styles.eyebrow}>Encuentros para tocar y compartir</p>
             <h2 id="events-title">Eventos en TECLAS</h2>
           </div>
-          <Link href="/events" className={styles.allEvents}>
+          <Link href="/events" className="btnPlum">
             Ver todos los eventos
           </Link>
         </div>
@@ -50,7 +62,11 @@ export default function EventCarousel() {
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
 
-          <ul ref={trackRef} className={styles.track}>
+          <ul
+            ref={trackRef}
+            className={styles.track}
+            onWheel={keepVerticalScrollOnPage}
+          >
             {events.map((event, index) => (
               <li
                 key={event.slug}

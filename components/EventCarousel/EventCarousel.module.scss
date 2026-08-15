@@ -1,6 +1,9 @@
 @use '../../styles/variables' as *;
 
 .section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding-block: var(--space-section);
   background:
     radial-gradient(
@@ -12,6 +15,8 @@
 }
 
 .inner {
+  position: relative;
+  z-index: 1;
   overflow: hidden;
 }
 
@@ -41,13 +46,6 @@
   text-transform: uppercase;
 }
 
-.allEvents {
-  color: var(--purple-900);
-  font-weight: 700;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.3em;
-}
-
 .carousel {
   position: relative;
   max-width: 960px;
@@ -67,11 +65,18 @@
   &::-webkit-scrollbar {
     display: none;
   }
+
+  @media (min-width: $mobile-breakpoint) {
+    grid-auto-columns: 50%;
+  }
 }
 
 .slide {
-  padding-inline: clamp(0rem, 4vw, 2.5rem);
   scroll-snap-align: start;
+
+  @media (min-width: $mobile-breakpoint) {
+    padding-inline: 0.75rem;
+  }
 }
 
 .card {
@@ -82,13 +87,10 @@
   border-radius: var(--radius-lg);
   background: white;
   box-shadow: var(--shadow-lg);
-
-  @media (min-width: $mobile-breakpoint) {
-    grid-template-columns: 1.05fr 1fr;
-  }
 }
 
 .imageWrapper {
+  height: 230px;
   min-height: 230px;
   background: var(--purple-300);
 }
@@ -106,11 +108,11 @@
   align-items: flex-start;
   justify-content: center;
   gap: var(--space-3);
-  padding: clamp(1.5rem, 5vw, 3rem);
+  padding: clamp(1.5rem, 4vw, 2rem);
 
   h3 {
     color: var(--blue-900);
-    font-size: clamp(1.5rem, 4vw, 2.15rem);
+    font-size: clamp(1.4rem, 3vw, 1.65rem);
     line-height: var(--leading-tight);
   }
 
