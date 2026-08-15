@@ -67,7 +67,7 @@
   }
 
   @media (min-width: $mobile-breakpoint) {
-    grid-auto-columns: 50%;
+    grid-auto-columns: 30%;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
   }
@@ -78,7 +78,7 @@
   padding-block: 1.5rem;
 
   @media (min-width: $mobile-breakpoint) {
-    padding-inline: 1rem;
+    padding-inline: 0.75rem;
     padding-block: 2rem;
   }
 }

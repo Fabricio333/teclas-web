@@ -14,11 +14,22 @@ import styles from './EventCarousel.module.scss';
 
 const AUTOPLAY_MS = 6000;
 
+// How many full copies of the track are rendered. The middle "real" copy is
+// what the user navigates; the copies on each side exist so there is always
+// content to scroll into. Whenever the scroll position lands inside a side
+// copy it is snapped back one full set — seamless, because the slides are
+// identical — which is what makes the loop infinite.
+const COPIES = 3;
+
 function prefersReducedMotion(): boolean {
   return (
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
+}
+
+function normalize(index: number, length: number): number {
+  return ((index % length) + length) % length;
 }
 
 export default function EventCarousel() {
@@ -27,6 +38,8 @@ export default function EventCarousel() {
   const rafRef = useRef<number | null>(null);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
+
+  const count = events.length;
 
   const slideWidth = useCallback(
     () =>
@@ -37,6 +50,14 @@ export default function EventCarousel() {
     [],
   );
 
+  /** Real scroll-tile index for a logical index: the middle copy starts at `count`. */
+  const realIndexFor = useCallback(
+    (logical: number) => normalize(logical, count) + count,
+    [count],
+  );
+
+  // Keep the native scroll position inside the middle copy no matter how far
+  // the user drags: step one full set as soon as the scroll enters a side copy.
   const syncFromScroll = useCallback(() => {
     if (rafRef.current !== null) return;
     rafRef.current = requestAnimationFrame(() => {
@@ -44,20 +65,28 @@ export default function EventCarousel() {
       const el = trackRef.current;
       const width = slideWidth();
       if (!el || !width) return;
-      setCurrent(Math.round(el.scrollLeft / width));
+
+      let real = Math.round(el.scrollLeft / width);
+      if (real < count) real += count;
+      else if (real >= count * (COPIES - 1)) real -= count;
+
+      if (real * width !== el.scrollLeft) {
+        el.scrollTo({ left: real * width, behavior: 'auto' });
+      }
+      setCurrent(normalize(real, count));
     });
-  }, [slideWidth]);
+  }, [count, slideWidth]);
 
   const goTo = useCallback(
-    (index: number) => {
+    (logical: number) => {
       const el = trackRef.current;
       const width = slideWidth();
+      const target = normalize(logical, count);
       if (!el || !width) return;
-      const next = (index + events.length) % events.length;
-      el.scrollTo({ left: next * width, behavior: 'smooth' });
-      setCurrent(next);
+      el.scrollTo({ left: realIndexFor(target) * width, behavior: 'smooth' });
+      setCurrent(target);
     },
-    [slideWidth],
+    [count, realIndexFor, slideWidth],
   );
 
   const move = useCallback(
@@ -65,10 +94,14 @@ export default function EventCarousel() {
       const el = trackRef.current;
       const width = slideWidth();
       if (!el || !width) return;
-      const currentIndex = Math.round(el.scrollLeft / width);
-      goTo(currentIndex + direction);
+      let real = Math.round(el.scrollLeft / width) + direction;
+      // Stay inside the middle copy with a single-step wrap.
+      if (real >= count * (COPIES - 1)) real -= count;
+      if (real < count) real += count;
+      el.scrollTo({ left: real * width, behavior: 'smooth' });
+      setCurrent(normalize(real, count));
     },
-    [goTo, slideWidth],
+    [count, slideWidth],
   );
 
   const stopAutoplay = useCallback(() => {
@@ -80,24 +113,38 @@ export default function EventCarousel() {
 
   const startAutoplay = useCallback(() => {
     stopAutoplay();
-    if (paused || prefersReducedMotion() || events.length < 2) return;
+    if (paused || prefersReducedMotion() || count < 2) return;
 
     timerRef.current = setInterval(() => {
       if (document.hidden) return;
       const el = trackRef.current;
       const width = slideWidth();
       if (!el || !width) return;
-      const currentIndex = Math.round(el.scrollLeft / width);
-      const next = (currentIndex + 1) % events.length;
+      let next = Math.round(el.scrollLeft / width) + 1;
+      if (next >= count * (COPIES - 1)) next -= count;
       el.scrollTo({ left: next * width, behavior: 'smooth' });
-      setCurrent(next);
+      setCurrent(normalize(next, count));
     }, AUTOPLAY_MS);
-  }, [paused, slideWidth, stopAutoplay]);
+  }, [count, paused, slideWidth, stopAutoplay]);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const width = slideWidth();
+    if (!width) return;
+    // Land on the real copy without animating on first paint.
+    el.scrollTo({ left: realIndexFor(0) * width, behavior: 'auto' });
+  }, [realIndexFor, slideWidth]);
 
   useEffect(() => {
     startAutoplay();
     return stopAutoplay;
   }, [startAutoplay, stopAutoplay]);
+
+  const slides = Array.from(
+    { length: count * COPIES },
+    (_, index) => events[index % count],
+  );
 
   return (
     <section
@@ -141,45 +188,51 @@ export default function EventCarousel() {
             onTouchStart={() => stopAutoplay()}
             onWheel={() => stopAutoplay()}
           >
-            {events.map((event, index) => (
-              <li
-                key={event.slug}
-                className={styles.slide}
-                aria-label={`${index + 1} de ${events.length}`}
-                aria-roledescription="diapositiva"
-              >
-                <article className={styles.card}>
-                  <Link
-                    href={`/events/${event.slug}`}
-                    className={styles.cardOverlay}
-                    aria-hidden="true"
-                    tabIndex={-1}
-                  />
-                  <div className={styles.imageWrapper}>
-                    <Image
-                      src={event.image}
-                      alt={event.imageAlt}
-                      width={720}
-                      height={540}
-                      className={styles.image}
+            {slides.map((event, index) => {
+              const logical = index % count;
+              return (
+                <li
+                  key={`${event.slug}-${index}`}
+                  className={styles.slide}
+                  aria-label={`${logical + 1} de ${count}`}
+                  aria-roledescription="diapositiva"
+                >
+                  <article className={styles.card}>
+                    <Link
+                      href={`/events/${event.slug}`}
+                      className={styles.cardOverlay}
+                      aria-hidden="true"
+                      tabIndex={-1}
                     />
-                  </div>
-                  <div className={styles.content}>
-                    <span className={styles.badge}>
-                      {event.status === 'upcoming'
-                        ? 'Pr\u00f3ximo evento'
-                        : 'Finalizado'}
-                    </span>
-                    <h3>{event.title}</h3>
-                    <p className={styles.date}>{event.date}</p>
-                    <p>{event.summary}</p>
-                    <Link href={`/events/${event.slug}`} className="btnPrimary">
-                      Ver evento
-                    </Link>
-                  </div>
-                </article>
-              </li>
-            ))}
+                    <div className={styles.imageWrapper}>
+                      <Image
+                        src={event.image}
+                        alt={event.imageAlt}
+                        width={720}
+                        height={540}
+                        className={styles.image}
+                      />
+                    </div>
+                    <div className={styles.content}>
+                      <span className={styles.badge}>
+                        {event.status === 'upcoming'
+                          ? 'Pr\u00f3ximo evento'
+                          : 'Finalizado'}
+                      </span>
+                      <h3>{event.title}</h3>
+                      <p className={styles.date}>{event.date}</p>
+                      <p>{event.summary}</p>
+                      <Link
+                        href={`/events/${event.slug}`}
+                        className="btnPrimary"
+                      >
+                        Ver evento
+                      </Link>
+                    </div>
+                  </article>
+                </li>
+              );
+            })}
           </ul>
 
           <button
