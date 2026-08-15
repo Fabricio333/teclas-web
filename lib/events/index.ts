@@ -1,5 +1,7 @@
 import eventJsonLd from '@/lib/seo/event';
 import { pastEventJsonLd } from '@/lib/seo/pastEvent';
+import { pastColonia2026JsonLd } from '@/lib/seo/pastColonia2026';
+import { colonia2027JsonLd } from '@/lib/seo/colonia2027';
 
 /**
  * Single source of truth for /events and its `/events/{slug}` detail pages, so
@@ -43,6 +45,35 @@ export function whatsappUrl(message: string): string {
 }
 
 export const events: TeclasEvent[] = [
+  {
+    slug: 'colonia-verano-2027',
+    title: 'Colonia de Verano 2027',
+    subtitle: 'Música, juegos y baile para las vacaciones',
+    status: 'upcoming',
+    date: 'Verano 2027 · Fechas a confirmar',
+    summary:
+      'Colonia de verano con música, juegos y baile para los más chicos durante las vacaciones.',
+    location: 'TECLAS — Blvd. Aviador Finca 6142, Local 12, Ciudad Jardín.',
+    image: '/events/colonia-verano-2026.jpg',
+    imageAlt: 'Grupo de chicos de la colonia de verano de TECLAS en el parque',
+    ctaLabel: 'Inscribirme por WhatsApp',
+    whatsappMessage:
+      '¡Hola TECLAS! Quiero anotarme a la Colonia de Verano 2027.',
+    metaDescription:
+      'Colonia de Verano 2027 en TECLAS Ciudad Jardín: música, juegos y baile para las vacaciones. Fechas a confirmar.',
+    body: [
+      'La Colonia de Verano es la propuesta de TECLAS para las vacaciones: música, juegos, baile y movimiento para los más chicos.',
+      'Cada jornada combina actividades musicales con juegos al aire libre, para que el verano se sienta como vacaciones de verdad y a la vez la música siga sonando.',
+      'Las fechas de la edición se están confirmando. Si te quedó gustando, dejanos un mensaje y te avisamos apenas estén.',
+    ],
+    facts: [
+      { label: 'Fechas', value: 'A confirmar' },
+      { label: 'Ediciones', value: 'Enero y Febrero' },
+      { label: 'Lugar', value: 'Blvd. Aviador Finca 6142, Local 12' },
+      { label: 'Dirigido a', value: 'Niños y jóvenes' },
+    ],
+    jsonLd: colonia2027JsonLd,
+  },
   {
     slug: 'clase-abierta-piano-series-pelis-juegos',
     title: 'Clase abierta de piano: series, pelis y juegos',
@@ -108,6 +139,36 @@ export const events: TeclasEvent[] = [
       { label: 'Contribución', value: 'Material impreso y seguro: $5.000' },
     ],
     jsonLd: pastEventJsonLd,
+  },
+  {
+    slug: 'colonia-verano-2026',
+    title: 'Colonia de Verano 2026',
+    subtitle: 'Música, juegos y baile para las vacaciones',
+    status: 'past',
+    date: 'Enero y Febrero de 2026',
+    summary:
+      'Colonia de verano con música, juegos y baile para los más chicos durante las vacaciones.',
+    location: 'TECLAS — Blvd. Aviador Finca 6142, Local 12, Ciudad Jardín.',
+    image: '/events/colonia-verano-2026.jpg',
+    imageAlt:
+      'Grupo de chicos de la colonia de verano de TECLAS durante la edición 2026',
+    ctaLabel: 'Consultar la próxima edición',
+    whatsappMessage:
+      '¡Hola TECLAS! Vi la Colonia de Verano 2026 y quiero saber cuándo es la próxima.',
+    metaDescription:
+      'Colonia de Verano 2026 en TECLAS Ciudad Jardín: música, juegos y baile para las vacaciones escolares.',
+    body: [
+      'La Colonia de Verano 2026 fue la propuesta de TECLAS para las vacaciones: música, juegos, baile y movimiento para los más chicos.',
+      'Durante enero y febrero, cada jornada combinó actividades musicales con juegos al aire libre, para que el verano se sintiera como vacaciones de verdad y la música siguiera sonando.',
+      'Fue un verano a pura música. Si te quedó gustando, consultanos por la próxima edición.',
+    ],
+    facts: [
+      { label: 'Fechas', value: 'Enero y Febrero de 2026' },
+      { label: 'Ediciones', value: 'Enero y Febrero' },
+      { label: 'Lugar', value: 'Blvd. Aviador Finca 6142, Local 12' },
+      { label: 'Dirigido a', value: 'Niños y jóvenes' },
+    ],
+    jsonLd: pastColonia2026JsonLd,
   },
 ];
 

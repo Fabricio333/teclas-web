@@ -25,6 +25,9 @@
     <image:image>
       <image:loc>https://teclasciudadjardin.com.ar/events/taller-piano-adultos-principiantes.jpg</image:loc>
     </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2026.jpg</image:loc>
+    </image:image>
   </url>
   <!--
     Event detail pages. Added, not altered: each is a new indexable page with
@@ -36,6 +39,28 @@
     <priority>0.7</priority>
     <image:image>
       <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg</image:loc>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2026.jpg</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027-flyer-post.png</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027-flyer-stories.png</image:loc>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2026</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2026.jpg</image:loc>
     </image:image>
   </url>
   <url>
@@ -194,6 +219,12 @@
     </image:image>
     <image:image>
       <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-stories.png</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027-flyer-post.png</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027-flyer-stories.png</image:loc>
     </image:image>
   </url>
 </urlset>
