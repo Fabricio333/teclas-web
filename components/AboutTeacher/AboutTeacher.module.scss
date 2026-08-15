@@ -97,6 +97,12 @@
 
 // Circular chips rather than bare glyphs: a bigger, more obvious hit target
 // (48px, above the 44px minimum) and somewhere for the hover to happen.
+//
+// Solid white rather than the translucent fill it used to have. The brand marks
+// are cut out of their own colour — Instagram's lens, YouTube's play triangle —
+// so the surface behind them shows through, and only white reads as the logo.
+// For the same reason hover no longer recolours the chip: tinting it would tint
+// the inside of both logos.
 .socialLink {
   display: inline-flex;
   align-items: center;
@@ -104,21 +110,23 @@
   width: 3.25rem;
   height: 3.25rem;
   border-radius: var(--radius-pill);
-  border: 1px solid rgb(255 255 255 / 0.28);
-  background-color: rgb(255 255 255 / 0.1);
-  color: #ffffff;
+  border: 1px solid rgb(255 255 255 / 0.9);
+  background-color: #ffffff;
+  box-shadow: 0 6px 16px rgb(var(--blue-deep-rgb) / 0.3);
   transition:
     transform var(--dur-base) var(--ease-spring),
-    background-color var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out);
+    box-shadow var(--dur-base) var(--ease-out);
 
   &:hover {
     transform: translateY(-4px);
-    background-color: var(--green-500);
-    border-color: var(--green-300);
-    color: var(--green-900);
+    box-shadow: 0 12px 26px rgb(var(--blue-deep-rgb) / 0.38);
   }
+}
+
+.brandIcon {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

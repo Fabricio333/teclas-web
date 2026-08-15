@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram } from '@fortawesome/free-brands-svg-icons';
 import { faMapPin, faPhone } from '@fortawesome/free-solid-svg-icons';
+import BrandIcon from '@/components/BrandIcon';
 import styles from './Footer.module.scss';
 
 /**
@@ -85,7 +85,11 @@ export default function Footer() {
                 href="https://www.instagram.com/teclas.ciudadjardin/"
                 className={styles.socialLink}
               >
-                <FontAwesomeIcon icon={faInstagram} className={styles.icon} />
+                <BrandIcon
+                  brand="instagram"
+                  gradientId="teclas-instagram-footer"
+                  className={styles.brandIcon}
+                />
                 <span>teclas.ciudadjardin</span>
               </Link>
             </div>

@@ -40,7 +40,21 @@
   z-index: 1;
 }
 
+// The brand green CTA, not the flat white one this used to be: white read as a
+// dead matte patch against the blue band, where the green is the action colour
+// used for every other primary call on the site and lifts off the blue.
 .cta {
   font-size: var(--text-xl);
   padding-inline: 2.75rem;
+  // Glow cast in the band's own deep blue rather than the green ramp's olive,
+  // so the halo reads as depth instead of as a second colour.
+  box-shadow:
+    0 6px 16px rgb(var(--blue-deep-rgb) / 0.38),
+    0 18px 40px rgb(var(--blue-deep-rgb) / 0.3);
+
+  &:hover {
+    box-shadow:
+      0 10px 22px rgb(var(--blue-deep-rgb) / 0.46),
+      0 26px 56px rgb(var(--blue-deep-rgb) / 0.36);
+  }
 }

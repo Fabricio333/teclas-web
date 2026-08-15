@@ -21,7 +21,7 @@ export default function Inscription() {
           </p>
           <Link
             href="https://docs.google.com/forms/d/e/1FAIpQLSenT_EzJoCuNDeRN6dQN38OdeJ8RBybZvxOkESqKQBYAObf8w/viewform?usp=dialog"
-            className={`btnLight ${styles.cta}`}
+            className={`btnPrimary ${styles.cta}`}
           >
             Inscribirme ahora
           </Link>

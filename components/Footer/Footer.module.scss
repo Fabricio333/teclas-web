@@ -116,6 +116,19 @@
         color var(--dur-base) var(--ease-out),
         transform var(--dur-base) var(--ease-spring);
 
+      // The Instagram mark is a gradient outline whose lens and viewfinder are
+      // knockouts, so it needs a light tile to sit on — on the green band the
+      // holes would fill with green and the logo would stop reading as itself.
+      .brandIcon {
+        box-sizing: border-box;
+        flex: none;
+        width: 1.6rem;
+        height: 1.6rem;
+        padding: 0.2rem;
+        border-radius: 0.45rem;
+        background-color: #ffffff;
+      }
+
       // Yellow-on-green was 1.4:1 — effectively invisible on hover. The deep
       // brand green is 8.6:1 against this surface.
       &:hover {

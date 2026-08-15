@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons';
 import AmbientNotes from '@/components/AmbientNotes';
+import BrandIcon from '@/components/BrandIcon';
 import Reveal from '@/components/Reveal';
 import styles from './AboutTeacher.module.scss';
 
@@ -50,14 +49,18 @@ export default function AboutTeacher() {
                 href="https://www.instagram.com/teclas.ciudadjardin/"
                 className={styles.socialLink}
               >
-                <FontAwesomeIcon icon={faInstagram} size="2x" />
+                <BrandIcon
+                  brand="instagram"
+                  gradientId="teclas-instagram-about"
+                  className={styles.brandIcon}
+                />
               </Link>
               <Link
                 aria-label="Canal de YouTube de Roxana Arena"
                 href="https://www.youtube.com/@roxanaarena618"
                 className={styles.socialLink}
               >
-                <FontAwesomeIcon icon={faYoutube} size="2x" />
+                <BrandIcon brand="youtube" className={styles.brandIcon} />
               </Link>
             </div>
           </Reveal>
