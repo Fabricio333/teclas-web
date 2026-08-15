@@ -9,25 +9,9 @@
   // visible viewport. Subtracting the header stops the page scrolling when its
   // content already fits, now that `main` carries the offset.
   min-height: calc(100dvh - var(--header-height));
-  // Was a single flat sky wash down the top 24rem. Now the same layered brand
-  // washes the landing page uses, so the FAQ reads as part of the same site.
+  // Plain white: it follows the blue Inscription band, so anything decorative
+  // here would fight the section above for attention.
   background-color: var(--neutral-0);
-  background-image:
-    radial-gradient(
-      54rem 30rem at 50% -8%,
-      rgb(var(--green-rgb) / 0.2),
-      transparent 62%
-    ),
-    radial-gradient(
-      40rem 26rem at 4% 32%,
-      rgb(var(--sky-rgb) / 0.14),
-      transparent 58%
-    ),
-    radial-gradient(
-      40rem 26rem at 96% 72%,
-      rgb(var(--blue-rgb) / 0.12),
-      transparent 58%
-    );
 }
 
 .inner {

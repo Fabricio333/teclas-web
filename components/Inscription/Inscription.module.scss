@@ -4,20 +4,21 @@
 .inscriptionSection {
   @extend .sectionPadding;
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   text-align: center;
-  background-color: #ffffff;
-  color: var(--purple-900);
+  background-image: var(--grad-blue);
+  color: var(--neutral-0);
   box-shadow:
-    0 -4px 12px rgba(0, 0, 0, 0.18),
-    0 4px 12px rgba(0, 0, 0, 0.18);
+    0 -4px 12px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.3);
 
   .sectionTitle {
     font-size: 2rem;
     margin-bottom: 1.5rem;
     line-height: var(--leading-snug);
     text-wrap: balance;
-    color: var(--purple-900);
+    color: var(--neutral-0);
 
     @media (min-width: $mobile-breakpoint) {
       font-size: 2.5rem;
@@ -26,7 +27,7 @@
 
   .sectionSubtitle {
     font-size: 1.25rem;
-    color: var(--purple-800);
+    color: rgb(255 255 255 / 0.88);
     margin-bottom: 2.5rem;
     max-width: 40rem;
     margin-inline: auto;

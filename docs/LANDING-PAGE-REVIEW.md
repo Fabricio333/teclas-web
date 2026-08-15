@@ -195,3 +195,16 @@ is applied and in the tree; none of it altered a rendered string.
   (`white-space: nowrap` against a fixed 1.75rem); the footer's social hover was
   yellow-on-green at 1.4:1; `Inscription` was marked `'use client'` without
   needing to be.
+
+## FAQ pendientes
+
+- ¿Las clases son individuales o grupales?
+- ¿Las clases son presenciales?
+- ¿Cuánto dura cada clase?
+- ¿Cuál es el valor de las clases?
+- ¿Se puede hacer una clase de prueba?
+- ¿Qué días y horarios están disponibles?
+- ¿Preparan alumnos para exámenes de conservatorio?
+- ¿Los adultos pueden empezar desde cero?
+- ¿Qué contenidos se trabajan en las clases?
+- ¿Cómo puedo inscribirme?

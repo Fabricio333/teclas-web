@@ -14,6 +14,16 @@ export const faqItems: FaqItem[] = [
     description:
       'Generalmente ofrecemos una clase semanal de una hora, aunque podemos adaptarnos a otras necesidades.',
   },
+  {
+    title: '¿Desde qué edad se puede empezar?',
+    description:
+      'Las clases están pensadas para chicos desde los 4 años, jóvenes y adultos.',
+  },
+  {
+    title: '¿Necesito tener piano o teclado en casa?',
+    description:
+      'No es indispensable para comenzar. Podemos orientarte sobre las opciones más adecuadas para practicar en casa.',
+  },
 ];
 
 export const faqJsonLd = {

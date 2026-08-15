@@ -5,7 +5,7 @@ import styles from './Philosophy.module.scss';
 export default function Philosophy() {
   return (
     <section className={styles.philosophy} id="philosophy">
-      <AmbientNotes density="dense" tone="light" />
+      <AmbientNotes density="dense" tone="plum" />
       <div className={`container ${styles.inner}`}>
         <Reveal className={styles.textCenter}>
           <h2 className={styles.sectionTitle}>
