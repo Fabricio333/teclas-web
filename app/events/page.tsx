@@ -1,5 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import AmbientNotes from '@/components/AmbientNotes';
+import Reveal from '@/components/Reveal';
 import {
   pastEvents,
   upcomingEvents,
@@ -72,6 +74,7 @@ function EventCard({ event }: { event: TeclasEvent }) {
 export default function EventsPage() {
   return (
     <section className={styles.eventsSection}>
+      <AmbientNotes density="sparse" tone="brand" />
       {/*
         Previously this schema was returned from `export function Head()`, which
         the App Router ignores entirely — so the Event JSON-LD never reached the
@@ -85,20 +88,36 @@ export default function EventsPage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(event.jsonLd) }}
         />
       ))}
-      <div className="container">
-        <h1 className={styles.title}>Próximos Eventos</h1>
+      <div className={`container ${styles.inner}`}>
+        {/*
+          This page arrived flat: no <Reveal>, no <AmbientNotes>, while every
+          landing band and the other pages have both. Cards reveal on scroll and
+          stagger, so a list of three does not land all at once — the same
+          treatment the feature cards on the landing page get. <Reveal> wraps
+          each card rather than being it: both define their own `transition`,
+          and whichever stylesheet loaded last would win the shorthand.
+        */}
+        <Reveal as="h1" className={styles.title}>
+          Próximos Eventos
+        </Reveal>
         <div className={styles.eventList}>
-          {upcomingEvents.map((event) => (
-            <EventCard key={event.slug} event={event} />
+          {upcomingEvents.map((event, index) => (
+            <Reveal key={event.slug} delay={index * 110}>
+              <EventCard event={event} />
+            </Reveal>
           ))}
         </div>
 
         {pastEvents.length > 0 && (
           <>
-            <h2 className={styles.pastTitle}>Eventos Anteriores</h2>
+            <Reveal as="h2" className={styles.pastTitle}>
+              Eventos Anteriores
+            </Reveal>
             <div className={styles.eventList}>
-              {pastEvents.map((event) => (
-                <EventCard key={event.slug} event={event} />
+              {pastEvents.map((event, index) => (
+                <Reveal key={event.slug} delay={index * 110}>
+                  <EventCard event={event} />
+                </Reveal>
               ))}
             </div>
           </>

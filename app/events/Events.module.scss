@@ -1,9 +1,21 @@
 @use '../../styles/variables' as *;
 @use '../../styles/components' as *;
 
+// `position: relative` and `overflow: hidden` are what <AmbientNotes> needs to
+// size and clip its drifting glyphs; `isolation` keeps the layer from painting
+// over anything outside this section.
 .eventsSection {
   @extend .sectionPadding;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: calc(100dvh - var(--header-height));
+}
+
+// Above the ambient layer, which is otherwise painted over the cards.
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
 .title {
