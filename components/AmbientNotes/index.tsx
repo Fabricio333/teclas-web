@@ -255,6 +255,142 @@ const SHAPES: Shape[] = [
     opacity: 0.26,
     rotate: -12,
   },
+  {
+    x: 3,
+    y: 88,
+    kind: 'sparkle',
+    size: 1.8,
+    float: 21,
+    wander: 26,
+    amplitude: 24,
+    delay: -21,
+    opacity: 0.36,
+    rotate: 16,
+  },
+  {
+    x: 30,
+    y: 60,
+    kind: 'note',
+    size: 1.5,
+    float: 16,
+    wander: 31,
+    amplitude: 20,
+    delay: -23,
+    opacity: 0.3,
+    rotate: -14,
+  },
+  {
+    x: 41,
+    y: 34,
+    kind: 'ring',
+    size: 1.1,
+    float: 27,
+    wander: 15,
+    amplitude: 30,
+    delay: -25,
+    opacity: 0.24,
+    rotate: 0,
+  },
+  {
+    x: 63,
+    y: 66,
+    kind: 'wave',
+    size: 2.7,
+    float: 18,
+    wander: 33,
+    amplitude: 26,
+    delay: -27,
+    opacity: 0.22,
+    rotate: 7,
+  },
+  {
+    x: 75,
+    y: 10,
+    kind: 'dot',
+    size: 0.75,
+    float: 23,
+    wander: 17,
+    amplitude: 32,
+    delay: -29,
+    opacity: 0.32,
+    rotate: 0,
+  },
+  {
+    x: 96,
+    y: 34,
+    kind: 'sparkle',
+    size: 1.3,
+    float: 14,
+    wander: 29,
+    amplitude: 18,
+    delay: -31,
+    opacity: 0.4,
+    rotate: -18,
+  },
+  {
+    x: 19,
+    y: 24,
+    kind: 'whole',
+    size: 1.6,
+    float: 25,
+    wander: 21,
+    amplitude: 28,
+    delay: -33,
+    opacity: 0.28,
+    rotate: 11,
+  },
+  {
+    x: 54,
+    y: 78,
+    kind: 'beam',
+    size: 2.5,
+    float: 20,
+    wander: 24,
+    amplitude: 22,
+    delay: -35,
+    opacity: 0.26,
+    rotate: -9,
+  },
+  {
+    x: 86,
+    y: 54,
+    kind: 'note',
+    size: 1.9,
+    float: 28,
+    wander: 19,
+    amplitude: 34,
+    delay: -37,
+    opacity: 0.34,
+    rotate: 18,
+  },
+  {
+    x: 9,
+    y: 4,
+    kind: 'dot',
+    size: 0.65,
+    float: 15,
+    wander: 32,
+    amplitude: 24,
+    delay: -39,
+    opacity: 0.26,
+    rotate: 0,
+  },
+];
+
+// On the white and near-white bands the field used to be a single flat green,
+// which read as a watermark. Each glyph now takes its own hue from the brand
+// ramp — the same colours as the artwork the site is built around. Assigned by
+// index, so the sequence is stable between the server render and the client.
+const CONFETTI = [
+  'var(--green-500)',
+  'var(--purple-500)',
+  'var(--pink-500)',
+  // The deep ends of the sky and yellow ramps: at these opacities the 500s are
+  // so pale on white that the glyph reads as a smudge rather than a colour.
+  'var(--sky-700)',
+  'var(--orange-500)',
+  'var(--yellow-600)',
+  'var(--blue-500)',
 ];
 
 // Tuning knobs for the whole field, applied to every shape's authored values.
@@ -263,8 +399,8 @@ const MOTION_SPEEDUP = 0.55;
 const MOTION_TRAVEL = 1.9;
 
 const DENSITY_COUNT: Record<AmbientDensity, number> = {
-  sparse: 8,
-  normal: 13,
+  sparse: 13,
+  normal: 20,
   dense: SHAPES.length,
 };
 
@@ -411,6 +547,9 @@ export default function AmbientNotes({
   tone = 'light',
 }: AmbientNotesProps) {
   const shapes = SHAPES.slice(0, DENSITY_COUNT[density]);
+  // Only the pale surfaces get the multicoloured treatment. On the blue and
+  // plum bands the single-ink tones still read best against the fill.
+  const confetti = tone === 'brand';
 
   return (
     <div
@@ -427,6 +566,9 @@ export default function AmbientNotes({
             left: `${shape.x}%`,
             top: `${shape.y}%`,
             width: `${shape.size}rem`,
+            // The glyphs paint with `currentColor`, so setting it here is all
+            // it takes to give each one its own hue.
+            ...(confetti ? { color: CONFETTI[index % CONFETTI.length] } : null),
             // The authored periods (13-30s) and amplitudes (16-34px) were slow
             // enough that the field read as a static decal. Everything below is
             // scaled off the same authored values so the relative variation

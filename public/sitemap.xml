@@ -14,6 +14,14 @@
     <loc>https://teclasciudadjardin.com.ar/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <!--
+      The instructor portrait, listed here because this is the page that shows
+      it: the media kit that used to carry the site's images is noindex now, and
+      an image is only indexed through a page a crawler is allowed to read.
+    -->
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/roxana.webp</image:loc>
+    </image:image>
   </url>
   <url>
     <loc>https://teclasciudadjardin.com.ar/events</loc>
@@ -39,6 +47,17 @@
     <priority>0.7</priority>
     <image:image>
       <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg</image:loc>
+    </image:image>
+    <!--
+      Both flyers moved here from the media-kit entry. They are shown on this
+      page, which is where they belong: a flyer found in Google Images should
+      land someone on the event it advertises, not on a press-assets page.
+    -->
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-post.png</image:loc>
+    </image:image>
+    <image:image>
+      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-stories.png</image:loc>
     </image:image>
   </url>
   <url>
@@ -210,21 +229,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-  <url>
-    <loc>https://teclasciudadjardin.com.ar/media-kit</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-    <image:image>
-      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-post.png</image:loc>
-    </image:image>
-    <image:image>
-      <image:loc>https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-stories.png</image:loc>
-    </image:image>
-    <image:image>
-      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027-flyer-post.png</image:loc>
-    </image:image>
-    <image:image>
-      <image:loc>https://teclasciudadjardin.com.ar/events/colonia-verano-2027-flyer-stories.png</image:loc>
-    </image:image>
-  </url>
+  <!--
+    /media-kit is deliberately absent. It is noindex now, and a sitemap is a
+    request to index: listing a noindexed URL asks Google for two contradictory
+    things. Its images were not dropped — they moved to the pages that show
+    them, the flyers to their own event entries above.
+  -->
 </urlset>

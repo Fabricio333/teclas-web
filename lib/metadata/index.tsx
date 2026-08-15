@@ -241,8 +241,15 @@ export const calibracionMetadata: Metadata = {
 /**
  * New page — added, not altered, per the SEO rule in CLAUDE.md.
  *
- * Indexable on purpose: a media kit exists to be found by journalists and
- * partners searching for the school's assets.
+ * Noindex at the site owner's request. It stays reachable and its assets stay
+ * downloadable for anyone given the link; it just should not compete in search
+ * with the pages meant to be found. `follow` is kept so the links out of it are
+ * still crawled, and the images it used to carry into the index are now listed
+ * in the sitemap against the pages that actually show them — the portrait on
+ * the landing page, each flyer on its own event page.
+ *
+ * It is also removed from sitemap.xml: listing a noindexed URL there asks
+ * Google to index and not index the same page.
  */
 export const mediaKitMetadata: Metadata = {
   title: 'Media kit | TECLAS Ciudad Jardín',
@@ -252,7 +259,7 @@ export const mediaKitMetadata: Metadata = {
     canonical: 'https://teclasciudadjardin.com.ar/media-kit',
   },
   robots: {
-    index: true,
+    index: false,
     follow: true,
   },
   openGraph: {
