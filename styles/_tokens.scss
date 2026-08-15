@@ -123,6 +123,10 @@
   --neutral-950: #0e121c;
 
   --blue-rgb: 65 92 169;
+  // --blue-900, for shadows cast on the blue bands: a glow tinted with the
+  // surface's own darkest value reads as depth, where a foreign hue reads as a
+  // coloured smear around the element.
+  --blue-deep-rgb: 20 29 54;
   --green-rgb: 165 206 57;
   --green-deep-rgb: 53 69 15;
   --white-rgb: 255 255 255;

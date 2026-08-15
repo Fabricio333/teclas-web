@@ -234,20 +234,24 @@ button {
 
 // For use on the dark coloured bands, where any filled colour loses contrast
 // against the background. Solid white, deep-green label: 15.5:1.
+//
+// The glow is tinted with --blue-deep-rgb, not the olive --green-deep-rgb it
+// used to use: this button only ever sits on the blue band, and an olive halo
+// on blue read as an odd discoloured pill around it rather than as a shadow.
 .btnLight {
   @extend .btn;
   background-color: var(--neutral-0);
   color: var(--green-900);
   border-color: rgb(255 255 255 / 0.9);
   box-shadow:
-    0 6px 16px rgb(var(--green-deep-rgb) / 0.34),
-    0 18px 40px rgb(var(--green-deep-rgb) / 0.28);
+    0 6px 16px rgb(var(--blue-deep-rgb) / 0.34),
+    0 18px 40px rgb(var(--blue-deep-rgb) / 0.28);
 
   &:hover {
     color: var(--green-800);
     box-shadow:
-      0 10px 22px rgb(var(--green-deep-rgb) / 0.42),
-      0 26px 56px rgb(var(--green-deep-rgb) / 0.34);
+      0 10px 22px rgb(var(--blue-deep-rgb) / 0.42),
+      0 26px 56px rgb(var(--blue-deep-rgb) / 0.34);
   }
 }
 
