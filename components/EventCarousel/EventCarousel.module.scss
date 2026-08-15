@@ -58,6 +58,18 @@
 .track {
   display: flex;
   will-change: transform;
+  // Vertical gestures keep scrolling the page; horizontal ones are ours, so the
+  // browser stops cancelling the pointer stream mid-drag on touch devices.
+  touch-action: pan-y;
+  // Without this a drag starting on a card selects its text or begins a native
+  // image drag, which kills the pointer capture halfway through the gesture.
+  user-select: none;
+  -webkit-user-select: none;
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
 }
 
 // One card per viewport on mobile. From tablet up the cards are wide enough
@@ -65,7 +77,6 @@
 // overflow — the "peek" that signals there is more to drag to.
 .slide {
   flex: 0 0 100%;
-  scroll-snap-align: start;
   padding-block: 1.5rem;
 
   @media (min-width: 560px) {
@@ -162,6 +173,8 @@
   font-weight: 700;
 }
 
+// Always visible, on every viewport, vertically centred inside the carousel so
+// no part of the circle can fall outside the clipped area.
 .control {
   position: absolute;
   top: 50%;
@@ -177,23 +190,22 @@
   box-shadow: var(--shadow-md);
   cursor: pointer;
   transform: translateY(-50%);
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out);
 
   &:hover {
     background: var(--purple-900);
     color: white;
   }
-
-  @media (min-width: $mobile-breakpoint) {
-    display: none;
-  }
 }
 
 .previous {
-  left: 0;
+  left: 0.5rem;
 }
 
 .next {
-  right: 0;
+  right: 0.5rem;
 }
 
 .dots {
@@ -234,24 +246,6 @@
 }
 
 @media (max-width: 767.98px) {
-  .control {
-    top: auto;
-    bottom: 1rem;
-    transform: none;
-  }
-
-  .previous {
-    left: 1rem;
-  }
-
-  .next {
-    right: 1rem;
-  }
-
-  .content {
-    padding-bottom: 5.5rem;
-  }
-
   .slide {
     // Full-width cards on phones: one per screen.
     flex-basis: 100%;

@@ -42,8 +42,18 @@ export default function EventCarousel() {
     pointerId: number;
     startX: number;
     startPos: number;
+    // Offset in cards from `startPos`, kept here instead of read back out of
+    // the style string so the snap can never disagree with what is on screen.
+    offset: number;
     moved: boolean;
   } | null>(null);
+  // Wheel gestures arrive as a burst of events; they are accumulated and only
+  // turned into a move once they add up to a card, then locked out until the
+  // slide transition ends. Otherwise a single trackpad swipe restarts the
+  // animation every frame and the track shakes in place.
+  const wheelRef = useRef({ delta: 0, lockedUntilMove: false });
+  const wheelIdleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressClickRef = useRef(false);
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -134,11 +144,25 @@ export default function EventCarousel() {
   // ------------------------------- drag and wheel
 
   const onPointerDown = (e: React.PointerEvent<HTMLUListElement>) => {
+    const track = trackRef.current;
+    const s = step();
+    if (!track || !s) return;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    suppressClickRef.current = false;
+
+    // Grab the position that is on screen right now, not the target of a
+    // transition still in flight, and freeze it there — otherwise the first
+    // pointermove teleports the track to that pending target.
+    const matrix = new DOMMatrixReadOnly(getComputedStyle(track).transform);
+    const startPos = -matrix.m41 / s;
+    track.style.transition = 'none';
+    track.style.transform = `translate3d(${matrix.m41}px, 0, 0)`;
+
     dragRef.current = {
       pointerId: e.pointerId,
       startX: e.clientX,
-      startPos: posRef.current,
+      startPos,
+      offset: 0,
       moved: false,
     };
     stopAutoplay();
@@ -150,7 +174,8 @@ export default function EventCarousel() {
     const s = step();
     if (!drag || drag.pointerId !== e.pointerId || !track || !s) return;
     const diff = (e.clientX - drag.startX) / s;
-    if (Math.abs(diff) > 0.05) drag.moved = true;
+    drag.offset = diff;
+    if (Math.abs(e.clientX - drag.startX) > 4) drag.moved = true;
     // Direct transform during the drag: transitions off so it never lags the
     // pointer, and off-copy positions are allowed (the wrap is re-based at
     // release).
@@ -161,22 +186,50 @@ export default function EventCarousel() {
   const endDrag = () => {
     const drag = dragRef.current;
     dragRef.current = null;
-    const track = trackRef.current;
-    const s = step();
-    if (!drag || !drag.moved || !track || !s) return;
-    // Snap to the nearest card and re-base the position into a drawn copy.
-    const px = posRef.current * s - parseFloat(track.style.transform.slice(12));
-    let target = Math.round(px / s);
+    if (!drag) return;
+    if (!drag.moved) {
+      // A tap froze an in-flight transition; let it finish to its target.
+      render(posRef.current, true);
+      startAutoplay();
+      return;
+    }
+    // A drag that ends on a card must not also open it.
+    suppressClickRef.current = true;
+    // Snap to the nearest card from where the drag actually left the track,
+    // then re-base into a drawn copy.
+    let target = Math.round(drag.startPos + drag.offset);
     while (target > high) target -= count;
     while (target < low) target += count;
     render(target, true);
     setCurrent(normalize(target, count));
+    startAutoplay();
   };
 
   const onWheel = (e: React.WheelEvent<HTMLUListElement>) => {
+    // Vertical intent belongs to the page.
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
     stopAutoplay();
-    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // page scrolls
-    move(e.deltaX > 0 ? 1 : -1);
+
+    const wheel = wheelRef.current;
+    if (!wheel.lockedUntilMove) {
+      wheel.delta += e.deltaX;
+      const threshold = step() * 0.35 || 60;
+      if (Math.abs(wheel.delta) >= threshold) {
+        move(wheel.delta > 0 ? 1 : -1);
+        wheel.delta = 0;
+        wheel.lockedUntilMove = true;
+      }
+    }
+
+    // The burst ends when the events stop arriving: release the lock, drop any
+    // leftover delta so the tail of the gesture cannot kick a second slide, and
+    // hand autoplay back.
+    if (wheelIdleRef.current) clearTimeout(wheelIdleRef.current);
+    wheelIdleRef.current = setTimeout(() => {
+      wheelRef.current.delta = 0;
+      wheelRef.current.lockedUntilMove = false;
+      startAutoplay();
+    }, 220);
   };
 
   useEffect(() => {
@@ -190,6 +243,13 @@ export default function EventCarousel() {
     startAutoplay();
     return stopAutoplay;
   }, [startAutoplay, stopAutoplay]);
+
+  useEffect(
+    () => () => {
+      if (wheelIdleRef.current) clearTimeout(wheelIdleRef.current);
+    },
+    [],
+  );
 
   // Repaint whenever the track geometry could differ (resize, fonts, images
   // loading) so the virtual position never drifts from the rendered pixels.
@@ -249,6 +309,12 @@ export default function EventCarousel() {
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
             onWheel={onWheel}
+            onClickCapture={(e) => {
+              if (!suppressClickRef.current) return;
+              suppressClickRef.current = false;
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             {slides.map((event, index) => {
               const logical = index % count;
