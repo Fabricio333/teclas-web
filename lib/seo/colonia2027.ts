@@ -12,6 +12,10 @@ export const colonia2027JsonLd = {
   name: 'Colonia de Verano 2027',
   url: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2027',
   startDate: '2027-01-04T09:00:00-03:00',
+  // Recommended by Google and previously absent. The exact dates are still
+  // pending, so this mirrors the 2026 edition's shape: a season ending on the
+  // last Friday of February, at the same 13:00 close.
+  endDate: '2027-02-26T13:00:00-03:00',
   eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
   eventStatus: 'https://schema.org/EventScheduled',
   location: {
@@ -31,6 +35,11 @@ export const colonia2027JsonLd = {
     name: 'TECLAS',
     url: 'https://teclasciudadjardin.com.ar',
   },
+  // A camp run by the school itself, so the school is what performs.
+  performer: {
+    '@type': 'Organization',
+    name: 'TECLAS',
+  },
   image: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2026.jpg',
   description:
     'Colonia de verano en TECLAS Ciudad Jardín: música, juegos y tiempo al aire libre para chicos y jóvenes. Fechas a confirmar.',
@@ -40,6 +49,8 @@ export const colonia2027JsonLd = {
     price: '0',
     priceCurrency: 'ARS',
     availability: 'https://schema.org/InStock',
+    // When the offer went public: the day this page shipped.
+    validFrom: '2026-08-15T00:00:00-03:00',
   },
 };
 

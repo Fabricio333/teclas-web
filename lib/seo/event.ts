@@ -15,7 +15,13 @@ export const eventJsonLd = {
   '@type': 'Event',
   name: 'Clase abierta de piano: series, pelis y juegos',
   url: 'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos',
-  startDate: '2026-08-29T17:00',
+  // The offset was missing: without it Google reads the hour as UTC and the
+  // rich result showed the class two hours early for anyone outside Argentina.
+  startDate: '2026-08-29T17:00:00-03:00',
+  // Recommended by Google and previously absent. The school has not published a
+  // finish time for this one, so it mirrors the two hours its other clase
+  // abierta ran for (see pastEvent.ts) — worth confirming with them.
+  endDate: '2026-08-29T19:00:00-03:00',
   eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
   eventStatus: 'https://schema.org/EventScheduled',
   location: {
@@ -35,6 +41,12 @@ export const eventJsonLd = {
     name: 'TECLAS',
     url: 'https://teclasciudadjardin.com.ar',
   },
+  // Who is actually on stage, per the page's own copy: "niños y jóvenes de
+  // TECLAS interpretarán música de series, películas y videojuegos".
+  performer: {
+    '@type': 'PerformingGroup',
+    name: 'Alumnos de TECLAS',
+  },
   image: [
     'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos.jpg',
     'https://teclasciudadjardin.com.ar/events/clase-abierta-piano-series-pelis-juegos-flyer-post.png',
@@ -48,6 +60,9 @@ export const eventJsonLd = {
     price: '5000',
     priceCurrency: 'ARS',
     availability: 'https://schema.org/InStock',
+    // When the offer became publicly available: the day this event page first
+    // shipped. Google flags a missing validFrom on every Offer.
+    validFrom: '2025-06-30T00:00:00-03:00',
   },
 };
 export default eventJsonLd;

@@ -60,11 +60,31 @@ export const metadata: Metadata = {
     description:
       'Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.',
     siteName: 'TECLAS',
+    /**
+     * /teclas.jpg is 5768x4094 and 3.4 MB. WhatsApp drops any og:image over
+     * roughly 300 KB, so every link to this site shared there rendered with no
+     * picture. This is the same artwork at the 1200x630 the platforms crop to,
+     * and 116 KB. Dimensions and type are declared because scrapers that will
+     * not download the file use them to choose a large card over a thumbnail.
+     */
     images: [
       {
-        url: '/teclas.jpg',
+        url: '/og-teclas.jpg',
+        width: 1200,
+        height: 630,
+        type: 'image/jpeg',
+        alt: 'TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires',
       },
     ],
+  },
+  /**
+   * There was no Twitter card at all, so X rendered links with whatever it
+   * could infer. `summary_large_image` with the same picture and no new copy —
+   * the title and description resolve from the ones above.
+   */
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/og-teclas.jpg'],
   },
 };
 

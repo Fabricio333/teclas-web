@@ -1,5 +1,25 @@
 import type { Metadata } from 'next';
 
+/**
+ * The shared link-preview image.
+ *
+ * Every page used to point at /teclas.jpg, which is 5768x4094 and 3.4 MB.
+ * WhatsApp drops any og:image over roughly 300 KB, so links to this site
+ * shared there rendered with no picture at all. /og-teclas.jpg is the same
+ * artwork at the 1200x630 the platforms actually crop to, and 116 KB.
+ *
+ * The dimensions and type are declared because scrapers that will not download
+ * the file — WhatsApp among them — use them to decide whether to lay the card
+ * out large or as a thumbnail. No title, description or URL changed.
+ */
+const OG_IMAGE = {
+  url: '/og-teclas.jpg',
+  width: 1200,
+  height: 630,
+  type: 'image/jpeg',
+  alt: 'TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires',
+};
+
 export const homeMetadata: Metadata = {
   title: 'TECLAS - Clases de Piano en Ciudad Jardín, Buenos Aires',
   description:
@@ -18,11 +38,7 @@ export const homeMetadata: Metadata = {
     description:
       'Clases de piano personalizadas en Ciudad Jardín, Buenos Aires. Domina el arte del piano con clases presenciales adaptadas a vos.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -44,11 +60,7 @@ export const eventsMetadata: Metadata = {
     description:
       'Próximos eventos y talleres de piano en Ciudad Jardín, Buenos Aires.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -70,11 +82,7 @@ export const faqMetadata: Metadata = {
     description:
       'Respuestas a las dudas más comunes sobre nuestras clases de piano en Ciudad Jardín, Buenos Aires.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -94,11 +102,7 @@ export const resourcesMetadata: Metadata = {
     title: 'Recursos de Aprendizaje | TECLAS Ciudad Jardín',
     description: 'Material de aprendizaje para mejorar tu práctica de piano.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -120,11 +124,7 @@ export const pianoPlayerMetadata: Metadata = {
     description:
       'Aplicación interactiva para aprender piano online. Seguí las notas en la partitura y tocá canciones clásicas usando tu teclado o haciendo clic en las teclas del piano.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -146,11 +146,7 @@ export const earTrainingMetadata: Metadata = {
     description:
       'Entrená tu oído musical identificando notas en el piano. Escuchá, reconocé y mejorá tu percepción auditiva con ejercicios interactivos.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -182,11 +178,7 @@ export const earTrainingEncontraLaNotaMetadata: Metadata = {
     description:
       'Escuchá una nota y encontrala en el piano. Cinco niveles, de Do Re Mi a dos octavas, para jugar con el mouse, el teclado, un MIDI o tu propio piano.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -208,11 +200,7 @@ export const earTrainingSimonMetadata: Metadata = {
     description:
       'La app toca una secuencia de notas y vos la repetís en el piano. Un juego de oído y memoria con las siete notas de la octava, sin saber música.',
     siteName: 'TECLAS',
-    images: [
-      {
-        url: '/teclas.jpg',
-      },
-    ],
+    images: [OG_IMAGE],
   },
 };
 
@@ -274,7 +262,7 @@ export const mediaKitMetadata: Metadata = {
     description:
       'Logo, colores, tipografías, fotos y textos de TECLAS Ciudad Jardín para prensa, notas y colaboraciones.',
     siteName: 'TECLAS',
-    images: [{ url: '/teclas.jpg' }],
+    images: [OG_IMAGE],
   },
 };
 

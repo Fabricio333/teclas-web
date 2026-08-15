@@ -32,6 +32,10 @@ export const pastEventJsonLd = {
     name: 'TECLAS',
     url: 'https://teclasciudadjardin.com.ar',
   },
+  performer: {
+    '@type': 'Person',
+    name: 'Roxana Arena',
+  },
   image:
     'https://teclasciudadjardin.com.ar/events/taller-piano-adultos-principiantes.jpg',
   description:
@@ -42,6 +46,8 @@ export const pastEventJsonLd = {
     price: '5000',
     priceCurrency: 'ARS',
     availability: 'https://schema.org/SoldOut',
+    // When the offer went public: the day this page shipped.
+    validFrom: '2026-08-02T00:00:00-03:00',
     validThrough: '2026-06-20T16:00:00-03:00',
   },
 };

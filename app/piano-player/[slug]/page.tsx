@@ -53,7 +53,16 @@ export async function generateMetadata({
       title,
       description,
       siteName: 'TECLAS',
-      images: [{ url: '/teclas.jpg' }],
+      // The 1200x630 preview, not the 3.4 MB original: WhatsApp drops any
+      // og:image over roughly 300 KB and renders the card with no picture.
+      images: [
+        {
+          url: '/og-teclas.jpg',
+          width: 1200,
+          height: 630,
+          type: 'image/jpeg',
+        },
+      ],
     },
   };
 }

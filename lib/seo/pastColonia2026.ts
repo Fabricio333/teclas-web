@@ -29,6 +29,10 @@ export const pastColonia2026JsonLd = {
     name: 'TECLAS',
     url: 'https://teclasciudadjardin.com.ar',
   },
+  performer: {
+    '@type': 'Organization',
+    name: 'TECLAS',
+  },
   image: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2026.jpg',
   description:
     'Colonia de verano en TECLAS Ciudad Jardín: música, juegos y tiempo al aire libre para chicos y jóvenes.',
@@ -38,6 +42,8 @@ export const pastColonia2026JsonLd = {
     price: '0',
     priceCurrency: 'ARS',
     availability: 'https://schema.org/SoldOut',
+    // When the offer went public: the day this page shipped.
+    validFrom: '2026-08-15T00:00:00-03:00',
     validThrough: '2026-02-27T13:00:00-03:00',
   },
 };
