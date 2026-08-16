@@ -399,7 +399,7 @@ const MOTION_SPEEDUP = 0.55;
 const MOTION_TRAVEL = 1.9;
 
 const DENSITY_COUNT: Record<AmbientDensity, number> = {
-  sparse: 13,
+  sparse: 16,
   normal: 20,
   dense: SHAPES.length,
 };

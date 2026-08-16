@@ -3,9 +3,17 @@
 @use '../../../styles/components' as *;
 
 .eventDetail {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   padding-bottom: var(--space-section);
   min-height: calc(100dvh - var(--header-height));
   animation: event-enter var(--dur-slow) var(--ease-out) both;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes event-enter {
@@ -22,6 +30,8 @@
 }
 
 .banner {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-height: 420px;
   overflow: hidden;

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import AmbientNotes from '@/components/AmbientNotes';
 import { events, getEventBySlug, whatsappUrl } from '@/lib/events';
 import { flyerPath } from '@/lib/flyer';
 import styles from './EventDetail.module.scss';
@@ -57,6 +58,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(event.jsonLd) }}
       />
+      <AmbientNotes density="normal" tone="brand" />
 
       <div className={styles.banner}>
         <Image
@@ -71,7 +73,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         />
       </div>
 
-      <div className="container">
+      <div className={['container', styles.inner].join(' ')}>
         <header className={styles.header}>
           <span
             className={`${styles.badge} ${isPast ? styles.badgePast : styles.badgeUpcoming}`}
