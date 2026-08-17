@@ -699,6 +699,35 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
       };
 
       /*
+       * Lights the arrow that leads to the note being asked for.
+       *
+       * The keyboard only reaches one octave at a time, so a note outside it
+       * cannot be played until the window moves — and until now nothing said
+       * so. The student saw an outlined key that did not respond and no reason
+       * why. It matters most in fullscreen, where three octaves are drawn and
+       * the automatic shift is deliberately suppressed: the note is right
+       * there on screen, and still out of reach of the computer keyboard.
+       */
+      const updateOctaveArrows = () => {
+        const down = document.getElementById('qwerty-octave-down');
+        const up = document.getElementById('qwerty-octave-up');
+        if (!down || !up) return;
+
+        down.classList.remove(styles.octaveBtnWanted);
+        up.classList.remove(styles.octaveBtnWanted);
+        if (pos >= SONG.length) return;
+
+        // Only the middle octave answers the computer keyboard, whatever is
+        // drawn — so this compares against the playable window, not the
+        // visible one.
+        const target = SONG[pos];
+        if (target < 60 + midiOffset)
+          down.classList.add(styles.octaveBtnWanted);
+        else if (target > 71 + midiOffset)
+          up.classList.add(styles.octaveBtnWanted);
+      };
+
+      /*
        * Says that the octave moved.
        *
        * In normal size the piano always draws Do4-Si4; shifting the octave
@@ -1236,6 +1265,8 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         const expected = SONG[pos];
         const expectedEl = keyEl(expected);
         if (expectedEl) expectedEl.classList.add(keys.hint);
+
+        updateOctaveArrows();
 
         // progress bar
         const progress = document.getElementById('progress');

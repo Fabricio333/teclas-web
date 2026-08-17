@@ -356,6 +356,39 @@
   }
 }
 
+/*
+ * "The note you need is this way."
+ *
+ * Amber, the colour the key being asked for already wears, because it means
+ * the same thing — this is where to go next. Only ever on one side at a time,
+ * so there is nothing to choose between.
+ */
+.octaveBtnWanted {
+  border-color: rgba(245, 158, 11, 0.85);
+  background: rgba(245, 158, 11, 0.22);
+  color: #fde68a;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: octaveWanted 1.6s var(--ease-in-out) infinite;
+  }
+
+  &:hover {
+    background: rgba(245, 158, 11, 0.34);
+    border-color: rgb(245, 158, 11);
+    color: #fff;
+  }
+}
+
+@keyframes octaveWanted {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.2);
+  }
+}
+
 // Wide enough for the longest range label ("Do3-Si3"), so the arrows either
 // side hold still as the octave changes.
 .qwertyWindow {
