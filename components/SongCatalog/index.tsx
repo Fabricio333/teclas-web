@@ -133,6 +133,9 @@ export function SongCard({
       }}
     >
       <span className={styles.cardName}>{level.name}</span>
+      {/* All on one line under the name. "Sonando ahora" used to be pinned to
+          the card's top-right corner, where on a narrow card it landed on top
+          of the title. */}
       <span className={styles.cardMeta}>
         <span
           aria-label={`Nivel ${level.difficulty}`}
@@ -141,14 +144,21 @@ export function SongCard({
           {stars(level.difficulty)}
         </span>
         <span>{level.notes.length} notas</span>
+        {hydrated && earned > 0 && (
+          <span
+            className={styles.cardEarned}
+            title={`${earned} de 3 estrellas`}
+          >
+            {'★'.repeat(earned)}
+            <span className={styles.cardEarnedDim}>
+              {'★'.repeat(3 - earned)}
+            </span>
+          </span>
+        )}
+        {current && (
+          <span className={styles.cardCurrentTag}>Sonando ahora</span>
+        )}
       </span>
-      {hydrated && earned > 0 && (
-        <span className={styles.cardEarned} title={`${earned} de 3 estrellas`}>
-          {'★'.repeat(earned)}
-          <span className={styles.cardEarnedDim}>{'★'.repeat(3 - earned)}</span>
-        </span>
-      )}
-      {current && <span className={styles.cardCurrentTag}>Sonando ahora</span>}
     </Link>
   );
 }

@@ -81,8 +81,20 @@ export default async function SongPage({ params }: SongPageProps) {
         }}
       />
       <LearnOnboarding />
-      <SongIntro level={level} />
+      {/*
+        The player first, then what the page has to say about the song.
+
+        The prose used to sit on top, so opening a song page meant scrolling
+        past a heading, two paragraphs and a fact list before reaching the
+        instrument — on a laptop the staff started below the fold. Someone who
+        followed a link here came to play; the writing is what they read once
+        they have, so it now sits under the piano and above the other songs.
+
+        Nothing about it changed but its position: same heading, same copy,
+        same facts, same links, same metadata and JSON-LD.
+      */}
       <PianoPlayer initialLevelId={level.id} />
+      <SongIntro level={level} />
       <SongLinks currentId={level.id} />
     </>
   );

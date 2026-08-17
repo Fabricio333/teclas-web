@@ -411,8 +411,12 @@
   .piano {
     // A whole octave has to fit a phone, so the instrument shrinks rather than
     // overflowing. Everything derived from these follows automatically.
-    --key-w: 40px;
-    --black-w: 28px;
+    //
+    // A surface that puts something else on the same row — the piano player
+    // has an octave arrow either side of the keys — can take the keys down
+    // further by setting these on any ancestor.
+    --key-w: var(--key-w-mobile, 40px);
+    --black-w: var(--black-w-mobile, 28px);
     height: 150px;
     transform-origin: top center;
   }

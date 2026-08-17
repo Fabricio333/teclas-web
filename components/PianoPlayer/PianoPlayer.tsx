@@ -56,8 +56,8 @@ import {
   faMicrophoneSlash,
   faExpand,
   faCompress,
-  faChevronDown,
-  faChevronUp,
+  faChevronLeft,
+  faChevronRight,
   faGear,
   faRotateLeft,
   faSliders,
@@ -1435,12 +1435,15 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
       keydownListener = (e) => {
         if (e.repeat) return;
         const key = e.key.toLowerCase();
-        if (key === 'z') {
+        // The arrow keys move the octave, matching the arrows either side of
+        // the on-screen piano. Z and X still work — they were the only way to
+        // do this for a long time — but nothing tells you about them any more.
+        if (e.key === 'ArrowLeft' || key === 'z') {
           e.preventDefault();
           shiftQwertyOctave(-1);
           return;
         }
-        if (key === 'x') {
+        if (e.key === 'ArrowRight' || key === 'x') {
           e.preventDefault();
           shiftQwertyOctave(1);
           return;
@@ -1986,32 +1989,13 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
           >
             {getMidiStatusLabel(midiStatus)}
           </span>
-          {/* Which octave the computer keyboard plays. It used to be labelled
-              "QWERTY" with a Z and an X button, which named the shortcut keys
-              rather than saying what pressing them does. */}
+          {/* Which octave the computer keyboard plays. The arrows that change
+              it live either side of the piano itself; this is just the readout. */}
           <span className={styles.qwertyControls}>
             <span className={styles.qwertyLabel}>Octava</span>
-            <button
-              id="qwerty-octave-down"
-              type="button"
-              className={styles.octaveBtn}
-              aria-label="Bajar una octava"
-              title="Bajar una octava (tecla Z)"
-            >
-              <FontAwesomeIcon icon={faChevronDown} />
-            </button>
             <span id="qwerty-window" className={styles.qwertyWindow}>
               Do4-Si4
             </span>
-            <button
-              id="qwerty-octave-up"
-              type="button"
-              className={styles.octaveBtn}
-              aria-label="Subir una octava"
-              title="Subir una octava (tecla X)"
-            >
-              <FontAwesomeIcon icon={faChevronUp} />
-            </button>
           </span>
         </div>
 
@@ -2203,18 +2187,45 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
           <span id="octave-indicator" className={styles.octaveIndicator}>
             Octava 4
           </span>
-          {/* The engine delegates its pointer handling to this wrapper and
-              finds the keys by `data-midi`, so its ref sits out here rather
-              than on the keyboard React owns. */}
-          <div ref={pianoRef}>
-            <PianoKeyboard
-              className={styles.pianoFrame}
-              fingers
-              fromMidi={pianoRange.from}
-              interactive
-              labels="letter"
-              toMidi={pianoRange.to}
-            />
+          {/*
+            The octave arrows flank the keys, pointing the way the keyboard
+            moves — which is also what the ← and → keys do. They sat up in the
+            status strip as a "QWERTY / Z / X" control, where they were neither
+            findable nor reachable with a thumb on a phone.
+
+            The engine delegates its pointer handling to the ref'd node and
+            finds the keys by `data-midi`, so that ref wraps only the keyboard
+            React owns; the arrows are buttons of their own outside it.
+          */}
+          <div className={styles.pianoRow}>
+            <button
+              aria-label="Bajar una octava"
+              className={styles.octaveBtn}
+              id="qwerty-octave-down"
+              title="Bajar una octava (flecha izquierda)"
+              type="button"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <div ref={pianoRef}>
+              <PianoKeyboard
+                className={styles.pianoFrame}
+                fingers
+                fromMidi={pianoRange.from}
+                interactive
+                labels="letter"
+                toMidi={pianoRange.to}
+              />
+            </div>
+            <button
+              aria-label="Subir una octava"
+              className={styles.octaveBtn}
+              id="qwerty-octave-up"
+              title="Subir una octava (flecha derecha)"
+              type="button"
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
           </div>
           {isFullscreen && settings.inputMode === 'keyboard' && (
             <p className={styles.keyboardReachNote}>

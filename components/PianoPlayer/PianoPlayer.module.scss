@@ -219,26 +219,52 @@
   color: $light-text-color;
 }
 
+// The keys, with an octave arrow either side of them.
+.pianoRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/*
+ * Octave arrows, on the cabinet either side of the keys.
+ *
+ * Sized as a proper touch target rather than the 1.65rem chip this was in the
+ * status strip: on a phone this is the control you reach for most, and it is
+ * now under the thumb that is already on the piano.
+ */
 .octaveBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.65rem;
-  height: 1.65rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: white;
-  color: $text-color;
-  font-size: 0.72rem;
-  font-weight: 800;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 3.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1rem;
   cursor: pointer;
   transition:
-    background 0.15s,
-    border-color 0.15s;
+    background 0.15s var(--ease-in-out),
+    border-color 0.15s var(--ease-in-out),
+    color 0.15s var(--ease-in-out);
 
   &:hover {
-    background: #f1f5f9;
-    border-color: #94a3b8;
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #fff;
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
   }
 }
 
@@ -1051,6 +1077,23 @@
 
   .statusInputs {
     gap: 0.35rem;
+  }
+
+  // An octave of 40px keys plus two arrows is wider than a 375px phone, so both
+  // give a little: the arrows narrow, and the keys come down to 36px.
+  .pianoRow {
+    --key-w-mobile: 36px;
+    --black-w-mobile: 26px;
+    gap: 0.25rem;
+  }
+
+  .octaveBtn {
+    width: 1.75rem;
+  }
+
+  .pianoWrapper {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
   }
 
   .inputPill {
