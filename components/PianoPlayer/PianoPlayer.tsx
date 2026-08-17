@@ -698,14 +698,55 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         updateSectionProgress();
       };
 
+      /*
+       * Says that the octave moved.
+       *
+       * In normal size the piano always draws Do4-Si4; shifting the octave
+       * changes which notes those same twelve keys sound, so nothing on screen
+       * moved and the only clue was a small line of text changing above them.
+       * Sliding the keys the way the window travelled — and bumping the label
+       * that now reads a different octave — makes the change something you see
+       * rather than something you have to notice.
+       */
+      const animateOctaveShift = (direction: -1 | 1) => {
+        const piano = pianoRef.current;
+        if (piano) {
+          // Up an octave moves the window to the right, so the keys arrive
+          // from the right; down, from the left.
+          piano.style.setProperty('--octave-shift-from', `${direction * 34}px`);
+          piano.classList.remove(styles.octaveShift);
+          // Re-adding the class only restarts the animation after a reflow.
+          void piano.offsetWidth;
+          piano.classList.add(styles.octaveShift);
+        }
+
+        const indicator = document.getElementById('octave-indicator');
+        if (indicator) {
+          indicator.classList.remove(styles.octaveIndicatorBump);
+          void indicator.offsetWidth;
+          indicator.classList.add(styles.octaveIndicatorBump);
+        }
+      };
+
       const shiftQwertyOctave = (direction: -1 | 1) => {
         const nextOffset = Math.min(
           MAX_QWERTY_OFFSET,
           Math.max(MIN_QWERTY_OFFSET, midiOffset + direction * 12),
         );
-        if (nextOffset === midiOffset) return;
+        // Already at the end of the range: nudge the keys back without moving
+        // them, so pressing the arrow still answers instead of doing nothing.
+        if (nextOffset === midiOffset) {
+          const piano = pianoRef.current;
+          if (piano) {
+            piano.classList.remove(styles.octaveBlocked);
+            void piano.offsetWidth;
+            piano.classList.add(styles.octaveBlocked);
+          }
+          return;
+        }
         midiOffset = nextOffset;
         updateOctaveIndicator();
+        animateOctaveShift(direction);
         highlightCurrent();
       };
 
@@ -752,6 +793,9 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         const direction = newOffset < midiOffset ? 'down' : 'up';
         midiOffset = newOffset;
         updateOctaveIndicator();
+        // The same movement as pressing an arrow, so a shift the song asked
+        // for and one the student asked for read as the same event.
+        animateOctaveShift(direction === 'down' ? -1 : 1);
         showShiftPopup(direction);
       };
 

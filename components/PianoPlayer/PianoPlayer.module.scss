@@ -225,6 +225,94 @@
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  // The keys travel a little on an octave change; without this they would
+  // slide out over the arrows. The keys cast a shadow ~10px below themselves
+  // and clipping would cut it off, so pad it back and take the same off the
+  // outside — the space this occupies is unchanged.
+  overflow: hidden;
+  padding-bottom: 14px;
+  margin-bottom: -14px;
+}
+
+/*
+ * The octave change, as movement.
+ *
+ * At normal size the piano always draws the same twelve keys — an octave shift
+ * changes what they sound, not what they look like — so this is the only thing
+ * that shows it happened. The keys arrive from the side the window moved
+ * towards and settle, which also reads as "there is more piano over there".
+ */
+@keyframes octaveSlide {
+  from {
+    transform: translateX(var(--octave-shift-from, 0));
+    opacity: 0.45;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.octaveShift {
+  animation: octaveSlide 0.3s var(--ease-in-out);
+}
+
+// At either end of the range there is nowhere to go, so the keys lean and come
+// back — an answer to the press, rather than the arrow appearing to be dead.
+@keyframes octaveBlocked {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(calc(var(--octave-shift-from, 6px) * 0.15));
+  }
+}
+
+.octaveBlocked {
+  animation: octaveBlocked 0.2s var(--ease-in-out);
+}
+
+// The colour lives in the keyframe rather than on the class: the class is left
+// on the element until the next shift, and a permanent white label would be a
+// different design from the one the page starts with.
+@keyframes octaveIndicatorBump {
+  0%,
+  100% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 0.5);
+  }
+  40% {
+    transform: scale(1.16);
+    color: #fff;
+  }
+}
+
+.octaveIndicatorBump {
+  animation: octaveIndicatorBump 0.45s var(--ease-in-out);
+}
+
+// Motion is the whole point here, so with it off the label flashes instead of
+// the keys travelling — the change still announces itself.
+@media (prefers-reduced-motion: reduce) {
+  .octaveShift,
+  .octaveBlocked {
+    animation: none;
+  }
+
+  .octaveIndicatorBump {
+    animation: octaveIndicatorFlash 0.45s step-end;
+  }
+}
+
+@keyframes octaveIndicatorFlash {
+  0%,
+  60% {
+    color: #fff;
+  }
+  100% {
+    color: rgba(255, 255, 255, 0.5);
+  }
 }
 
 /*
