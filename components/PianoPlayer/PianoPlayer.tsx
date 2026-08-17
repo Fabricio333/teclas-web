@@ -56,6 +56,8 @@ import {
   faMicrophoneSlash,
   faExpand,
   faCompress,
+  faChevronDown,
+  faChevronUp,
   faGear,
   faRotateLeft,
   faSliders,
@@ -1984,28 +1986,31 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
           >
             {getMidiStatusLabel(midiStatus)}
           </span>
+          {/* Which octave the computer keyboard plays. It used to be labelled
+              "QWERTY" with a Z and an X button, which named the shortcut keys
+              rather than saying what pressing them does. */}
           <span className={styles.qwertyControls}>
-            <span className={styles.qwertyLabel}>QWERTY</span>
+            <span className={styles.qwertyLabel}>Octava</span>
             <button
               id="qwerty-octave-down"
               type="button"
               className={styles.octaveBtn}
-              aria-label="Bajar octava QWERTY"
-              title="Bajar octava QWERTY (Z)"
+              aria-label="Bajar una octava"
+              title="Bajar una octava (tecla Z)"
             >
-              Z
+              <FontAwesomeIcon icon={faChevronDown} />
             </button>
             <span id="qwerty-window" className={styles.qwertyWindow}>
-              C4-B4
+              Do4-Si4
             </span>
             <button
               id="qwerty-octave-up"
               type="button"
               className={styles.octaveBtn}
-              aria-label="Subir octava QWERTY"
-              title="Subir octava QWERTY (X)"
+              aria-label="Subir una octava"
+              title="Subir una octava (tecla X)"
             >
-              X
+              <FontAwesomeIcon icon={faChevronUp} />
             </button>
           </span>
         </div>
@@ -2192,7 +2197,7 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         <div
           id="piano-wrapper"
           ref={pianoWrapperRef}
-          className={`${styles.pianoWrapper} ${showPiano ? '' : styles.pianoHidden}`}
+          className={`${keys.cabinet} ${styles.pianoWrapper} ${showPiano ? '' : styles.pianoHidden}`}
           aria-hidden={!showPiano}
         >
           <span id="octave-indicator" className={styles.octaveIndicator}>

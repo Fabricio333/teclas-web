@@ -18,6 +18,7 @@ import styles from './CalibrationWizard.module.scss';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { midiToSolfege } from '@/lib/piano-player/noteNames';
 import PianoKeyboard from '@/components/PianoKeyboard';
+import keys from '@/components/PianoKeyboard/PianoKeyboard.module.scss';
 import {
   captureNote,
   fitTuning,
@@ -466,13 +467,14 @@ export default function CalibrationWizard() {
 
           {/* Which keys are coming, before the microphone is ever opened. */}
           <p className={styles.legend}>Vas a tocar estas notas</p>
-          <PianoKeyboard
-            className={styles.keyboard}
-            markedMidi={new Set(targets)}
-            fromMidi={Math.min(...targets)}
-            labels="solfege"
-            toMidi={Math.max(...targets)}
-          />
+          <div className={`${keys.cabinet} ${styles.keyboard}`}>
+            <PianoKeyboard
+              markedMidi={new Set(targets)}
+              fromMidi={Math.min(...targets)}
+              labels="solfege"
+              toMidi={Math.max(...targets)}
+            />
+          </div>
 
           {sourceKind === 'whistle' && (
             <p className={styles.hint}>
@@ -584,16 +586,17 @@ export default function CalibrationWizard() {
             <strong className={styles.targetName}>{noteLabel(target)}</strong>
           </p>
 
-          <PianoKeyboard
-            className={styles.keyboard}
-            markedMidi={doneNotes}
-            fromMidi={Math.min(...targets)}
-            labels="solfege"
-            scrollToMidi={target}
-            targetMidi={target}
-            toMidi={Math.max(...targets)}
-            wrongMidi={heardWrong}
-          />
+          <div className={`${keys.cabinet} ${styles.keyboard}`}>
+            <PianoKeyboard
+              markedMidi={doneNotes}
+              fromMidi={Math.min(...targets)}
+              labels="solfege"
+              scrollToMidi={target}
+              targetMidi={target}
+              toMidi={Math.max(...targets)}
+              wrongMidi={heardWrong}
+            />
+          </div>
 
           <div
             className={`${styles.meter} ${captureState === 'recording' ? styles.meterRecording : ''}`}
@@ -689,13 +692,14 @@ export default function CalibrationWizard() {
                 })()}
               </p>
 
-              <PianoKeyboard
-                className={styles.keyboard}
-                markedMidi={new Set(captured.map((n) => n.midi))}
-                fromMidi={Math.min(...captured.map((n) => n.midi))}
-                labels="solfege"
-                toMidi={Math.max(...captured.map((n) => n.midi))}
-              />
+              <div className={`${keys.cabinet} ${styles.keyboard}`}>
+                <PianoKeyboard
+                  markedMidi={new Set(captured.map((n) => n.midi))}
+                  fromMidi={Math.min(...captured.map((n) => n.midi))}
+                  labels="solfege"
+                  toMidi={Math.max(...captured.map((n) => n.midi))}
+                />
+              </div>
 
               <ul className={styles.noteList}>
                 {captured.map((n) => (

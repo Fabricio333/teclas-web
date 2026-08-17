@@ -220,7 +220,10 @@
 }
 
 .octaveBtn {
-  min-width: 1.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.65rem;
   height: 1.65rem;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
@@ -239,11 +242,15 @@
   }
 }
 
+// Wide enough for the longest range label ("Do3-Si3"), so the arrows either
+// side hold still as the octave changes.
 .qwertyWindow {
-  min-width: 4.6rem;
+  min-width: 4.4rem;
   font-size: 0.75rem;
   font-weight: 700;
   color: $text-color;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 // ---------- Song stages ----------
@@ -727,13 +734,9 @@
 }
 
 .pianoWrapper {
-  background: linear-gradient(180deg, #0f172a, $black-key-color);
-  border-radius: 16px;
-  padding: 1.25rem 1.25rem 1.5rem;
+  // The cabinet itself now comes from PianoKeyboard's `.cabinet`, composed on
+  // alongside this class. What is left here is only this screen's spacing.
   margin-bottom: 1rem;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Only the middle octave answers to QWERTY; the outer two are there to read
@@ -968,11 +971,13 @@
 // side of what they are for. Stacking them is how the typing trainer does it,
 // and for the same reason — the thing you read and the thing you press should
 // be on the same vertical line.
+// No max-width of its own: the toolbar, the status strip and the stage panel
+// all run to the section's width, and a narrower play area underneath made the
+// sheet and the piano look like they belonged to a different page.
 .playArea {
   display: flex;
   flex-direction: column;
-  max-width: 900px;
-  margin: 0 auto 1.25rem;
+  margin: 0 0 1.25rem;
 }
 
 .sheetWrapper {

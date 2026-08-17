@@ -887,7 +887,7 @@ export default function EarTraining() {
       {/* Piano. The engine delegates its pointer handling to this wrapper and
           finds the keys by `data-midi`, so the ref sits here rather than on the
           keyboard React owns. */}
-      <div ref={pianoRef} className={styles.pianoWrapper}>
+      <div ref={pianoRef} className={`${keys.cabinet} ${styles.pianoWrapper}`}>
         <span id="octave-indicator" className={styles.octaveIndicator}>
           Octava 4
         </span>

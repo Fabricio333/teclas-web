@@ -29,6 +29,20 @@
   position: relative;
 }
 
+// The cabinet the instrument sits in. It was copy-pasted, identically, into the
+// piano player, the ear training game and Simon, and the calibration wizard had
+// none at all — which is why calibration looked like a different app's piano.
+// Applied to the element *around* the keyboard, since the player and the ear
+// training game also put an octave indicator inside it.
+.cabinet {
+  background: linear-gradient(180deg, #0f172a, $black-key-color);
+  border-radius: 16px;
+  padding: 1.25rem 1.25rem 1.5rem;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
 // Only applied when the range is wider than one octave. A plain frame stays
 // overflow-visible, so the single-octave keyboard every game uses keeps its
 // drop shadow and its exact box — this wrapper changes nothing for them.

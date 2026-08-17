@@ -127,13 +127,9 @@
 }
 
 .pianoWrapper {
-  background: linear-gradient(180deg, #0f172a, $black-key-color);
-  border-radius: 16px;
-  padding: 1.25rem 1.25rem 1.5rem;
+  // The cabinet itself now comes from PianoKeyboard's `.cabinet`, composed on
+  // alongside this class. What is left here is only this screen's spacing.
   margin-bottom: 1rem;
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .keyboardRef {

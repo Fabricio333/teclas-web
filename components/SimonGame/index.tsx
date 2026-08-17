@@ -12,6 +12,7 @@ import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { WHITE_KEYS, BLACK_KEYS } from '@/lib/piano-player/songs';
 import { letterNameToSolfege } from '@/lib/piano-player/noteNames';
 import PianoKeyboard from '@/components/PianoKeyboard';
+import keys from '@/components/PianoKeyboard/PianoKeyboard.module.scss';
 import StatPills from '@/components/StatPills';
 import styles from './SimonGame.module.scss';
 
@@ -502,7 +503,7 @@ export default function SimonGame() {
       </div>
 
       {/* The house keyboard, the same one the piano player shows. */}
-      <div className={styles.pianoWrapper}>
+      <div className={`${keys.cabinet} ${styles.pianoWrapper}`}>
         <PianoKeyboard
           disabled={busy}
           labels="both"
