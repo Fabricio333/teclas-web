@@ -140,57 +140,13 @@
 
 // ---------- Score cards ----------
 
-.scoreCards {
-  display: flex;
-  gap: 0.75rem;
+// ---------- Prompt area ----------
+
+// Centred under the controls, where the row of cards used to sit.
+.stats {
   justify-content: center;
   margin-bottom: 1.25rem;
 }
-
-.scoreCard {
-  flex: 1;
-  max-width: 160px;
-  padding: 0.6rem 0.75rem;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-.scoreCardLabel {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  opacity: 0.8;
-}
-
-.scoreCardValue {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.scoreCardBlue {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
-}
-
-.scoreCardAmber {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #b45309;
-}
-
-.scoreCardGreen {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #15803d;
-}
-
-// ---------- Prompt area ----------
 
 .promptArea {
   background: white;
@@ -293,183 +249,6 @@
   box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.piano {
-  display: flex;
-  justify-content: center;
-  position: relative;
-  height: $white-key-height;
-  margin: 0 auto;
-  max-width: 500px;
-  touch-action: none;
-}
-
-.key {
-  background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
-  border: 1px solid #c4b99a;
-  width: $white-key-width;
-  height: 100%;
-  position: relative;
-  text-align: center;
-  font-weight: bold;
-  z-index: 1;
-  user-select: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 8px;
-  margin: 0 1px;
-  border-radius: 0 0 6px 6px;
-  transition:
-    background 0.06s ease-out,
-    transform 0.04s ease-out,
-    box-shadow 0.06s ease-out;
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.15),
-    inset 0 -2px 3px rgba(0, 0, 0, 0.04);
-
-  &:hover {
-    background: linear-gradient(180deg, #fdfcf5 0%, #ede8de 60%, #e4ddd0 100%);
-  }
-
-  &:active {
-    transform: translateY(3px);
-    box-shadow:
-      0 1px 2px rgba(0, 0, 0, 0.1),
-      inset 0 2px 4px rgba(0, 0, 0, 0.08);
-    background: linear-gradient(180deg, #f0ebe0 0%, #e8e2d5 100%);
-  }
-}
-
-.black {
-  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
-  color: white;
-  width: $black-key-width;
-  height: 60%;
-  position: absolute;
-  top: 0;
-  z-index: 3;
-  border-radius: 0 0 4px 4px;
-  border: 1px solid #000;
-  align-items: flex-end;
-  padding-bottom: 6px;
-  box-shadow:
-    0 4px 8px rgba(0, 0, 0, 0.5),
-    inset 0 -1px 2px rgba(255, 255, 255, 0.06);
-
-  &:hover {
-    background: linear-gradient(180deg, #333 0%, #222 40%, #181818 100%);
-  }
-
-  &:active {
-    transform: translateY(2px);
-    box-shadow:
-      0 1px 3px rgba(0, 0, 0, 0.4),
-      inset 0 2px 4px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(180deg, #222 0%, #151515 100%);
-  }
-}
-
-.black[data-key-position='0'] {
-  left: calc(50% - 175px + 32px);
-}
-
-.black[data-key-position='1'] {
-  left: calc(50% - 175px + 82px);
-}
-
-.black[data-key-position='3'] {
-  left: calc(50% - 175px + 182px);
-}
-
-.black[data-key-position='4'] {
-  left: calc(50% - 175px + 232px);
-}
-
-.black[data-key-position='5'] {
-  left: calc(50% - 175px + 282px);
-}
-
-.keyLabel {
-  font-size: $font-size-sm;
-  color: #999;
-  pointer-events: none;
-  position: relative;
-  z-index: 1;
-}
-
-.black .keyLabel {
-  color: #999;
-}
-
-.pressed {
-  transform: translateY(3px) !important;
-  background: linear-gradient(180deg, #e8e2d5 0%, #ddd6c6 100%) !important;
-  box-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.08),
-    inset 0 2px 5px rgba(0, 0, 0, 0.1) !important;
-
-  .keyLabel {
-    color: #888;
-  }
-}
-
-.black.pressed {
-  transform: translateY(2px) !important;
-  background: linear-gradient(180deg, #181818 0%, #0e0e0e 100%) !important;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.3),
-    inset 0 2px 6px rgba(0, 0, 0, 0.5) !important;
-}
-
-.hintKey {
-  outline: 3px solid rgba(245, 158, 11, 0.6);
-  outline-offset: -3px;
-}
-
-.feedback {
-  position: absolute;
-  top: -1.4rem;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.2rem;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-.feedbackVisible {
-  opacity: 1;
-}
-
-// ---------- Correct / Incorrect key flash ----------
-
-@keyframes correctFlash {
-  0% {
-    background: $success-color;
-  }
-  100% {
-    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
-  }
-}
-
-@keyframes incorrectFlash {
-  0% {
-    background: $failure-color;
-  }
-  100% {
-    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
-  }
-}
-
-.correctFlash {
-  animation: correctFlash 0.6s ease-out forwards;
-}
-
-.incorrectFlash {
-  animation: incorrectFlash 0.6s ease-out forwards;
 }
 
 // ---------- Hint & done ----------
@@ -642,22 +421,6 @@
     font-size: 0.9rem;
   }
 
-  .scoreCards {
-    gap: 0.5rem;
-  }
-
-  .scoreCard {
-    padding: 0.5rem 0.4rem;
-  }
-
-  .scoreCardLabel {
-    font-size: 0.65rem;
-  }
-
-  .scoreCardValue {
-    font-size: 1.2rem;
-  }
-
   .promptArea {
     padding: 1rem;
   }
@@ -670,38 +433,6 @@
   .pianoWrapper {
     padding: 0.75rem 0.5rem 1rem;
     border-radius: 12px;
-  }
-
-  .piano {
-    height: 150px;
-  }
-
-  .key {
-    width: 40px;
-  }
-
-  .black {
-    width: 28px;
-  }
-
-  .black[data-key-position='0'] {
-    left: calc(50% - 147px + 28px);
-  }
-
-  .black[data-key-position='1'] {
-    left: calc(50% - 147px + 70px);
-  }
-
-  .black[data-key-position='3'] {
-    left: calc(50% - 147px + 154px);
-  }
-
-  .black[data-key-position='4'] {
-    left: calc(50% - 147px + 196px);
-  }
-
-  .black[data-key-position='5'] {
-    left: calc(50% - 147px + 238px);
   }
 
   .keyboardRef {

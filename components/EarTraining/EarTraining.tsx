@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './EarTraining.module.scss';
+// The keys are the house keyboard's, and this engine drives them by toggling
+// that module's classes on the nodes it rendered — see the contract note in
+// PianoKeyboard.module.scss.
+import PianoKeyboard from '@/components/PianoKeyboard';
+import StatPills from '@/components/StatPills';
+import keys from '@/components/PianoKeyboard/PianoKeyboard.module.scss';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import {
   LEVELS,
@@ -9,7 +15,6 @@ import {
   MIDI_TO_KEY,
   MIDI_TO_SOLFEGE,
   WHITE_KEYS,
-  BLACK_KEYS,
   generateRound,
 } from '@/lib/ear-training/levels';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
@@ -232,7 +237,7 @@ export default function EarTraining() {
           `[data-midi="${baseMidi}"]`,
         );
         if (el) {
-          el.classList.add(styles.pressed);
+          el.classList.add(keys.pressed);
           pressedElements.set(midiNumber, el);
         }
       };
@@ -240,7 +245,7 @@ export default function EarTraining() {
       const releaseKey = (midiNumber: number) => {
         const el = pressedElements.get(midiNumber);
         if (el) {
-          el.classList.remove(styles.pressed);
+          el.classList.remove(keys.pressed);
           pressedElements.delete(midiNumber);
         }
       };
@@ -299,34 +304,8 @@ export default function EarTraining() {
         updateOctaveIndicator();
       };
 
-      // ---------- Build piano DOM ----------
-      pianoDiv.innerHTML = '';
-      WHITE_KEYS.forEach((white, i) => {
-        const wEl = document.createElement('div');
-        wEl.className = styles.key;
-        wEl.dataset.midi = String(white.midi);
-
-        const labelEl = document.createElement('span');
-        labelEl.className = styles.keyLabel;
-        labelEl.textContent = white.label;
-        wEl.appendChild(labelEl);
-
-        pianoDiv.appendChild(wEl);
-      });
-
-      BLACK_KEYS.forEach((black) => {
-        const bEl = document.createElement('div');
-        bEl.className = `${styles.key} ${styles.black}`;
-        bEl.dataset.midi = String(black.midi);
-        bEl.dataset.keyPosition = String(black.afterWhiteIndex);
-
-        const bLabel = document.createElement('span');
-        bLabel.className = styles.keyLabel;
-        bLabel.textContent = black.label;
-        bEl.appendChild(bLabel);
-
-        pianoDiv.appendChild(bEl);
-      });
+      // The keys themselves are rendered by <PianoKeyboard> below; this engine
+      // only finds them by `data-midi` and marks them.
 
       // ---------- UI helpers ----------
       const scoreEl = document.getElementById('score-val');
@@ -377,8 +356,8 @@ export default function EarTraining() {
           `[data-midi="${baseMidi}"]`,
         );
         if (!el) return;
-        const cls = correct ? styles.correctFlash : styles.incorrectFlash;
-        el.classList.remove(styles.correctFlash, styles.incorrectFlash);
+        const cls = correct ? keys.correctFlash : keys.incorrectFlash;
+        el.classList.remove(keys.correctFlash, keys.incorrectFlash);
         // Force reflow
         void el.offsetWidth;
         el.classList.add(cls);
@@ -391,22 +370,20 @@ export default function EarTraining() {
           `[data-midi="${baseMidi}"]`,
         );
         if (!el) return;
-        let fb = el.querySelector<HTMLSpanElement>(`.${styles.feedback}`);
+        let fb = el.querySelector<HTMLSpanElement>(`.${keys.feedback}`);
         if (!fb) {
           fb = document.createElement('span');
-          fb.className = styles.feedback;
+          fb.className = keys.feedback;
           el.appendChild(fb);
         }
         fb.textContent = ok ? '\u2713' : '\u2717';
-        fb.classList.add(styles.feedbackVisible);
-        setTimeout(() => fb?.classList.remove(styles.feedbackVisible), 300);
+        fb.classList.add(keys.feedbackVisible);
+        setTimeout(() => fb?.classList.remove(keys.feedbackVisible), 300);
       };
 
       const clearHintKey = () => {
-        const prevHint = pianoDiv.querySelector<HTMLElement>(
-          `.${styles.hintKey}`,
-        );
-        prevHint?.classList.remove(styles.hintKey);
+        const prevHint = pianoDiv.querySelector<HTMLElement>(`.${keys.hint}`);
+        prevHint?.classList.remove(keys.hint);
       };
 
       const showHintKey = (midiNumber: number) => {
@@ -414,7 +391,7 @@ export default function EarTraining() {
         const el = pianoDiv.querySelector<HTMLElement>(
           `[data-midi="${baseMidi}"]`,
         );
-        if (el) el.classList.add(styles.hintKey);
+        if (el) el.classList.add(keys.hint);
       };
 
       // ---------- Idle hint system ----------
@@ -618,7 +595,7 @@ export default function EarTraining() {
 
       pointerDownListener = (e) => {
         const target = (e.target as HTMLElement).closest<HTMLElement>(
-          `.${styles.key}`,
+          `.${keys.key}`,
         );
         if (!target) return;
         const baseMidi = Number(target.dataset.midi);
@@ -686,7 +663,7 @@ export default function EarTraining() {
         sustainedMidi.clear();
         sustainPedalDown = false;
         if (synth?.loaded) synth.releaseAll();
-        pressedElements.forEach((el) => el.classList.remove(styles.pressed));
+        pressedElements.forEach((el) => el.classList.remove(keys.pressed));
         pressedElements.clear();
         pressedMidi.clear();
         pressedAt.clear();
@@ -870,27 +847,19 @@ export default function EarTraining() {
         {micError && <p className={styles.micErrorText}>{micError}</p>}
       </div>
 
-      {/* Score cards */}
-      <div className={styles.scoreCards}>
-        <div className={`${styles.scoreCard} ${styles.scoreCardBlue}`}>
-          <span className={styles.scoreCardLabel}>Puntos</span>
-          <span id="score-val" className={styles.scoreCardValue}>
-            0
-          </span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardAmber}`}>
-          <span className={styles.scoreCardLabel}>Racha</span>
-          <span id="streak-val" className={styles.scoreCardValue}>
-            0
-          </span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardGreen}`}>
-          <span className={styles.scoreCardLabel}>Precision</span>
-          <span id="accuracy-val" className={styles.scoreCardValue}>
-            {'\u2014'}
-          </span>
-        </div>
-      </div>
+      <StatPills
+        className={styles.stats}
+        stats={[
+          { id: 'score-val', label: 'Puntos', tone: 'blue', value: '0' },
+          { id: 'streak-val', label: 'Racha', tone: 'amber', value: '0' },
+          {
+            id: 'accuracy-val',
+            label: 'Precisi\u00F3n',
+            tone: 'green',
+            value: '\u2014',
+          },
+        ]}
+      />
 
       {/* Prompt area */}
       <div className={styles.promptArea}>
@@ -915,12 +884,14 @@ export default function EarTraining() {
         </div>
       </div>
 
-      {/* Piano */}
-      <div className={styles.pianoWrapper}>
+      {/* Piano. The engine delegates its pointer handling to this wrapper and
+          finds the keys by `data-midi`, so the ref sits here rather than on the
+          keyboard React owns. */}
+      <div ref={pianoRef} className={styles.pianoWrapper}>
         <span id="octave-indicator" className={styles.octaveIndicator}>
           Octava 4
         </span>
-        <div ref={pianoRef} className={styles.piano} />
+        <PianoKeyboard interactive labels="letter" />
       </div>
 
       {/* Hint text */}

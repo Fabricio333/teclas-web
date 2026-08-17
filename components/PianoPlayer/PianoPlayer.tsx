@@ -2,6 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import styles from './PianoPlayer.module.scss';
+// The keys are the house keyboard's, and this engine drives them by toggling
+// that module's classes on the nodes it rendered — see the contract note in
+// PianoKeyboard.module.scss. Aliased, because `styles.hint` here is the hint
+// *paragraph* under the piano, not the outline on a key.
+import PianoKeyboard from '@/components/PianoKeyboard';
+import keys from '@/components/PianoKeyboard/PianoKeyboard.module.scss';
 import { midiNumberToNote } from '@/lib/piano-player/Midi';
 // Students read fixed-do. `midiNumberToNote` stays for the Tone.js sampler,
 // whose note strings double as sample filenames.
@@ -15,7 +21,6 @@ import {
   KEY_TO_MIDI,
   MIDI_TO_KEY,
   WHITE_KEYS,
-  BLACK_KEYS,
   getSectionForPosition,
   getSongPatterns,
   getSongSections,
@@ -24,9 +29,15 @@ import {
   songPath,
   voiceClassForHand,
 } from '@/lib/piano-player/songs';
-import type { SongSection, SongSectionKind } from '@/lib/piano-player/songs';
+import type {
+  Level,
+  SongSection,
+  SongSectionKind,
+} from '@/lib/piano-player/songs';
 import { songPageTitle } from '@/lib/piano-player/songPages';
 import ShareButton from '@/components/ShareButton';
+import SongBrowser from '@/components/SongBrowser';
+import StatPills from '@/components/StatPills';
 import { useMicrophonePitch } from '@/hooks/use-microphone-pitch';
 import { useCalibrationSettings } from '@/hooks/use-calibration-settings';
 import { recordRun, updateSettings, useSettings } from '@/lib/progress';
@@ -46,6 +57,7 @@ import {
   faExpand,
   faCompress,
   faGear,
+  faRotateLeft,
   faSliders,
   faKeyboard,
   faVolumeHigh,
@@ -119,88 +131,8 @@ const DEFAULT_VELOCITY_BY_SOURCE: Record<InputSource, number> = {
 const MIN_QWERTY_OFFSET = -24;
 const MAX_QWERTY_OFFSET = 24;
 
-/** Semitones of the octave that are white keys. */
-const WHITE_SET = new Set([0, 2, 4, 5, 7, 9, 11]);
-/** Rendered white-key pitch, border included — the step the CSS uses. */
-const KEY_STEP = 50;
-const BLACK_HALF = 18;
-
-const LETTER_BY_MIDI = new Map(
-  [...WHITE_KEYS, ...BLACK_KEYS].map((k) => [k.midi, k]),
-);
-
-/**
- * Draws the keys for a midi range into the piano container.
- *
- * Extracted so fullscreen can widen the keyboard without re-running the engine
- * effect, which owns the synth, the MIDI bindings and the sheet. Only the keys
- * are replaced; the pointer handlers live on the container and survive.
- *
- * Black keys carry an inline `left` instead of the per-slot CSS rules, which
- * were pixel values hand-set for exactly one octave and could not describe a
- * third one.
- */
-function buildPianoKeys(
-  pianoDiv: HTMLElement,
-  fromMidi: number,
-  toMidi: number,
-) {
-  pianoDiv.innerHTML = '';
-
-  const whites: number[] = [];
-  for (let m = fromMidi; m <= toMidi; m += 1) {
-    if (WHITE_SET.has(((m % 12) + 12) % 12)) whites.push(m);
-  }
-  const spanPx = whites.length * KEY_STEP;
-  pianoDiv.style.setProperty('--piano-span', `${spanPx}px`);
-
-  whites.forEach((midi) => {
-    const known = LETTER_BY_MIDI.get(midi);
-    const wEl = document.createElement('div');
-    wEl.className = styles.key;
-    wEl.dataset.midi = String(midi);
-
-    const labelEl = document.createElement('span');
-    labelEl.className = styles.keyLabel;
-    const letterEl = document.createElement('span');
-    letterEl.className = styles.keyLetter;
-    letterEl.textContent = known?.label ?? '';
-    labelEl.appendChild(letterEl);
-    const fingerEl = document.createElement('span');
-    fingerEl.className = styles.keyFinger;
-    fingerEl.textContent = known ? String(known.finger) : '';
-    labelEl.appendChild(fingerEl);
-    wEl.appendChild(labelEl);
-
-    pianoDiv.appendChild(wEl);
-  });
-
-  for (let m = fromMidi; m <= toMidi; m += 1) {
-    if (WHITE_SET.has(((m % 12) + 12) % 12)) continue;
-    // Whites strictly below this black key decide where it sits.
-    const slot = whites.filter((w) => w < m).length;
-    const known = LETTER_BY_MIDI.get(m);
-
-    const bEl = document.createElement('div');
-    bEl.className = `${styles.key} ${styles.black}`;
-    bEl.dataset.midi = String(m);
-    bEl.style.left = `calc(50% - ${spanPx / 2}px + ${slot * KEY_STEP - BLACK_HALF}px)`;
-
-    const bLabel = document.createElement('span');
-    bLabel.className = styles.keyLabel;
-    const bLetter = document.createElement('span');
-    bLetter.className = styles.keyLetter;
-    bLetter.textContent = known?.label ?? '';
-    bLabel.appendChild(bLetter);
-    const bFinger = document.createElement('span');
-    bFinger.className = styles.keyFinger;
-    bFinger.textContent = known ? String(known.finger) : '';
-    bLabel.appendChild(bFinger);
-    bEl.appendChild(bLabel);
-
-    pianoDiv.appendChild(bEl);
-  }
-}
+/** How long after the last note the page stays in its "playing" state. */
+const PLAYING_FADE_MS = 2500;
 
 type PianoPlayerProps = {
   /**
@@ -216,6 +148,8 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
   const pianoRef = useRef<HTMLDivElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
   const doneRef = useRef<HTMLDivElement>(null);
+  // The engine adds `.playing` here while notes are coming in — see markPlaying.
+  const sectionRef = useRef<HTMLElement>(null);
 
   // Bridge refs for microphone pitch detection
   const notePressRef = useRef<NoteHandler | null>(null);
@@ -333,6 +267,24 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
   // index goes in through a ref like everything else it reads from React.
   const initialLevelIndexRef = useRef(initialLevelIndex);
 
+  /**
+   * Load a song, on the engine's terms.
+   *
+   * The engine already owns level switching and listens to `#level-select`, so
+   * the song browser routes its choice through that element rather than
+   * reaching into the engine — which keeps the in-place switch, the URL
+   * rewrite and the `teclas:level-changed` broadcast working as they are.
+   */
+  const selectLevel = useCallback((level: Level) => {
+    const select = document.getElementById(
+      'level-select',
+    ) as HTMLSelectElement | null;
+    const index = ALL_LEVELS.findIndex((lev) => lev.id === level.id);
+    if (!select || index < 0) return;
+    select.value = String(index);
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }, []);
+
   useEffect(() => {
     const onLevelChanged = (event: Event) => {
       const index = (event as CustomEvent<{ index: number }>).detail?.index;
@@ -398,36 +350,25 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
   }, [micEnabled, startListening, stopListening]);
 
   /*
-   * Fullscreen widens the keyboard to three octaves.
+   * Fullscreen widens the keyboard to three octaves. `<PianoKeyboard>` draws
+   * whatever range this describes; the extra octaves are for reading along,
+   * since only the middle one is reachable from the computer keyboard — which
+   * the badge below the piano says out loud when that is the chosen input.
    *
-   * The engine effect below runs once and owns the synth, MIDI and sheet, so
-   * it cannot be re-run just to redraw keys. It does not cache key elements —
-   * every lookup is a querySelector by data-midi at call time — and the
-   * pointer handlers are delegated on the container, so swapping the children
-   * underneath it is safe.
-   *
-   * The extra octaves are for reading along: only the middle one is reachable
-   * from the computer keyboard, which the badge below the piano says out loud
-   * when that is the chosen input.
-   */
-  /*
    * What the piano currently draws. The engine effect below is a closure that
    * runs once, so it reads the range through this ref rather than capturing a
    * value that would go stale the moment fullscreen widened the keyboard.
    */
+  const pianoRange = isFullscreen ? { from: 48, to: 83 } : { from: 60, to: 71 };
   const drawnRangeRef = useRef({ from: 60, to: 71 });
 
   useEffect(() => {
-    const pianoDiv = pianoRef.current;
-    if (!pianoDiv) return;
     const range = isFullscreen ? { from: 48, to: 83 } : { from: 60, to: 71 };
     drawnRangeRef.current = range;
-    buildPianoKeys(pianoDiv, range.from, range.to);
 
-    // Redrawing replaces every key element, which throws away the outline on
-    // the key the student is supposed to play next — so going fullscreen left
-    // nothing marked until the next correct note. The engine owns that
-    // highlight, so ask it to put it back on the keys that now exist.
+    // Widening the range mounts the outer octaves. The middle ones are reused,
+    // so the engine's marks survive — but the engine still has to re-evaluate
+    // which key it wants outlined for the range that now exists.
     window.dispatchEvent(new Event('teclas:keyboard-redrawn'));
 
     // The engine only refreshes this on an octave shift, and a widened
@@ -571,7 +512,7 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
       const pressKey = (midiNumber: number) => {
         const el = keyEl(midiNumber);
         if (el) {
-          el.classList.add(styles.pressed);
+          el.classList.add(keys.pressed);
           pressedElements.set(midiNumber, el);
         }
       };
@@ -579,7 +520,7 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
       const releaseKey = (midiNumber: number) => {
         const el = pressedElements.get(midiNumber);
         if (el) {
-          el.classList.remove(styles.pressed);
+          el.classList.remove(keys.pressed);
           pressedElements.delete(midiNumber);
         }
       };
@@ -812,8 +753,8 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         showShiftPopup(direction);
       };
 
-      // ---------- Build piano DOM ----------
-      buildPianoKeys(pianoDiv, 60, 71);
+      // The keys themselves are rendered by <PianoKeyboard> below; this engine
+      // only finds them by `data-midi` and marks them.
 
       // ---------- Sheet music ----------
       /** Durations of the rendered notes, in whole-notes, parallel to
@@ -831,7 +772,20 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
           paddingtop: 10,
           responsive: 'resize',
           scale: 1.08,
-          staffwidth: 700,
+          /*
+           * Deliberately narrower than the column this renders into.
+           *
+           * `responsive: 'resize'` makes abcjs scale the finished SVG to the
+           * container, so this width is really a request for how many bars go
+           * on a line — and the narrower it is, the further everything is
+           * scaled up to fill the page. At 700 (sized for the old half-width
+           * column, back when the piano sat beside the staff) a short piece
+           * came out as one thin line of tiny noteheads. Around 460 it breaks
+           * into a couple of short systems that then fill the reading column,
+           * which is the point of the "Renglones" setting: a pentagram or two
+           * at a time, at a size worth reading.
+           */
+          staffwidth: 460,
         });
 
         // Real rhythm for the playback below, read out of abcjs's own parse
@@ -1231,13 +1185,11 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         followCurrentSystem();
 
         // hint key outline on piano (use base MIDI for DOM lookup)
-        const prevHint = pianoDiv.querySelector<HTMLElement>(
-          `.${styles.hintKey}`,
-        );
-        prevHint?.classList.remove(styles.hintKey);
+        const prevHint = pianoDiv.querySelector<HTMLElement>(`.${keys.hint}`);
+        prevHint?.classList.remove(keys.hint);
         const expected = SONG[pos];
         const expectedEl = keyEl(expected);
-        if (expectedEl) expectedEl.classList.add(styles.hintKey);
+        if (expectedEl) expectedEl.classList.add(keys.hint);
 
         // progress bar
         const progress = document.getElementById('progress');
@@ -1268,16 +1220,40 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
       const showFeedback = (midiNumber: number, ok: boolean) => {
         const el = keyEl(midiNumber);
         if (!el) return;
-        let fb = el.querySelector<HTMLSpanElement>(`.${styles.feedback}`);
+        let fb = el.querySelector<HTMLSpanElement>(`.${keys.feedback}`);
         if (!fb) {
           fb = document.createElement('span');
-          fb.className = styles.feedback;
+          fb.className = keys.feedback;
           el.appendChild(fb);
         }
         fb.textContent = ok ? '\u2713' : '\u2717';
-        fb.classList.add(styles.feedbackVisible);
-        setTimeout(() => fb?.classList.remove(styles.feedbackVisible), 300);
+        fb.classList.add(keys.feedbackVisible);
+        setTimeout(() => fb?.classList.remove(keys.feedbackVisible), 300);
       };
+
+      /*
+       * Fades the chrome back while a student is actually playing, and brings
+       * it up again once they stop. Borrowed from the typing trainer, where the
+       * words stay bright and everything around them dims — here the staff, the
+       * keyboard and the score keep full strength.
+       *
+       * A class rather than React state: this fires on every keystroke, and
+       * re-rendering a 2000-line component per note to change one opacity would
+       * be the most expensive thing in the loop.
+       */
+      let playingTimer: ReturnType<typeof setTimeout> | undefined;
+      const markPlaying = () => {
+        sectionRef.current?.classList.add(styles.playing);
+        if (playingTimer) clearTimeout(playingTimer);
+        playingTimer = setTimeout(
+          () => sectionRef.current?.classList.remove(styles.playing),
+          PLAYING_FADE_MS,
+        );
+      };
+      cleanupFns.push(() => {
+        if (playingTimer) clearTimeout(playingTimer);
+        sectionRef.current?.classList.remove(styles.playing);
+      });
 
       const clearIdle = () => {
         if (idleTimer) clearTimeout(idleTimer);
@@ -1328,6 +1304,7 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         pressKey(midiNumber);
         pressedMidi.add(midiNumber);
         pressedAt.set(midiNumber, performance.now());
+        markPlaying();
 
         if (pos >= SONG.length) return;
 
@@ -1491,7 +1468,7 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
 
       pointerDownListener = (e) => {
         const target = (e.target as HTMLElement).closest<HTMLElement>(
-          `.${styles.key}`,
+          `.${keys.key}`,
         );
         if (!target) return;
         const drawnMidi = Number(target.dataset.midi);
@@ -1583,7 +1560,7 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
         sustainedMidi.clear();
         sustainPedalDown = false;
         if (synth?.loaded) synth.releaseAll();
-        pressedElements.forEach((el) => el.classList.remove(styles.pressed));
+        pressedElements.forEach((el) => el.classList.remove(keys.pressed));
         pressedElements.clear();
         pressedMidi.clear();
         pressedAt.clear();
@@ -1781,38 +1758,53 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
   }, []);
 
   return (
-    <section className={styles.gameSection}>
-      {/* Header */}
-      <div className={styles.header}>
-        <h2 className={styles.title}>Aprende Piano</h2>
-        <p className={styles.subtitle}>
-          Sigue las notas en la partitura. Usa el teclado o haz clic en las
-          teclas del piano.
-        </p>
-      </div>
+    <section className={styles.gameSection} ref={sectionRef}>
+      {/* Header. The player used to open with a heading and a paragraph of
+          instructions above six more rows of chrome, which pushed the music
+          most of a screen down. The song's own <h1> is on the page above on a
+          song page; here the name lives in the toolbar, where it doubles as the
+          way to change it. */}
+      <h2 className={styles.srHeading}>Aprende Piano</h2>
 
-      {/* Controls panel */}
-      <div className={styles.controlsPanel}>
-        <div className={styles.controls}>
-          <label className={styles.selectLabel}>
-            Cancion:{' '}
-            {/* Uncontrolled: the engine owns the current level and writes this
-                value back itself, so React only sets where it starts. */}
-            <select
-              id="level-select"
-              className={styles.select}
-              defaultValue={initialLevelIndex}
-            >
-              {ALL_LEVELS.map((lev, i) => (
-                <option key={lev.id} value={i}>
-                  {getDifficultyLabel(lev.difficulty)} {lev.name}
-                </option>
-              ))}
-            </select>
-          </label>
+      {/* Toolbar: what you are playing, and what you can do to it. */}
+      <div className={styles.hud}>
+        <div className={styles.hudMain}>
+          {/*
+            The engine owns which level is loaded and writes this value back
+            itself, so it stays as the control surface. It is hidden because
+            SongBrowser is now what a student actually uses — but selecting
+            through it keeps the in-place switch, the URL rewrite and the
+            `teclas:level-changed` broadcast working untouched.
+          */}
+          <select
+            aria-hidden="true"
+            className={styles.hiddenSelect}
+            defaultValue={initialLevelIndex}
+            id="level-select"
+            tabIndex={-1}
+          >
+            {ALL_LEVELS.map((lev, i) => (
+              <option key={lev.id} value={i}>
+                {getDifficultyLabel(lev.difficulty)} {lev.name}
+              </option>
+            ))}
+          </select>
 
-          <button id="restart-btn" className={styles.restartBtn}>
-            Reiniciar
+          <SongBrowser currentLevel={currentLevel} onPick={selectLevel} />
+
+          <p id="song-meta" className={styles.songMeta}>
+            {ALL_LEVELS[0].notes.length} notas · QWERTY o MIDI
+          </p>
+        </div>
+
+        <div className={styles.hudActions}>
+          <button
+            className={styles.restartBtn}
+            id="restart-btn"
+            title="Empezar la canción de nuevo"
+          >
+            <FontAwesomeIcon icon={faRotateLeft} />
+            <span className={styles.actionLabel}>Reiniciar</span>
           </button>
 
           {/* Next to the picker, because the thing being shared is the song
@@ -1965,10 +1957,19 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
             )}
           </div>
         </div>
-        <p id="song-meta" className={styles.songMeta}>
-          {ALL_LEVELS[0].notes.length} notas · QWERTY o MIDI
-        </p>
-        <div className={styles.inputStatus} aria-live="polite">
+      </div>
+
+      {/*
+        Status and score on one line.
+
+        These were three stacked blocks: two input pills, a QWERTY octave row,
+        and three large cards for Puntos / Racha / Precisión. Together they cost
+        about as much height as the staff itself, for numbers a student glances
+        at between phrases. The ids stay exactly as they were — the engine
+        writes all six of them by getElementById.
+      */}
+      <div className={styles.status}>
+        <div className={styles.statusInputs} aria-live="polite">
           <span
             className={`${styles.inputPill} ${
               micStatus === 'listening' ? styles.inputPillActive : ''
@@ -1983,77 +1984,65 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
           >
             {getMidiStatusLabel(midiStatus)}
           </span>
-        </div>
-        <div className={styles.qwertyControls}>
-          <span className={styles.qwertyLabel}>QWERTY</span>
-          <button
-            id="qwerty-octave-down"
-            type="button"
-            className={styles.octaveBtn}
-            aria-label="Bajar octava QWERTY"
-            title="Bajar octava QWERTY (Z)"
-          >
-            Z
-          </button>
-          <span id="qwerty-window" className={styles.qwertyWindow}>
-            C4-B4
+          <span className={styles.qwertyControls}>
+            <span className={styles.qwertyLabel}>QWERTY</span>
+            <button
+              id="qwerty-octave-down"
+              type="button"
+              className={styles.octaveBtn}
+              aria-label="Bajar octava QWERTY"
+              title="Bajar octava QWERTY (Z)"
+            >
+              Z
+            </button>
+            <span id="qwerty-window" className={styles.qwertyWindow}>
+              C4-B4
+            </span>
+            <button
+              id="qwerty-octave-up"
+              type="button"
+              className={styles.octaveBtn}
+              aria-label="Subir octava QWERTY"
+              title="Subir octava QWERTY (X)"
+            >
+              X
+            </button>
           </span>
-          <button
-            id="qwerty-octave-up"
-            type="button"
-            className={styles.octaveBtn}
-            aria-label="Subir octava QWERTY"
-            title="Subir octava QWERTY (X)"
-          >
-            X
-          </button>
         </div>
-        {micError && <p className={styles.micErrorText}>{micError}</p>}
-      </div>
 
-      {/* Score cards */}
-      <div className={styles.scoreCards}>
-        <div className={`${styles.scoreCard} ${styles.scoreCardBlue}`}>
-          <span className={styles.scoreCardLabel}>Puntos</span>
-          <span id="score-val" className={styles.scoreCardValue}>
-            0
-          </span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardAmber}`}>
-          <span className={styles.scoreCardLabel}>Racha</span>
-          <span id="streak-val" className={styles.scoreCardValue}>
-            0
-          </span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardGreen}`}>
-          <span className={styles.scoreCardLabel}>Precision</span>
-          <span id="accuracy-val" className={styles.scoreCardValue}>
-            {'\u2014'}
-          </span>
-        </div>
+        <StatPills
+          stats={[
+            { id: 'score-val', label: 'Puntos', tone: 'blue', value: '0' },
+            { id: 'streak-val', label: 'Racha', tone: 'amber', value: '0' },
+            {
+              id: 'accuracy-val',
+              label: 'Precisión',
+              tone: 'green',
+              value: '—',
+            },
+          ]}
+        />
       </div>
+      {micError && <p className={styles.micErrorText}>{micError}</p>}
 
-      {/* Song structure */}
+      {/* Song structure. One line now: which part of the piece is being
+          drilled, and how far through it you are. */}
       <div className={styles.stagePanel}>
-        <div className={styles.stageHeader}>
-          <span id="stage-mode" className={styles.stageMode}>
-            Cancion completa
-          </span>
-          <span id="stage-progress" className={styles.stageProgress}>
-            1/1
-          </span>
-        </div>
-        <div className={styles.stageCurrent}>
-          <span id="stage-kind" className={styles.stageKind}>
-            Principal
-          </span>
-          <span id="stage-name" className={styles.stageName}>
-            Principal
-          </span>
-          <span id="stage-pattern" className={styles.stagePattern}>
-            Patron: Idea central
-          </span>
-        </div>
+        <span id="stage-mode" className={styles.stageMode}>
+          Cancion completa
+        </span>
+        <span id="stage-kind" className={styles.stageKind}>
+          Principal
+        </span>
+        <span id="stage-name" className={styles.stageName}>
+          Principal
+        </span>
+        <span id="stage-pattern" className={styles.stagePattern}>
+          Patron: Idea central
+        </span>
+        <span id="stage-progress" className={styles.stageProgress}>
+          1/1
+        </span>
         <div id="stage-track" className={styles.stageTrack} />
       </div>
 
@@ -2209,7 +2198,19 @@ export default function PianoPlayer({ initialLevelId }: PianoPlayerProps = {}) {
           <span id="octave-indicator" className={styles.octaveIndicator}>
             Octava 4
           </span>
-          <div ref={pianoRef} className={styles.piano} />
+          {/* The engine delegates its pointer handling to this wrapper and
+              finds the keys by `data-midi`, so its ref sits out here rather
+              than on the keyboard React owns. */}
+          <div ref={pianoRef}>
+            <PianoKeyboard
+              className={styles.pianoFrame}
+              fingers
+              fromMidi={pianoRange.from}
+              interactive
+              labels="letter"
+              toMidi={pianoRange.to}
+            />
+          </div>
           {isFullscreen && settings.inputMode === 'keyboard' && (
             <p className={styles.keyboardReachNote}>
               <FontAwesomeIcon icon={faKeyboard} />

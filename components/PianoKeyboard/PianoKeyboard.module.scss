@@ -1,19 +1,29 @@
 @use '../../styles/variables' as *;
 
 // ---------------------------------------------------------------------------
-// The keyboard, extracted verbatim from PianoPlayer.module.scss so that every
-// game shows the *same* instrument. It had been duplicated between the piano
-// player and the ear training game, and a third, plainer one had grown inside
-// the Simon game — which is what made that screen look like a different app.
+// The one keyboard. The piano player, the ear training games and the
+// calibration wizard all draw from here, so a student sees the same instrument
+// whichever exercise they open — there used to be three near-identical copies
+// of these rules, which is what made each screen look like a different app.
 //
-// PianoPlayer and EarTraining still build their own DOM imperatively (their
-// engines bind handlers to those nodes), so they keep their copies of these
-// rules for now; this module is what any *new* surface should use.
+// Two of those surfaces still drive their keys from an imperative engine, and
+// they toggle classes from *this* module on the nodes React rendered. That
+// makes the following a public contract, not private styling: `.key`, `.black`,
+// `.pressed`, `.hint`, `.feedback`/`.feedbackVisible` and
+// `.correctFlash`/`.incorrectFlash` are named by PianoPlayer.tsx and
+// EarTraining.tsx and cannot be renamed without updating them.
 // ---------------------------------------------------------------------------
 
-// One white key plus its two 1px margins. Black keys are placed in multiples
-// of this, which is what lets the same rules draw one octave or seven.
-$key-pitch: $white-key-width + 2px;
+// Key geometry lives in custom properties so a narrow screen can shrink the
+// whole instrument by overriding two values, instead of restating every black
+// key's offset against a hand-measured half-span the way the old copies did.
+.piano {
+  --key-w: #{$white-key-width};
+  --black-w: #{$black-key-width};
+  // One white key plus its two 1px margins. Black keys are placed in multiples
+  // of this, which is what lets the same rules draw one octave or seven.
+  --pitch: calc(var(--key-w) + 2px);
+}
 
 .frame {
   position: relative;
@@ -42,7 +52,7 @@ $key-pitch: $white-key-width + 2px;
   margin: 0 auto;
   // Sized to its keys rather than to the page, so a black key can be offset
   // from the keyboard's own left edge instead of from a hand-measured centre.
-  width: calc(var(--white-count) * #{$key-pitch});
+  width: calc(var(--white-count) * var(--pitch));
   touch-action: none; // eliminates ~100ms browser touch delay
 }
 
@@ -50,7 +60,7 @@ $key-pitch: $white-key-width + 2px;
   background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
   border: 1px solid #c4b99a;
   flex: 0 0 auto;
-  width: $white-key-width;
+  width: var(--key-w);
   height: 100%;
   position: relative;
   text-align: center;
@@ -89,8 +99,10 @@ $key-pitch: $white-key-width + 2px;
   }
 }
 
-// A read-only keyboard is a diagram, not a control.
-div.key {
+// A read-only keyboard is a diagram, not a control. `.live` marks the keyboards
+// that *are* playable but let an engine handle the press, so they keep the
+// control affordances without becoming <button>s.
+.piano:not(.live) div.key {
   cursor: default;
 
   &:hover {
@@ -101,13 +113,13 @@ div.key {
 .black {
   background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
   color: white;
-  width: $black-key-width;
+  width: var(--black-w);
   height: 60%;
   position: absolute;
   top: 0;
   // `--slot` is how many white keys sit to this one's left, so it lands on
   // the boundary between them whatever the range or the scroll position.
-  left: calc(var(--slot) * #{$key-pitch} - #{$black-key-width * 0.5});
+  left: calc(var(--slot) * var(--pitch) - var(--black-w) / 2);
   z-index: 3;
   border-radius: 0 0 4px 4px;
   border: 1px solid #000;
@@ -130,7 +142,7 @@ div.key {
   }
 }
 
-div.black:hover {
+.piano:not(.live) div.black:hover {
   background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
 }
 
@@ -156,8 +168,27 @@ div.black:hover {
   line-height: 1;
 }
 
+// The suggested finger, when `fingers` is on.
+.keyFinger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.16);
+  color: #64748b;
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
 .black .keyLabel {
   color: #999;
+}
+
+.black .keyFinger {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
 }
 
 .pressed {
@@ -282,8 +313,92 @@ div.black:hover {
   background: linear-gradient(180deg, #2f3a1c 0%, #1a2010 100%);
 }
 
+// ---------------------------------------------------------------------------
+// Engine-owned classes.
+//
+// Everything above is set from props. What follows is toggled from outside, by
+// PianoPlayer's and EarTraining's engines, on nodes this component rendered.
+// They are transient — a 300ms badge, a 600ms flash — driven by timers inside a
+// closure React does not participate in, so they stay imperative rather than
+// becoming props that would force the whole engine into React state.
+// ---------------------------------------------------------------------------
+
+// The ✓ / ✗ that pops above a key as it is judged.
+.feedback {
+  position: absolute;
+  top: -1.4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.2rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.feedbackVisible {
+  opacity: 1;
+}
+
+@keyframes correctFlash {
+  0% {
+    background: $success-color;
+  }
+  100% {
+    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
+  }
+}
+
+@keyframes incorrectFlash {
+  0% {
+    background: $failure-color;
+  }
+  100% {
+    background: linear-gradient(180deg, #fffff8 0%, #f5f0e8 60%, #ece6da 100%);
+  }
+}
+
+.correctFlash {
+  animation: correctFlash 0.6s ease-out forwards;
+}
+
+.incorrectFlash {
+  animation: incorrectFlash 0.6s ease-out forwards;
+}
+
+// Both flashes settle on the ivory gradient, so a black key used to finish the
+// animation white and stay there. These fade back to ebony instead.
+@keyframes correctFlashBlack {
+  0% {
+    background: $success-color;
+  }
+  100% {
+    background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
+  }
+}
+
+@keyframes incorrectFlashBlack {
+  0% {
+    background: $failure-color;
+  }
+  100% {
+    background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 40%, #111 100%);
+  }
+}
+
+.black.correctFlash {
+  animation-name: correctFlashBlack;
+}
+
+.black.incorrectFlash {
+  animation-name: incorrectFlashBlack;
+}
+
 @media (max-width: $mobile-breakpoint) {
   .piano {
+    // A whole octave has to fit a phone, so the instrument shrinks rather than
+    // overflowing. Everything derived from these follows automatically.
+    --key-w: 40px;
+    --black-w: 28px;
     height: 150px;
     transform-origin: top center;
   }

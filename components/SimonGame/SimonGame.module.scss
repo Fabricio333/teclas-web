@@ -78,56 +78,6 @@
   }
 }
 
-.scoreCards {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  margin-bottom: 1.25rem;
-}
-
-.scoreCard {
-  flex: 1;
-  max-width: 160px;
-  padding: 0.6rem 0.75rem;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.15rem;
-}
-
-.scoreCardLabel {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  opacity: 0.8;
-}
-
-.scoreCardValue {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.scoreCardBlue {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1d4ed8;
-}
-
-.scoreCardAmber {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  color: #b45309;
-}
-
-.scoreCardGreen {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  color: #15803d;
-}
-
 .promptArea {
   background: white;
   border: 1px solid #e2e8f0;
@@ -421,4 +371,10 @@
   padding: 0.75rem 0;
   font-size: 0.85rem;
   color: $light-text-color;
+}
+
+// Centred under the controls, where the row of cards used to sit.
+.stats {
+  justify-content: center;
+  margin-bottom: 1.25rem;
 }

@@ -12,6 +12,7 @@ import { midiNumberToNote } from '@/lib/piano-player/Midi';
 import { WHITE_KEYS, BLACK_KEYS } from '@/lib/piano-player/songs';
 import { letterNameToSolfege } from '@/lib/piano-player/noteNames';
 import PianoKeyboard from '@/components/PianoKeyboard';
+import StatPills from '@/components/StatPills';
 import styles from './SimonGame.module.scss';
 
 /**
@@ -443,20 +444,14 @@ export default function SimonGame() {
         </div>
       </div>
 
-      <div className={styles.scoreCards}>
-        <div className={`${styles.scoreCard} ${styles.scoreCardBlue}`}>
-          <span className={styles.scoreCardLabel}>Puntos</span>
-          <span className={styles.scoreCardValue}>{score}</span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardAmber}`}>
-          <span className={styles.scoreCardLabel}>Ronda</span>
-          <span className={styles.scoreCardValue}>{steps.length || 1}</span>
-        </div>
-        <div className={`${styles.scoreCard} ${styles.scoreCardGreen}`}>
-          <span className={styles.scoreCardLabel}>Mejor</span>
-          <span className={styles.scoreCardValue}>{best}</span>
-        </div>
-      </div>
+      <StatPills
+        className={styles.stats}
+        stats={[
+          { label: 'Puntos', tone: 'blue', value: score },
+          { label: 'Ronda', tone: 'amber', value: steps.length || 1 },
+          { label: 'Mejor', tone: 'green', value: best },
+        ]}
+      />
 
       <div className={styles.promptArea}>
         <p className={styles.noteCounter}>

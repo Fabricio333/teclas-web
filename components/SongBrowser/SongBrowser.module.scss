@@ -1,0 +1,179 @@
+@use '../../styles/variables' as *;
+
+// ---------- Trigger ----------
+
+// Reads as the song's name first and a control second: it is the loudest thing
+// in the toolbar because it is the only one a student changes on purpose.
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  transition:
+    border-color 0.15s var(--ease-in-out),
+    background 0.15s var(--ease-in-out);
+
+  &:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-alt);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+.triggerStars {
+  letter-spacing: -0.08em;
+}
+
+.triggerName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.triggerCaret {
+  color: var(--color-text-subtle);
+  font-size: 0.7em;
+}
+
+// ---------- Dialog ----------
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--color-scrim);
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: browserFade 0.15s var(--ease-in-out);
+  }
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 760px);
+  // Tall enough to show two rows of cards without scrolling on a laptop, and
+  // never taller than the window.
+  max-height: min(80vh, 640px);
+  border-radius: var(--radius-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: browserRise 0.2s var(--ease-in-out);
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem 0.75rem;
+}
+
+.headTitle {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-sunken);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-border);
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 1.25rem 0.9rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.search {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+.body {
+  padding: 1rem 1.25rem 1.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@keyframes browserFade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes browserRise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: $mobile-breakpoint) {
+  .scrim {
+    // A full-height sheet: on a phone the dialog *is* the screen, and centring
+    // it just wastes the top and bottom.
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .dialog {
+    width: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+}

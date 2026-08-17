@@ -1,0 +1,183 @@
+@use '../../styles/variables' as *;
+
+// ---------------------------------------------------------------------------
+// Shared song-list parts: the difficulty filter and the card grid. Used by the
+// player's song browser and by the list at the foot of every song page, so the
+// two describe the same catalogue in the same shapes.
+// ---------------------------------------------------------------------------
+
+// ---------- Difficulty filter ----------
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-in-out),
+    border-color 0.15s var(--ease-in-out),
+    color 0.15s var(--ease-in-out);
+
+  &:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface-alt);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+.pillOn {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-fg);
+
+  &:hover {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+  }
+
+  .pillCount {
+    background: rgb(255 255 255 / 0.22);
+    color: var(--color-primary-fg);
+  }
+}
+
+.pillHint {
+  font-weight: var(--weight-medium);
+}
+
+// The tally is context, not content — small enough to read past.
+.pillCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-sunken);
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+// ---------- Card grid ----------
+
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.groupTitle {
+  margin: 0 0 0.6rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.grid {
+  display: grid;
+  // Cards find their own columns, so the same grid serves a 1200px page and a
+  // dialog half that wide without a breakpoint for each.
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.6rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  transition:
+    border-color 0.15s var(--ease-in-out),
+    box-shadow 0.15s var(--ease-in-out),
+    transform 0.15s var(--ease-in-out);
+
+  &:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}
+
+.cardCurrent {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.cardName {
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.cardStars {
+  letter-spacing: -0.08em;
+}
+
+// Stars *earned*, as opposed to the difficulty above — the only thing on a card
+// that changes as the student plays, so it is the one thing tinted.
+.cardEarned {
+  color: var(--color-xp);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+}
+
+.cardEarnedDim {
+  color: var(--color-text-subtle);
+}
+
+.cardCurrentTag {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  color: var(--color-primary);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.empty {
+  margin: 0;
+  padding: 1.5rem 0;
+  color: var(--color-text-muted);
+  text-align: center;
+}

@@ -1,0 +1,72 @@
+@use '../../styles/variables' as *;
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+// Label and value side by side rather than stacked: it halves the height, and
+// at a glance "Racha 8" reads as one fact instead of two.
+.stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.label {
+  color: var(--color-text-muted);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.value {
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  // Otherwise the row twitches sideways every time the score ticks over.
+  font-variant-numeric: tabular-nums;
+}
+
+// The same three tints and inks the cards used, carried over unchanged so the
+// numbers stay recognisable at their new size.
+.blue {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.amber {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+.green {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+// The label rides the pill's ink rather than the page's grey, which is what
+// keeps each stat legible as one unit.
+.blue,
+.amber,
+.green {
+  .label {
+    color: currentcolor;
+    opacity: 0.75;
+  }
+
+  .value {
+    color: currentcolor;
+  }
+}
