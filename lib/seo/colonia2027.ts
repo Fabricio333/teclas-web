@@ -1,21 +1,22 @@
 /**
- * Structured data for the upcoming 2027 "Colonia de Verano".
+ * Structured data for the upcoming 2027 "Colonia Musical".
  *
- * Same shape as `event.ts`; the address mirrors `localBusiness.ts`. The dates
- * are still to be confirmed by the school, so `startDate` carries the season
- * (which edits this month) and the page's own `facts` say the exact dates are
- * pending.
+ * Same shape as `event.ts`; the address mirrors `localBusiness.ts`. The school
+ * confirmed six weeks of Monday-to-Friday activity across January and February,
+ * in two shifts (10–12 and 17–19 hs.); the exact opening day is still pending,
+ * so the range starts on the first Monday of January and runs the six weeks
+ * from there.
  */
 export const colonia2027JsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Event',
-  name: 'Colonia de Verano 2027',
+  name: 'Colonia Musical 2027',
   url: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2027',
-  startDate: '2027-01-04T09:00:00-03:00',
-  // Recommended by Google and previously absent. The exact dates are still
-  // pending, so this mirrors the 2026 edition's shape: a season ending on the
-  // last Friday of February, at the same 13:00 close.
-  endDate: '2027-02-26T13:00:00-03:00',
+  startDate: '2027-01-04T10:00:00-03:00',
+  // Recommended by Google and previously absent. Six weeks from the first
+  // Monday of January close on Friday 12 February, at the end of the
+  // afternoon shift.
+  endDate: '2027-02-12T19:00:00-03:00',
   eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
   eventStatus: 'https://schema.org/EventScheduled',
   location: {
@@ -42,7 +43,7 @@ export const colonia2027JsonLd = {
   },
   image: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2026.jpg',
   description:
-    'Colonia de verano en TECLAS Ciudad Jardín: música, juegos y tiempo al aire libre para chicos y jóvenes. Fechas a confirmar.',
+    'Colonia Musical en TECLAS Ciudad Jardín: seis semanas de juegos musicales, canto, percusión, coreografías y piano para chicos y jóvenes, de lunes a viernes en enero y febrero.',
   offers: {
     '@type': 'Offer',
     url: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2027',

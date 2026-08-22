@@ -225,18 +225,26 @@ function infoRows(event) {
   const fact = (label) =>
     event.facts.find((f) => f.label === label)?.value ?? '';
 
+  // An event without the matching fact drops its row rather than printing a
+  // bare "Horario" / "Entrada" with nothing after it.
+  const optional = (label, prefix) => {
+    const value = fact(label);
+    return value ? `${prefix} ${value.toLowerCase()}` : '';
+  };
+
   const rows = [
     [solid.faCalendarDays, '#ED3B95', event.date],
-    [solid.faClock, '#60C9DE', `Horario ${fact('Horario').toLowerCase()}`],
+    [solid.faClock, '#60C9DE', optional('Horario', 'Horario')],
     [
       solid.faLocationDot,
       '#F3862C',
       event.location.replace(/^TECLAS — /, '').replace(/\.$/, ''),
     ],
-    [solid.faTicket, '#FFD122', `Entrada ${fact('Entrada').toLowerCase()}`],
+    [solid.faTicket, '#FFD122', optional('Entrada', 'Entrada')],
   ];
 
   return rows
+    .filter(([, , text]) => text)
     .map(
       ([icon, color, text]) =>
         `<li class="infoRow"><span class="chip" style="background:${color}">${faIcon(icon, 'chipIcon')}</span><span class="infoText">${esc(text)}</span></li>`,

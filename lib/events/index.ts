@@ -46,29 +46,38 @@ export function whatsappUrl(message: string): string {
 
 export const events: TeclasEvent[] = [
   {
+    // La URL sigue siendo `colonia-verano-2027` (ya publicada y en el sitemap)
+    // aunque la escuela pasó a llamarla «Colonia Musical».
     slug: 'colonia-verano-2027',
-    title: 'Colonia de Verano 2027',
-    subtitle: 'Música, juegos y baile para las vacaciones',
+    title: 'Colonia Musical 2027',
+    subtitle: 'Seis semanas de juegos musicales, canto, percusión y piano',
     status: 'upcoming',
-    date: 'Verano 2027 · Fechas a confirmar',
+    date: 'Enero y Febrero de 2027 · Lunes a Viernes',
     summary:
-      'Colonia de verano con música, juegos y baile para los más chicos durante las vacaciones.',
+      'Seis semanas de juegos musicales, canto, percusión, coreografías y piano para todos los chicos.',
     location: 'TECLAS — Blvd. Aviador Finca 6142, Local 12, Ciudad Jardín.',
     image: '/events/colonia-verano-2026.jpg',
-    imageAlt: 'Grupo de chicos de la colonia de verano de TECLAS en el parque',
+    imageAlt:
+      'Chicos de la colonia de TECLAS sentados en ronda con instrumentos de percusión',
     ctaLabel: 'Inscribirme por WhatsApp',
-    whatsappMessage:
-      '¡Hola TECLAS! Quiero anotarme a la Colonia de Verano 2027.',
+    whatsappMessage: '¡Hola TECLAS! Quiero anotarme a la Colonia Musical 2027.',
     metaDescription:
-      'Colonia de Verano 2027 en TECLAS Ciudad Jardín: música, juegos y baile para las vacaciones. Fechas a confirmar.',
+      'Colonia Musical 2027 en TECLAS Ciudad Jardín: seis semanas de juegos musicales, canto, percusión, coreografías y piano, de lunes a viernes en enero y febrero.',
     body: [
-      'La Colonia de Verano es la propuesta de TECLAS para las vacaciones: música, juegos, baile y movimiento para los más chicos.',
-      'Cada jornada combina actividades musicales con juegos al aire libre, para que el verano se sienta como vacaciones de verdad y a la vez la música siga sonando.',
-      'Las fechas de la edición se están confirmando. Si te quedó gustando, dejanos un mensaje y te avisamos apenas estén.',
+      'La Colonia Musical de TECLAS dura seis semanas: de lunes a viernes durante enero y febrero de 2027, en dos turnos — de 10 a 12 y de 17 a 19 hs.',
+      'Cada jornada se arma con juegos musicales, canto, percusión y coreografías. Todos los chicos tienen la posibilidad de tocar el piano, y quien quiera profundizar en el instrumento también puede hacerlo.',
+      'A eso se suman actividades especiales: un taller literario en el que se musicalizan poesías y producciones de los propios chicos, juegos de ingenio, y manualidades y arte.',
+      'Todas las actividades son lúdicas y recreativas, siempre dentro del marco de la educación musical. Durante la colonia se realizan muestras y se invita a las familias a verlas.',
     ],
     facts: [
-      { label: 'Fechas', value: 'A confirmar' },
-      { label: 'Ediciones', value: 'Enero y Febrero' },
+      { label: 'Fechas', value: 'Enero y Febrero de 2027' },
+      { label: 'Duración', value: '6 semanas, de lunes a viernes' },
+      { label: 'Horario', value: 'de 10 a 12 y de 17 a 19 hs.' },
+      {
+        label: 'Actividades',
+        value:
+          'Juegos musicales, canto, percusión, coreografías y piano. Taller literario, juegos de ingenio, manualidades y arte.',
+      },
       { label: 'Lugar', value: 'Blvd. Aviador Finca 6142, Local 12' },
       { label: 'Dirigido a', value: 'Niños y jóvenes' },
     ],
