@@ -157,7 +157,8 @@ export default function MediaKitPage() {
               de TECLAS en Google. Los dos tienen el piano de la escuela en el
               centro y están generados con corrección de errores alta, así que
               se pueden imprimir en un flyer, en un cartel o en una tarjeta y se
-              siguen escaneando.
+              siguen escaneando. El cartel de reseñas usa el QR de Google y está
+              listo para imprimir.
             </p>
 
             <div className={styles.assetGrid}>
@@ -165,10 +166,10 @@ export default function MediaKitPage() {
                 <div className={styles.asset} key={asset.file}>
                   <div className={styles.assetPreview}>
                     <Image
-                      alt={`${asset.name} de TECLAS con el piano en el centro`}
+                      alt={`${asset.name} de TECLAS`}
                       className={styles.assetImage}
                       height={128}
-                      src={asset.file}
+                      src={asset.preview ?? asset.file}
                       unoptimized
                       width={128}
                     />

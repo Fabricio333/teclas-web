@@ -16,6 +16,8 @@ export interface Asset {
   file: string;
   format: string;
   detail: string;
+  /** Image shown on the page when `file` is not one, e.g. a PDF. */
+  preview?: string;
 }
 
 export interface Swatch {
@@ -98,6 +100,19 @@ export const QR_ASSETS: Asset[] = [
     file: '/media-kit/qr-google.svg',
     format: 'SVG',
     detail: 'Vectorial · para imprimir a cualquier tamaño',
+  },
+  {
+    name: 'Cartel de reseñas',
+    file: '/media-kit/cartel-review-google.png',
+    format: 'PNG',
+    detail: 'Con el QR de Google · para mostrador, WhatsApp y redes',
+  },
+  {
+    name: 'Cartel de reseñas',
+    file: '/media-kit/cartel-review-google.pdf',
+    preview: '/media-kit/cartel-review-google.png',
+    format: 'PDF',
+    detail: 'Tamaño A6 · listo para imprimir',
   },
 ];
 
@@ -199,7 +214,7 @@ export const FACTS: { label: string; value: string; href?: string }[] = [
   {
     label: 'Dirección',
     value:
-      'Blvd. F.i.n.c.a 6142 Local 12, Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires',
+      'Boulevard Finca 6142 Local 12, Ciudad Jardín Lomas del Palomar, Provincia de Buenos Aires',
   },
   {
     label: 'Teléfono',

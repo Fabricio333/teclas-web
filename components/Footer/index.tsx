@@ -56,7 +56,7 @@ export default function Footer() {
                 rel="noopener noreferrer"
                 className={styles.locationLink}
               >
-                Blvd. F.i.n.c.a 6142 Local 12, Ciudad Jardín Lomas del Palomar,
+                Boulevard Finca 6142 Local 12, Ciudad Jardín Lomas del Palomar,
                 Provincia de Buenos Aires
               </a>
             </div>

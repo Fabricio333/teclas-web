@@ -12,6 +12,7 @@
     "flyer": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/flyer/build.mjs",
     "video:artwork": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/story-video/sync-artwork.mjs",
     "qr": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/qr/build.mjs",
+    "review-card": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/review-card/build.mjs",
     "video:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/story-video/check-layout.mjs"
   },
   "dependencies": {
