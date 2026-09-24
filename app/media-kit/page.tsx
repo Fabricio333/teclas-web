@@ -151,12 +151,13 @@ export default function MediaKitPage() {
 
           {/* ---------- QR ---------- */}
           <Reveal as="section" className={styles.block}>
-            <h2 className={styles.blockTitle}>Código QR</h2>
+            <h2 className={styles.blockTitle}>Códigos QR</h2>
             <p className={styles.blockText}>
-              Lleva directo a teclasciudadjardin.com.ar y tiene el piano de la
-              escuela en el centro. Está generado con corrección de errores
-              alta, así que se puede imprimir en un flyer, en un cartel o en una
-              tarjeta y se sigue escaneando.
+              Uno lleva directo a teclasciudadjardin.com.ar y el otro al perfil
+              de TECLAS en Google. Los dos tienen el piano de la escuela en el
+              centro y están generados con corrección de errores alta, así que
+              se pueden imprimir en un flyer, en un cartel o en una tarjeta y se
+              siguen escaneando.
             </p>
 
             <div className={styles.assetGrid}>
@@ -164,10 +165,10 @@ export default function MediaKitPage() {
                 <div className={styles.asset} key={asset.file}>
                   <div className={styles.assetPreview}>
                     <Image
-                      alt="Código QR de TECLAS con el piano en el centro"
+                      alt={`${asset.name} de TECLAS con el piano en el centro`}
                       className={styles.assetImage}
                       height={128}
-                      src="/media-kit/qr-teclasciudadjardin.png"
+                      src={asset.file}
                       unoptimized
                       width={128}
                     />

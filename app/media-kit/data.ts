@@ -87,6 +87,18 @@ export const QR_ASSETS: Asset[] = [
     format: 'SVG',
     detail: 'Vectorial · para imprimir a cualquier tamaño',
   },
+  {
+    name: 'QR de Google',
+    file: '/media-kit/qr-google.png',
+    format: 'PNG',
+    detail: 'Perfil de TECLAS en Google · reseñas, horarios y mapa',
+  },
+  {
+    name: 'QR de Google',
+    file: '/media-kit/qr-google.svg',
+    format: 'SVG',
+    detail: 'Vectorial · para imprimir a cualquier tamaño',
+  },
 ];
 
 export const PALETTE: Swatch[] = [

@@ -1,5 +1,5 @@
 /**
- * Website QR code -> SVG + PNG, with the school's piano in the middle.
+ * QR codes -> SVG + PNG, with the school's piano in the middle.
  *
  *   npm run qr
  *
@@ -29,7 +29,12 @@ register('../flyer/ts-loader.mjs', import.meta.url);
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 const OUT_DIR = join(ROOT, 'public/media-kit');
 
-export const QR_TARGET = 'https://teclasciudadjardin.com.ar';
+/** One code per entry; `file` is the basename written for both formats. */
+export const QR_TARGETS = [
+  { url: 'https://teclasciudadjardin.com.ar', file: 'qr-teclasciudadjardin' },
+  // Google Business profile ("TECLAS - Escuela de Piano").
+  { url: 'https://share.google/yPuX0nikV1GI0jRMt', file: 'qr-google' },
+];
 
 /** Rendered size of the PNG. The SVG is resolution-independent. */
 const SIZE = 1200;
@@ -140,8 +145,8 @@ function pianoBadge() {
  * that path with a fill produces a blank code that still looks plausible in a
  * viewer. It has to be stroked at width 1.
  */
-async function qrPath() {
-  const svg = await QRCode.toString(QR_TARGET, {
+async function qrPath(target) {
+  const svg = await QRCode.toString(target, {
     type: 'svg',
     errorCorrectionLevel: 'H',
     margin: 2,
@@ -166,20 +171,22 @@ async function qrPath() {
 
 // ---------------------------------------------------------------- compose
 
-const { viewBox, path } = await qrPath();
-const [, , vbW, vbH] = viewBox.split(/\s+/).map(Number);
-
-const badgeSide = vbW * BADGE;
-const badgeX = (vbW - badgeSide) / 2;
-const badgeY = (vbH - badgeSide) / 2;
-/* A little breathing room so dark modules never touch the badge edge. */
-const plateSide = badgeSide * 1.16;
-const plateX = (vbW - plateSide) / 2;
-const plateY = (vbH - plateSide) / 2;
-
 const badge = pianoBadge();
+mkdirSync(OUT_DIR, { recursive: true });
 
-const composed = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${SIZE}" height="${SIZE}">
+for (const { url, file } of QR_TARGETS) {
+  const { viewBox, path } = await qrPath(url);
+  const [, , vbW, vbH] = viewBox.split(/\s+/).map(Number);
+
+  const badgeSide = vbW * BADGE;
+  const badgeX = (vbW - badgeSide) / 2;
+  const badgeY = (vbH - badgeSide) / 2;
+  /* A little breathing room so dark modules never touch the badge edge. */
+  const plateSide = badgeSide * 1.16;
+  const plateX = (vbW - plateSide) / 2;
+  const plateY = (vbH - plateSide) / 2;
+
+  const composed = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${SIZE}" height="${SIZE}">
   <rect width="100%" height="100%" fill="#ffffff"/>
   <path d="${path}" stroke="#141d36" stroke-width="1" fill="none" shape-rendering="crispEdges"/>
   <rect x="${plateX.toFixed(3)}" y="${plateY.toFixed(3)}" width="${plateSide.toFixed(3)}" height="${plateSide.toFixed(3)}" rx="${(plateSide * 0.18).toFixed(3)}" fill="#ffffff"/>
@@ -189,45 +196,44 @@ const composed = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" w
   </svg>
 </svg>`;
 
-mkdirSync(OUT_DIR, { recursive: true });
+  const svgPath = join(OUT_DIR, `${file}.svg`);
+  const pngPath = join(OUT_DIR, `${file}.png`);
 
-const svgPath = join(OUT_DIR, 'qr-teclasciudadjardin.svg');
-const pngPath = join(OUT_DIR, 'qr-teclasciudadjardin.png');
+  writeFileSync(svgPath, composed);
+  const png = await sharp(Buffer.from(composed), { density: 300 })
+    .resize(SIZE, SIZE)
+    .png({ compressionLevel: 9 })
+    .toFile(pngPath);
 
-writeFileSync(svgPath, composed);
-const png = await sharp(Buffer.from(composed), { density: 300 })
-  .resize(SIZE, SIZE)
-  .png({ compressionLevel: 9 })
-  .toFile(pngPath);
+  // -------------------------------------------------------------- verify
 
-// ---------------------------------------------------------------- verify
+  /*
+   * Decode what was actually written. A code whose badge has eaten one module
+   * too many still looks perfectly fine on screen; the only way to know is to
+   * read it back.
+   */
+  const { default: jsQR } = await import('jsqr');
+  const raw = await sharp(pngPath)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const decoded = jsQR(
+    new Uint8ClampedArray(raw.data),
+    raw.info.width,
+    raw.info.height,
+  );
 
-/*
- * Decode what was actually written. A code whose badge has eaten one module
- * too many still looks perfectly fine on screen; the only way to know is to
- * read it back.
- */
-const { default: jsQR } = await import('jsqr');
-const raw = await sharp(pngPath)
-  .ensureAlpha()
-  .raw()
-  .toBuffer({ resolveWithObject: true });
-const decoded = jsQR(
-  new Uint8ClampedArray(raw.data),
-  raw.info.width,
-  raw.info.height,
-);
+  if (!decoded || decoded.data !== url) {
+    throw new Error(
+      `the rendered QR does not scan back to ${url} (got ${decoded ? decoded.data : 'no code found'}). ` +
+        'Shrink BADGE or raise the margin in scripts/qr/build.mjs.',
+    );
+  }
 
-if (!decoded || decoded.data !== QR_TARGET) {
-  throw new Error(
-    `the rendered QR does not scan back to ${QR_TARGET} (got ${decoded ? decoded.data : 'no code found'}). ` +
-      'Shrink BADGE or raise the margin in scripts/qr/build.mjs.',
+  console.log(
+    `QR -> ${url}\n` +
+      `  public/media-kit/${file}.svg  (vector, for print)\n` +
+      `  public/media-kit/${file}.png  ${png.width}x${png.height}  ${(png.size / 1024).toFixed(0)} KB\n` +
+      '  verified: decodes back to the target URL',
   );
 }
-
-console.log(
-  `QR -> ${QR_TARGET}\n` +
-    `  public/media-kit/qr-teclasciudadjardin.svg  (vector, for print)\n` +
-    `  public/media-kit/qr-teclasciudadjardin.png  ${png.width}x${png.height}  ${(png.size / 1024).toFixed(0)} KB\n` +
-    '  verified: decodes back to the site URL',
-);
