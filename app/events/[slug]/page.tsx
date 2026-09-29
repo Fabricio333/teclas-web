@@ -1,10 +1,18 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import AmbientNotes from '@/components/AmbientNotes';
-import { events, getEventBySlug, whatsappUrl } from '@/lib/events';
-import { flyerPath } from '@/lib/flyer';
+import {
+  events,
+  getEventBySlug,
+  whatsappUrl,
+  type TeclasEvent,
+} from '@/lib/events';
+import { FLYER_SIZES, flyerPath } from '@/lib/flyer';
+import EventGallery, { type GalleryPicture } from './EventGallery';
 import styles from './EventDetail.module.scss';
 
 type EventPageProps = { params: Promise<{ slug: string }> };
@@ -43,6 +51,29 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * The event's photo plus its generated feed flyer, when `npm run flyer` has
+ * written one — past events have none, so they get no gallery.
+ */
+function galleryPictures(event: TeclasEvent): GalleryPicture[] {
+  const pictures: GalleryPicture[] = [
+    { src: event.image, alt: event.imageAlt, width: 1600, height: 1136 },
+  ];
+
+  const post = FLYER_SIZES.find((size) => size.key === 'post');
+  const flyer = post && flyerPath(event.slug, post.key);
+  if (post && flyer && existsSync(join(process.cwd(), 'public', flyer))) {
+    pictures.push({
+      src: flyer,
+      alt: `Flyer de ${event.title}, ${event.date}`,
+      width: post.width,
+      height: post.height,
+    });
+  }
+
+  return pictures;
+}
+
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
   const event = getEventBySlug(slug);
@@ -50,7 +81,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   if (!event) notFound();
 
   const isPast = event.status === 'past';
-  const bannerImage = isPast ? event.image : flyerPath(event.slug, 'post');
+  const pictures = galleryPictures(event);
 
   return (
     <article className={styles.eventDetail}>
@@ -60,16 +91,24 @@ export default async function EventDetailPage({ params }: EventPageProps) {
       />
       <AmbientNotes density="normal" tone="brand" />
 
+      {/* The photo is shown whole, never cropped to the strip: a blurred copy
+          of itself fills the width behind it. */}
       <div className={styles.banner}>
         <Image
-          src={bannerImage}
-          alt={isPast ? event.imageAlt : `Flyer de ${event.title}`}
-          width={isPast ? 1600 : 1080}
-          height={isPast ? 900 : 1350}
+          src={event.image}
+          alt=""
+          aria-hidden
+          fill
+          sizes="100vw"
+          className={styles.bannerBackdrop}
+        />
+        <Image
+          src={event.image}
+          alt={event.imageAlt}
+          width={1600}
+          height={1136}
           priority
-          className={`${styles.bannerImage} ${
-            isPast ? '' : styles.flyerBannerImage
-          }`}
+          className={styles.bannerImage}
         />
       </div>
 
@@ -122,6 +161,8 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             </dl>
           </aside>
         </div>
+
+        {pictures.length > 1 && <EventGallery pictures={pictures} />}
       </div>
     </article>
   );

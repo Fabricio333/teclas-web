@@ -1,0 +1,135 @@
+@use '../../../../styles/variables' as *;
+
+.gallery {
+  // One row height for every picture, each at its own width.
+  --row-height: 260px;
+
+  max-width: 960px;
+  margin: var(--space-10) auto 0;
+
+  @media (min-width: $mobile-breakpoint) {
+    --row-height: 380px;
+  }
+
+  @media (min-width: $tablet-breakpoint) {
+    --row-height: 460px;
+  }
+}
+
+.viewport {
+  position: relative;
+}
+
+.track {
+  display: flex;
+  gap: var(--space-4);
+  // Room either side so the first and last pictures can reach the centre.
+  // Half the track minus half the narrowest picture expected — a 4:5 flyer.
+  padding: var(--space-2)
+    max(var(--space-4), calc(50% - 0.4 * var(--row-height)));
+  margin: 0;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  // The neighbouring pictures fade out at the edges instead of being cut.
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 6%,
+    #000 94%,
+    transparent
+  );
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.slide {
+  flex: none;
+  scroll-snap-align: center;
+  line-height: 0;
+
+  a {
+    display: block;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba($dark-text-color, 0.14);
+    transition: transform var(--dur-base) var(--ease-out);
+
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
+}
+
+.image {
+  width: auto;
+  max-width: 84vw;
+  height: var(--row-height);
+  object-fit: contain;
+  background-color: rgba($blue-color, 0.06);
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: none;
+  border-radius: 50%;
+  background: $background-color;
+  color: $primary-color;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity var(--dur-fast) var(--ease-out);
+
+  &:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  // Phones swipe; the arrows only appear where there is a pointer.
+  @media (min-width: $mobile-breakpoint) {
+    display: grid;
+  }
+}
+
+.arrowPrev {
+  left: 0;
+}
+
+.arrowNext {
+  right: 0;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: var(--space-4);
+}
+
+.dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgb(var(--purple-rgb) / 0.3);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.dotActive {
+  background: var(--purple-900);
+  transform: scale(1.35);
+}
