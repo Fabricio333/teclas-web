@@ -10,7 +10,7 @@
 export const colonia2027JsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Event',
-  name: 'Colonia Musical 2027',
+  name: 'Colonia de Verano 2027',
   url: 'https://teclasciudadjardin.com.ar/events/colonia-verano-2027',
   startDate: '2027-01-04T10:00:00-03:00',
   // Recommended by Google and previously absent. Six weeks from the first

@@ -120,6 +120,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             {isPast ? 'Finalizado' : 'Próximo evento'}
           </span>
           <h1 className={styles.title}>{event.title}</h1>
+          {event.altName && <h2 className={styles.altName}>{event.altName}</h2>}
           {event.subtitle && (
             <p className={styles.subtitle}>{event.subtitle}</p>
           )}

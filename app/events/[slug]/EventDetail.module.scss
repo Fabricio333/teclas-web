@@ -101,6 +101,18 @@
   }
 }
 
+.altName {
+  font-family: var(--font-lobster), cursive;
+  font-weight: 400;
+  font-size: $font-size-lg;
+  color: $purple-color;
+  margin-bottom: var(--space-3);
+
+  @media (min-width: $tablet-breakpoint) {
+    font-size: $font-size-xl;
+  }
+}
+
 .subtitle {
   color: $purple-color;
   font-style: italic;

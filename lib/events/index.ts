@@ -25,6 +25,16 @@ export type TeclasEvent = {
    * after the colon.
    */
   flyerTitle?: string;
+  /**
+   * Label of the small pill above the flyer headline. Falls back to the part
+   * of `title` before the colon.
+   */
+  flyerKicker?: string;
+  /**
+   * Second name shown under the title, in Lobster — for an event the school
+   * also calls by another name. The title stays what search already knows.
+   */
+  altName?: string;
   /** Label of the WhatsApp pill — an ended event should not say "inscribirme". */
   ctaLabel: string;
   /** Pre-filled WhatsApp message. */
@@ -47,9 +57,13 @@ export function whatsappUrl(message: string): string {
 export const events: TeclasEvent[] = [
   {
     // La URL sigue siendo `colonia-verano-2027` (ya publicada y en el sitemap)
-    // aunque la escuela pasó a llamarla «Colonia Musical».
+    // y el título sigue siendo «Colonia de Verano 2027»; «Colonia Musical», el
+    // nombre que usa la escuela, va debajo como `altName`.
     slug: 'colonia-verano-2027',
-    title: 'Colonia Musical 2027',
+    title: 'Colonia de Verano 2027',
+    altName: 'Colonia Musical 2027',
+    flyerKicker: 'Colonia Musical',
+    flyerTitle: 'TECLAS 2027',
     subtitle: 'Seis semanas de juegos musicales, canto, percusión y piano',
     status: 'upcoming',
     date: 'Enero y Febrero de 2027 · Lunes a Viernes',
@@ -62,7 +76,7 @@ export const events: TeclasEvent[] = [
     ctaLabel: 'Inscribirme por WhatsApp',
     whatsappMessage: '¡Hola TECLAS! Quiero anotarme a la Colonia Musical 2027.',
     metaDescription:
-      'Colonia Musical 2027 en TECLAS Ciudad Jardín: seis semanas de juegos musicales, canto, percusión, coreografías y piano, de lunes a viernes en enero y febrero.',
+      'Colonia de Verano 2027 en TECLAS Ciudad Jardín: seis semanas de juegos musicales, canto, percusión, coreografías y piano, de lunes a viernes en enero y febrero.',
     body: [
       'La Colonia Musical de TECLAS dura seis semanas: de lunes a viernes durante enero y febrero de 2027, en dos turnos — de 10 a 12 y de 17 a 19 hs.',
       'Cada jornada se arma con juegos musicales, canto, percusión y coreografías. Todos los chicos tienen la posibilidad de tocar el piano, y quien quiera profundizar en el instrumento también puede hacerlo.',
