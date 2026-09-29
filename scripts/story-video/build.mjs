@@ -1,7 +1,8 @@
 /**
  * Event story video -> MP4, one per upcoming event.
  *
- *   npm run video
+ *   npm run video                        every upcoming event
+ *   npm run video -- colonia-verano-2027 only the events named
  *
  * The composition in `videos/event-story/` is hand-authored once; only its
  * headline and fact list change from event to event. For every upcoming event
@@ -75,7 +76,20 @@ function compose(html, event) {
 const { upcomingEvents } = await import('@/lib/events');
 const { storyVideoPath } = await import('@/lib/flyer');
 
-if (upcomingEvents.length === 0) {
+/* A render takes minutes, so a copy change to one event can re-render just
+   that one. */
+const only = process.argv.slice(2);
+const unknown = only.filter(
+  (slug) => !upcomingEvents.some((event) => event.slug === slug),
+);
+if (unknown.length) {
+  throw new Error(`not an upcoming event: ${unknown.join(', ')}`);
+}
+const selected = only.length
+  ? upcomingEvents.filter((event) => only.includes(event.slug))
+  : upcomingEvents;
+
+if (selected.length === 0) {
   console.log('No upcoming events in lib/events — nothing to render.');
   process.exit(0);
 }
@@ -91,7 +105,7 @@ const env = {
     process.env.HYPERFRAMES_BROWSER_PATH ?? findChromium(),
 };
 
-for (const event of upcomingEvents) {
+for (const event of selected) {
   const rel = storyVideoPath(event.slug);
   const out = join(PUBLIC_DIR, rel);
   const work = mkdtempSync(join(tmpdir(), 'teclas-story-'));

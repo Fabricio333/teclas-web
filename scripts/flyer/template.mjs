@@ -259,6 +259,7 @@ export function infoRows(event) {
  * rename the event on the site and the flyer follows.
  */
 export function kicker(event) {
+  if (event.flyerKicker) return event.flyerKicker;
   return event.title.split(/:\s*/)[0];
 }
 
