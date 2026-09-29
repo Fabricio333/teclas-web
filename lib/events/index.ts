@@ -154,7 +154,7 @@ export const events: TeclasEvent[] = [
     title: 'Colonia de Verano 2026',
     subtitle: 'Música, juegos y baile para las vacaciones',
     status: 'past',
-    date: 'Enero y Febrero de 2026',
+    date: '5 de Enero al 13 de Febrero de 2026',
     summary:
       'Colonia de verano con música, juegos y baile para los más chicos durante las vacaciones.',
     location: 'TECLAS — Blvd. Aviador Finca 6142, Local 12, Ciudad Jardín.',
@@ -167,15 +167,13 @@ export const events: TeclasEvent[] = [
     metaDescription:
       'Colonia de Verano 2026 en TECLAS Ciudad Jardín: música, juegos y baile para las vacaciones escolares.',
     body: [
-      'La Colonia de Verano 2026 fue la propuesta de TECLAS para las vacaciones: música, juegos, baile y movimiento para los más chicos.',
-      'Durante enero y febrero, cada jornada combinó actividades musicales con juegos al aire libre, para que el verano se sintiera como vacaciones de verdad y la música siguiera sonando.',
-      'Fue un verano a pura música. Si te quedó gustando, consultanos por la próxima edición.',
+      'La colonia de verano 2026 fue una propuesta de Teclas para niños entre 4 y 12 años donde se combinaron actividades lúdicas y recreativas en torno a la música. Los niños cantaron, bailaron, hicieron bandas de ritmos y dieron sus primeros pasos en el aprendizaje del piano. Los que contaban con experiencia en el instrumento siguieron progresando y ampliando sus repertorios pianísticos.',
     ],
     facts: [
-      { label: 'Fechas', value: 'Enero y Febrero de 2026' },
-      { label: 'Ediciones', value: 'Enero y Febrero' },
+      { label: 'Fecha', value: '5 de Enero al 13 de Febrero de 2026' },
+      { label: 'Edición', value: 'Colonia Musical 2026' },
       { label: 'Lugar', value: 'Blvd. Aviador Finca 6142, Local 12' },
-      { label: 'Dirigido a', value: 'Niños y jóvenes' },
+      { label: 'Dirigido a', value: 'Niños entre 4 y 12 años.' },
     ],
     jsonLd: pastColonia2026JsonLd,
   },
