@@ -38,3 +38,11 @@ export const FLYER_SIZES: FlyerSize[] = [
 export function flyerPath(slug: string, sizeKey: string): string {
   return `/events/${slug}-flyer-${sizeKey}.png`;
 }
+
+/**
+ * Public URL of an event's animated story (1080x1920 MP4), rendered by
+ * `scripts/story-video/build.mjs` — also its path under `public/`.
+ */
+export function storyVideoPath(slug: string): string {
+  return `/events/${slug}-story.mp4`;
+}

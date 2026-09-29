@@ -14,6 +14,13 @@
  * to a few moments across its length, and every star and note is compared
  * against the text above and below the artwork. Overlap is an error; anything
  * closer than MIN_GAP is a warning.
+ *
+ * It also checks that the contact bar ends inside the bottom safe area: a
+ * longer title or an extra fact line pushes everything down, and the render
+ * would quietly crop the phone number.
+ *
+ * Takes an optional project folder, so `npm run video` can check each event's
+ * copy of the composition before rendering it.
  */
 
 import {
@@ -27,14 +34,18 @@ import {
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-const PROJECT = join(ROOT, 'videos/event-story');
+const PROJECT = process.argv[2]
+  ? resolve(process.argv[2])
+  : join(ROOT, 'videos/event-story');
 
 /** Comfortable breathing room, in CSS px, between artwork and type. */
 const MIN_GAP = 24;
+/** Lowest the contact bar may end: clear of the frame's bottom edge. */
+const SAFE_BOTTOM = 1920 - 48;
 /** Moments to test. The ambient drift moves things after the build-in. */
 const TIMES = [5, 6.5, 9, 11.5, 14.5];
 
@@ -102,7 +113,7 @@ const PROBE = (times) => `
         // GSAP applies a seek synchronously, so the boxes are readable at
         // once. Awaiting rAF here never resolves under --virtual-time-budget.
         tl.seek(t);
-        var above = document.querySelector('#subtitle').getBoundingClientRect().bottom;
+        var above = (document.querySelector('#subtitle') || document.querySelector('#title')).getBoundingClientRect().bottom;
         var below = document.querySelector('#info').getBoundingClientRect().top;
         var lowest = -Infinity, highest = Infinity;
         document.querySelectorAll('.hf-star, .hf-note').forEach(function (el) {
@@ -111,7 +122,8 @@ const PROBE = (times) => `
           lowest = Math.max(lowest, r.bottom);
           highest = Math.min(highest, r.top);
         });
-        out.push({ t: t, gapBelow: below - lowest, gapAbove: highest - above });
+        var contact = document.querySelector('#contact').getBoundingClientRect().bottom;
+        out.push({ t: t, gapBelow: below - lowest, gapAbove: highest - above, contact: contact });
       });
       document.title = 'layout:' + JSON.stringify(out);
     } catch (e) {
@@ -155,10 +167,13 @@ try {
   const rows = JSON.parse(match[1]);
   let worstBelow = Infinity;
   let worstAbove = Infinity;
+  let lowestContact = -Infinity;
 
   for (const row of rows) {
     worstBelow = Math.min(worstBelow, row.gapBelow);
     worstAbove = Math.min(worstAbove, row.gapAbove);
+    // Only after the build-in: the bar rises into place from below.
+    if (row.t >= 9) lowestContact = Math.max(lowestContact, row.contact);
     console.log(
       `  t=${String(row.t).padStart(4)}s  above type: ${row.gapAbove.toFixed(0).padStart(5)}px` +
         `   below type: ${row.gapBelow.toFixed(0).padStart(5)}px`,
@@ -183,6 +198,13 @@ try {
     problems.push(
       `only ${worstAbove.toFixed(0)}px between the artwork and the subtitle (want ${MIN_GAP})`,
     );
+
+  if (lowestContact > SAFE_BOTTOM) {
+    throw new Error(
+      `the contact bar ends ${(lowestContact - SAFE_BOTTOM).toFixed(0)}px past ` +
+        'the safe area. Shorten the event copy or tighten the composition.',
+    );
+  }
 
   if (problems.length) {
     throw new Error(

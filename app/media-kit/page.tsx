@@ -9,7 +9,7 @@ import {
 import AmbientNotes from '@/components/AmbientNotes';
 import Reveal from '@/components/Reveal';
 import { upcomingEvents } from '@/lib/events';
-import { FLYER_SIZES, flyerPath } from '@/lib/flyer';
+import { FLYER_SIZES, flyerPath, storyVideoPath } from '@/lib/flyer';
 import { mediaKitMetadata } from '@/lib/metadata';
 import { mediaKitJsonLd } from '@/lib/seo/mediaKit';
 import CopyButton from './CopyButton';
@@ -119,8 +119,8 @@ export default function MediaKitPage() {
             </p>
 
             <div className={styles.assetGrid}>
-              {upcomingEvents.flatMap((event) =>
-                FLYER_SIZES.map((size) => {
+              {upcomingEvents.flatMap((event) => [
+                ...FLYER_SIZES.map((size) => {
                   const href = flyerPath(event.slug, size.key);
 
                   return (
@@ -145,7 +145,41 @@ export default function MediaKitPage() {
                     </div>
                   );
                 }),
-              )}
+                <div className={styles.asset} key={storyVideoPath(event.slug)}>
+                  {/* Muted and inline so it can autoplay on phones; the
+                      stories flyer is the same design, so it stands in until
+                      the video loads. */}
+                  <video
+                    aria-label={`Historia animada de ${event.title}, ${event.date}`}
+                    autoPlay
+                    className={styles.flyerImage}
+                    height={1920}
+                    loop
+                    muted
+                    playsInline
+                    poster={flyerPath(event.slug, 'stories')}
+                    preload="none"
+                    src={storyVideoPath(event.slug)}
+                    width={1080}
+                  />
+                  <div className={styles.assetMeta}>
+                    <span className={styles.assetName}>
+                      Historia animada · 9:16 <small>MP4</small>
+                    </span>
+                    <span className={styles.assetDetail}>
+                      {event.title} · Historias de Instagram y estados de
+                      WhatsApp
+                    </span>
+                  </div>
+                  <a
+                    className={styles.download}
+                    download
+                    href={storyVideoPath(event.slug)}
+                  >
+                    <FontAwesomeIcon icon={faDownload} /> Descargar
+                  </a>
+                </div>,
+              ])}
             </div>
           </Reveal>
 

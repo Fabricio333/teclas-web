@@ -221,7 +221,7 @@ function contactRows(contact) {
  * list where one exists, so the flyer cannot claim an hour or a price the
  * article does not.
  */
-function infoRows(event) {
+export function infoRows(event) {
   const fact = (label) =>
     event.facts.find((f) => f.label === label)?.value ?? '';
 
@@ -258,11 +258,11 @@ function infoRows(event) {
  * label and the big Lobster line its hook, without either being retyped here —
  * rename the event on the site and the flyer follows.
  */
-function kicker(event) {
+export function kicker(event) {
   return event.title.split(/:\s*/)[0];
 }
 
-function headline(event) {
+export function headline(event) {
   // An explicit poster headline wins: a page title and a thing you shout on a
   // flyer are not always the same words in the same order.
   if (event.flyerTitle) return event.flyerTitle;
@@ -272,7 +272,7 @@ function headline(event) {
   return rest.charAt(0).toUpperCase() + rest.slice(1);
 }
 
-function esc(value) {
+export function esc(value) {
   return String(value).replace(
     /[&<>"']/g,
     (c) =>
