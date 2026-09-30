@@ -25,7 +25,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-# HyperFrames render artifacts — regenerate with `npm run render` / `snapshot`
-/videos/*/out/
-/videos/*/snapshots/
-/videos/*/.hyperframes/

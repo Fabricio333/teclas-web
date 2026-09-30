@@ -52,8 +52,8 @@ export async function generateMetadata({
 }
 
 /**
- * The event's photo plus its generated feed flyer, when `npm run flyer` has
- * written one — past events have none, so they get no gallery.
+ * The event's photo plus its generated feed flyer, when teclas-media's
+ * `npm run flyer` has written one — past events have none, so they get no gallery.
  */
 function galleryPictures(event: TeclasEvent): GalleryPicture[] {
   const pictures: GalleryPicture[] = [

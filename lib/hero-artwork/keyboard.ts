@@ -2,8 +2,8 @@
  * Geometry of the curved keyboard drawn by the landing page's animated hero.
  *
  * Pure maths, no React and no DOM: the hero renders it as interactive SVG
- * paths, and `scripts/flyer/template.mjs` renders the same paths into the
- * event flyer. Extracted here so the two cannot drift — a change to the curve
+ * paths, and teclas-media renders the same paths into the event flyers,
+ * story videos and QR codes. Extracted here so the two cannot drift — a change to the curve
  * moves both.
  *
  * Presentation is deliberately NOT here. The hero styles its keys from

@@ -1,6 +1,7 @@
 /**
- * Flyer sizes, shared by the generator (`scripts/flyer/build.mjs`) and the
- * media kit (`app/media-kit`), which is where they are offered.
+ * Flyer sizes, shared by the generator (`scripts/flyer/build.mjs` in the
+ * teclas-media repo, which imports this file) and the media kit
+ * (`app/media-kit`), which is where they are offered.
  *
  * Both sides derive the filename from `flyerPath`, so a renamed size can never
  * leave the page linking at a PNG the generator does not write.
@@ -41,7 +42,8 @@ export function flyerPath(slug: string, sizeKey: string): string {
 
 /**
  * Public URL of an event's animated story (1080x1920 MP4), rendered by
- * `scripts/story-video/build.mjs` — also its path under `public/`.
+ * `scripts/story-video/build.mjs` in teclas-media — also its path under
+ * `public/`.
  */
 export function storyVideoPath(slug: string): string {
   return `/events/${slug}-story.mp4`;

@@ -25,6 +25,7 @@ Run `npx prettier --write .` and `npm run lint` before committing.
 - **Styles** (`styles/`) — `globals.scss`, `_variables.scss` (colors, breakpoints, font sizes), `_components.scss` (shared classes like `.container`, `.btnPrimary`)
 - **Lib** (`lib/`) — utilities, metadata definitions, SEO/JSON-LD schemas, piano game constants/types
 - **Hooks** (`hooks/`) — custom React hooks (`use-mobile`, `use-on-click-outside`, `use-toast`)
+- **Media** — flyers, story videos, QR codes, the review card and the OG image are generated in the separate `teclas-ar/teclas-media` repo, which imports `lib/events`, `lib/hero-artwork` and `lib/flyer` from here and writes into `public/`. Keep those modules importable by plain Node (no path aliases beyond `@/`, no React).
 
 ## Styling
 

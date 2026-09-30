@@ -2,8 +2,8 @@
  * The notes and stars floating around the hero keyboard.
  *
  * Placement and glyph shapes only — no React, no animation. The landing page
- * maps this to animated SVG groups; `scripts/flyer/template.mjs` renders the
- * same list statically into the event flyer. Sharing the data is the point:
+ * maps this to animated SVG groups; teclas-media's flyer and story video
+ * render the same list statically. Sharing the data is the point:
  * move a note here and it moves in both places.
  *
  * Coordinates are in the keyboard's 1000 × 710 viewBox, see `./keyboard`.
