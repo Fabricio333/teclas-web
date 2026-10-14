@@ -107,10 +107,22 @@ export default function Footer() {
         </div>
 
         <div className={styles.footerBottom}>
-          <p>
-            &copy; {new Date().getFullYear()} Teclas Ciudad Jardín. Todos los
-            derechos reservados.
-          </p>
+          <div>
+            <p>
+              &copy; {new Date().getFullYear()} Teclas Ciudad Jardín. Todos los
+              derechos reservados.
+            </p>
+            <p className={styles.credit}>
+              Sitio hecho por{' '}
+              <a
+                href="https://bitbybit.com.ar/es"
+                target="_blank"
+                rel="noopener"
+              >
+                BitByBit
+              </a>
+            </p>
+          </div>
           <a
             href="https://www.teclas.ar"
             target="_blank"
