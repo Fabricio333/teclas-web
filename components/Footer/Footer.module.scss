@@ -179,6 +179,20 @@
       }
     }
 
+    .credit {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+
+      a {
+        transition: color var(--dur-base) var(--ease-out);
+
+        &:hover {
+          color: var(--green-900);
+          text-decoration: underline;
+        }
+      }
+    }
+
     img {
       display: block;
       max-width: 100%;
